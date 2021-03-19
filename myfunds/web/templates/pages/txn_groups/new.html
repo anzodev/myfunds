@@ -1,0 +1,38 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Новая группа транзакций{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.txn_groups') }}">Вернуться к списку</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-3">
+    <form action="{{ url_for('form.add_txn_group') }}" method="POST" class="border rounded p-2" autocomplete="off">
+      <div class="form-group">
+        <label for="ff__txn-type" class="mb-1">Тип:</label>
+        <select name="txn_type" id="ff__txn-type" class="form-control form-control-sm px-1" required>
+          {% for value, name in form_data.txn_types.items() %}
+          <option value="{{ value }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="ff__name" class="mb-1">Название:</label>
+        <input type="text" name="name" id="ff__name" class="form-control form-control-sm" required>
+      </div>
+      <div class="form-group">
+        <label for="ff__color-sign" class="mb-1">Знак:</label>
+        <input type="color" name="color_sign" id="ff__color-sign" class="form-control form-control-sm" required>
+      </div>
+      <div class="form-group mb-0">
+        <button type="submit" class="btn btn-sm btn-primary w-100">Добавить группу</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

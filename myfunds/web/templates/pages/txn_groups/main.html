@@ -1,0 +1,40 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Группы транзакций{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.txn_groups_new') }}">Добавить группу</a>
+{% endblock %}
+
+
+{% block content %}
+{% if txn_groups %}
+<table class="table table-sm table-bordered table-hover m-0">
+  <thead>
+    <tr class="border-bottom">
+      <th>Тип</th>
+      <th>Название</th>
+      <th class="w-1 text-nowrap">Знак</th>
+      <th class="w-1"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tg in txn_groups %}
+    <tr>
+      <td>{{ tg.type_alias }}</td>
+      <td>{{ tg.name }}</td>
+      <td class="text-center align-middle">
+        <div
+          style="position: relative; top: 4px; display: inline-block; width: 16px; height: 16px; border-radius: 50%; background-color: {{ tg.color_sign }};">
+        </div>
+      </td>
+      <td class="px-2"><a href="{{ url_for('page.txn_group_edit', txn_group_id=tg.id) }}" class="d-block"><i
+            data-feather="edit"></i></a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>myfunds</title>
+
+  <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='libs/normalize-8.0.1/normalize.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='libs/bootswatch-4.5.2/cerulean.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='libs/daterangepicker-3.1.0/daterangepicker.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='libs/chartjs-2.9.3/Chart.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+  <main class="main-container">
+    {% block body %}{% endblock %}
+  </main>
+
+  <div class="fixed-bottom">
+    <div class="main-container">
+      <div class="container">
+        <div class="row">
+          <div id="alerts" class="col-6">
+            {% for message_color, message in get_flashed_messages(with_categories=true) %}
+            <div
+              class="alert alert-dismissible fade show d-flex justify-content-between align-items-center shadow-sm border bg-white mb-3 px-3 py-1">
+              <p class="m-0 mr-4 text-{{ message_color }}">{{ message }}</p>
+              <button type="button" class="btn btn-transparent pr-0" data-dismiss="alert">
+                <i data-feather="x"></i>
+              </button>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='libs/jquery-3.5.1/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/bootstrap-4.5.2/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/feather-4.28.0/feather.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/moment-2.18.1/moment.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/daterangepicker-3.1.0/daterangepicker.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/jquery-mask-plugin-1.14.16/jquery.mask.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/chartjs-2.9.3/Chart.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/hammerjs-2.0.8/hammerjs.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/chartjs-plugin-zoom-0.7.7/chartjs-plugin-zoom.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/bs-custom-file-input-1.3.4/bs-custom-file-input.min.js') }}">
+  </script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  {% block js %}{% endblock %}
+
+</body>

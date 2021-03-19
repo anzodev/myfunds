@@ -1,0 +1,27 @@
+* {
+  outline: 0;
+  box-shadow: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: 14px;
+  color: #666;
+}
+
+.main-container {
+  width: 980px;
+  margin: 0 auto;
+}
+
+a.active {
+  color: #157ab5;
+  text-decoration: underline;
+}
+
+ul {
+  list-style: none;
+}
+
+.w-1 { width: 1%; }

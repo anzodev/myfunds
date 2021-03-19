@@ -1,0 +1,28 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Баланс: {{ g.balance.name }}{% endblock %}
+
+
+{% block heading_extra %}
+<div class="mt-2">
+  <span class="text-muted font-italic">Сумма: <span
+      class="{% if g.balance.amount > 0 %}text-success{% elif g.balance.amount < 0 %}text-danger{% endif %}">{{ g.balance.amount_repr() }}</span></span>
+  <span class="text-muted font-italic ml-4">Валюта: {{ g.balance.currency.code_alpha }}</span>
+  <span class="text-muted font-italic ml-4">Пополнения: {{ g.balance_stats.replenishments_qty }}</span>
+  <span class="text-muted font-italic ml-4">Выводы: {{ g.balance_stats.withdrawals_qty }}</span>
+</div>
+{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.balances') }}" class="pr-4 border-right">Вернуться к списку</a>
+<a href="{{ url_for('page.balance_transactions', balance_id=g.balance.id) }}"
+  class="ml-4 {% if request.endpoint == 'page.balance_transactions' %} active{% endif %}">Транзакции</a>
+<a href="{{ url_for('page.balance_replenishment', balance_id=g.balance.id) }}"
+  class="ml-4 {% if request.endpoint == 'page.balance_replenishment' %} active{% endif %}">Пополнение</a>
+<a href="{{ url_for('page.balance_withdrawal', balance_id=g.balance.id) }}"
+  class="ml-4 {% if request.endpoint == 'page.balance_withdrawal' %} active{% endif %}">Вывод</a>
+<a href="{{ url_for('page.balance_statistic', balance_id=g.balance.id) }}"
+  class="ml-4 {% if request.endpoint == 'page.balance_statistic' %} active{% endif %}">Статистика</a>
+{% endblock %}

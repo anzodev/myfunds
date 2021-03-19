@@ -1,0 +1,39 @@
+{% extends 'layouts/centered.html' %}
+
+
+{% block content %}
+<div class="w-100">
+  <div class="lead font-weight-bold mb-2">Произошла ошибка!</div>
+  <p class="font-italic text-black-50 mb-0">Код статуса: {{ status_code }}</p>
+  <p class="font-italic text-black-50 mb-4">
+    Описание: {{ description }}
+    {% if traceback %}
+    (<button type="button" class="font-italic btn btn-sm btn-link p-0 m-0" data-toggle="modal"
+      data-target="#modal-traceback">посмотреть трейсбек</button>)
+    {% endif %}
+  </p>
+  <ul class="m-0">
+    {% if return_url %}
+    <li class="mb-1"><a href="{{ return_url }}">Назад</a></li>
+    {% endif %}
+    <li class="mb-1"><a href="{{ url_for('page.index') }}">Перейти на главную</a></li>
+  </ul>
+</div>
+{% if traceback %}
+<div id="modal-traceback" class="modal">
+  <div class="container py-5">
+    <div class="modal-content">
+      <div class="modal-header d-flex align-items-center">
+        <h5 class="modal-title">Трейсбек</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <i data-feather="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre class="m-0">{{ traceback }}</pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

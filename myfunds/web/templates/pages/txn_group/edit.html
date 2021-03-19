@@ -1,0 +1,48 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Редактирование группы транзакций: {{ g.txn_group.name }}{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.txn_groups') }}">Вернуться к списку</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-3">
+    <form action="{{ url_for('form.update_txn_group') }}" method="POST" class="border p-2 rounded" autocomplete="off">
+      <input type="hidden" name="txn_group_id" value="{{ g.txn_group.id }}" required>
+      <div class="form-group">
+        <label class="mb-1">Тип:</label>
+        <input type="text" class="form-control form-control-sm" value="{{ g.txn_types[g.txn_group.type_] }}" readonly>
+      </div>
+      <div class="form-group">
+        <label for="ff__name" class="mb-1">Название:</label>
+        <input type="text" name="name" id="ff__name" class="form-control form-control-sm" value="{{ g.txn_group.name }}"
+          required>
+      </div>
+      <div class="form-group">
+        <label for="ff__color-sign" class="mb-1">Знак:</label>
+        <input type="color" name="color_sign" id="ff__color-sign" class="form-control form-control-sm"
+          value="{{ g.txn_group.color_sign }}" required>
+      </div>
+      <div class="form-group mb-0">
+        <button type="submit" class="btn btn-sm btn-primary w-100">Обновить запись</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-3">
+    <form action="{{ url_for('form.delete_txn_group') }}" method="POST" autocomplete="off">
+      <input type="hidden" name="txn_group_id" value="{{ g.txn_group.id }}" required>
+      <div class="form-group">
+        <button type="button" class="btn btn-sm btn-outline-info w-100 mb-2 display-toggler"
+          data-target="delete-group-acknowledge">Удалить группу</button>
+        <button type="submit" id="delete-group-acknowledge"
+          class="btn btn-sm btn-danger w-100 d-none">Подтвердить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

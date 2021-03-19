@@ -1,0 +1,47 @@
+{% macro pagination(page, page_count, limit, endpoint) %}
+{% set request_args = dict(request.args) %}
+{% set _ = request_args.pop("page", None) %}
+{% set _ = request_args.pop("limit", None) %}
+{% set _ = kwargs.update(request_args) %}
+<ul class="d-flex m-0">
+  {% if page > 1 %}
+  <li class="mr-3">
+    <a href="{{ url_for(endpoint, page=1, limit=limit, **kwargs) }}">
+      <span aria-hidden="true">К началу</span>
+    </a>
+  </li>
+  {% endif %}
+  {% if page - 1 > 0 %}
+  <li class="mr-3">
+    <a href="{{ url_for(endpoint, page=(page - 1), limit=limit, **kwargs) }}">
+      <span aria-hidden="true">Назад</span>
+    </a>
+  </li>
+  {% endif %}
+  {% for i in range(3, 0, -1) %}
+  {% if page > i %}
+  <li class="mr-3"><a href="{{ url_for(endpoint, page=(page - i), limit=limit, **kwargs) }}">{{ page - i }}</a></li>
+  {% endif %}
+  {% endfor %}
+  <li><a href="{{ url_for(endpoint, page=page, limit=limit, **kwargs) }}" class="active">{{ page }}</a></li>
+  {% for i in range(1, 4) %}
+  {% if page_count >= page + i %}
+  <li class="ml-3"><a href="{{ url_for(endpoint, page=(page + i), limit=limit, **kwargs) }}">{{ page + i }}</a></li>
+  {% endif %}
+  {% endfor %}
+  {% if page + 1 <= page_count %}
+  <li class="ml-3">
+    <a href="{{ url_for(endpoint, page=(page + 1), limit=limit, **kwargs) }}">
+      <span aria-hidden="true">Вперед</span>
+    </a>
+  </li>
+  {% endif %}
+  {% if page < page_count %}
+  <li class="ml-3">
+    <a href="{{ url_for(endpoint, page=page_count, limit=limit, **kwargs) }}">
+      <span aria-hidden="true">В конец</span>
+    </a>
+  </li>
+  {% endif %}
+</ul>
+{% endmacro %}

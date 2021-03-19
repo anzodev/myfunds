@@ -1,0 +1,43 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Планы{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.plans_new') }}" class="btn btn-sm btn-success">Создать</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="border rounded bg-white shadow-sm">
+  {% if plans %}
+  <table class="table table-borderless table-hover m-0">
+    <thead>
+      <tr class="border-bottom">
+        <th class="w1px"></th>
+        <th>Название</th>
+        <th class="w1px">Баланс</th>
+        <th class="w1px text-nowrap">Целевая сумма</th>
+        <th class="w1px text-nowrap">Целевая дата</th>
+        <th class="w1px text-nowrap">Дата создания</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in plans %}
+      <tr>
+        <td><a href="{{ url_for('page.plan_info', plan_id=p.id) }}"><i data-feather="log-in"></i></a></td>
+        <td>{{ p.name }}</td>
+        <td class="text-nowrap">{{ p.balance.name }}</td>
+        <td>{{ p.target_amount | amount }} {{ p.balance.currency.code_alpha }}</td>
+        <td>{{ p.target_date | utc_dt_to_local_d }}</td>
+        <td class="text-nowrap">{{ p.created_at | utc_dt_to_local_d }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="p-3">Планы не найдены (перейти к <a href="{{ url_for('page.plans_new') }}">созданию</a>).</div>
+  {% endif %}
+</div>
+{% endblock %}

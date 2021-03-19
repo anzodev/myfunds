@@ -1,0 +1,38 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Редактирование баланса: {{ g.balance.name }}{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.balances') }}">Вернуться к списку</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-3">
+    <form action="{{ url_for('form.update_balance') }}" method="POST" class="border rounded p-2" autocomplete="off">
+      <input type="hidden" name="balance_id" value="{{ g.balance.id }}" required>
+      <div class="form-group">
+        <label for="ff__name" class="mb-1">Название:</label>
+        <input type="text" name="name" id="ff__name" class="form-control form-control-sm" value="{{ g.balance.name }}" required>
+      </div>
+      <div class="form-group mb-0">
+        <button type="submit" class="btn btn-sm btn-primary w-100">Обновить запись</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-3">
+    <form action="{{ url_for('form.delete_balance') }}" method="POST" autocomplete="off">
+      <input type="hidden" name="balance_id" value="{{ g.balance.id }}" required>
+      <div class="form-group">
+        <button type="button" class="btn btn-sm btn-outline-info w-100 mb-2 display-toggler"
+          data-target="delete-group-acknowledge">Удалить баланс</button>
+        <button type="submit" id="delete-group-acknowledge"
+          class="btn btn-sm btn-danger w-100 d-none">Подтвердить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

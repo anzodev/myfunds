@@ -1,0 +1,26 @@
+{% extends 'layouts/balance-base.html' %}
+
+
+{% block content %}
+<div class="border p-2">
+  <table class="table table-sm table-borderless m-0">
+    <tbody>
+      {% for i in txns_by_groups %}
+      <tr>
+        <td class="text-nowrap w-1">
+          <span
+            style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }};">
+          </span>
+          <span class="ml-2"><a href="{{ url_for('page.balance_transactions', balance_id=g.balance.id, txn_type=i.type, txn_group=i.group_id, created_at_range=form_filter_values.stats_range) }}">{{ i.group }}</a></span>
+        </td>
+        <td class="w-1 pl-3">{{ i.amount_sum }}</td>
+        <td class="w-1 pl-3">{{ i.amount_pct }}%</td>
+        <td class="pl-3 align-middle">
+          <div style="width: {{ i.amount_pct }}%; height: 16px; background-color: {{ i.color_sign }};"></div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

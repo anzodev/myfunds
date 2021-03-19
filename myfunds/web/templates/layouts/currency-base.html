@@ -1,0 +1,10 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Валюта: {{ g.currency.code_alpha }}{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.currencies') }}" class="pr-4 border-right">Вернуться к списку</a>
+<a href="{{ url_for('page.currency_edit', currency_id=g.currency.id) }}" class="ml-4 {% if request.endpoint == 'page.currency_edit' %} active{% endif %}">Редактировать</a>
+{% endblock %}

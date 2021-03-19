@@ -1,0 +1,160 @@
+{% extends 'layouts/balance-base.html' %}
+
+
+{% block section_content %}
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('page.balance_stats_total', balance_id=g.balance.id) }}">Итог</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="{{ url_for('page.balance_stats_txns', balance_id=g.balance.id) }}">Транзакции</a>
+  </li>
+</ul>
+<div class="mb-4">
+  <form action="{{ url_for('page.balance_stats_txns', balance_id=g.balance.id, **request.args) }}" autocomplete="off">
+    <div class="row">
+      <div class="col-6">
+        <div class="form-group m-0">
+          <label class="mb-1" for="ff__stats-range">Период:</label>
+          <input type="text" name="stats_range" id="ff__stats-range" class="form-control"
+            value="{{ form_filter_values.stats_range }}">
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="mb-4">
+  <button id="btn__hide-all-txn-groups" type="button" class="btn btn-sm btn-secondary border">Скрыть все группы</button>
+  <button id="btn__open-all-txn-groups" type="button" class="btn btn-sm btn-secondary border">Открыть все группы</button>
+  <a href="{{ url_for('page.balance_stats_txns', balance_id=g.balance.id, **request.args) }}" class="btn btn-sm btn-secondary border">Обновить</a>
+  <a href="{{ url_for('page.balance_stats_txns', balance_id=g.balance.id) }}" class="btn btn-sm btn-secondary border">Очистить</a>
+</div>
+<div class="border rounded bg-white shadow-sm p-3 mb-4">
+  <canvas id="chart"></canvas>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  let formFilterFieldStatsRange = $("#ff__stats-range");
+
+  formFilterFieldStatsRange.daterangepicker({
+    timePicker: true,
+    timePicker24Hour: true,
+    timePickerSeconds: true,
+    autoApply: true,
+    locale: {
+      format: 'DD.MM.YYYY HH:mm:ss'
+    }
+  });
+
+  formFilterFieldStatsRange.on("change", function () {
+    this.form.submit();
+  });
+
+  let chartData = {{ chart_data | tojson }};
+  let chartOptions = {
+    type: "line",
+    data: {
+      datasets: []
+    },
+    options: {
+      showLines: false,
+      animation: {
+        duration: 0 // general animation time
+      },
+      hover: {
+        animationDuration: 0 // duration of animations when hovering an item
+      },
+      responsiveAnimationDuration: 0, // animation duration after a resize
+      scales: {
+        xAxes: [
+          {
+            type: 'time',
+            time: {
+              unit: 'day',
+              displayFormats: {
+                day: 'DD.MM'
+              }
+            },
+            ticks: {
+              min: moment(chartData.ticks_min, "DD.MM.YYYY HH:mm:ss"),
+              max: moment(chartData.ticks_max, "DD.MM.YYYY HH:mm:ss"),
+            }
+          }
+        ],
+      },
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'xy'
+          },
+          zoom: {
+            enabled: true,
+            mode: 'xy',
+          }
+        }
+      },
+      tooltips: {
+        callbacks: {
+          mode: 'single',
+          label: function (tooltipItems, data) {
+            let group = data.datasets[tooltipItems.datasetIndex].label;
+            let amount = tooltipItems.yLabel;
+            return group + ' ' + amount + ' ' + chartData.balance_currency;
+          },
+          footer: function (tooltipItems, data) {
+            return data.datasets[tooltipItems[0].datasetIndex].comments[tooltipItems[0].index];
+          }
+        }
+      }
+    }
+  }
+
+  for (k1 in chartData.datasets) {
+    let dataset = {
+      label: chartData.datasets[k1].label,
+      backgroundColor: chartData.datasets[k1].color,
+      pointBorderWidth: 0,
+      pointBackgroundColor: chartData.datasets[k1].color,
+      pointRadius: 4.0,
+      data: [],
+      comments: []
+    }
+    for (k2 in chartData.datasets[k1].data) {
+      dataset.data.push(
+        {
+          x: moment(chartData.datasets[k1].data[k2].x, "DD.MM.YYYY HH:mm:ss"),
+          y: chartData.datasets[k1].data[k2].y,
+        }
+      );
+      dataset.comments.push(chartData.datasets[k1].data[k2].comment);
+    }
+    chartOptions.data.datasets.push(dataset);
+  }
+
+  let chart = new Chart("chart", chartOptions);
+
+  $("#btn__hide-all-txn-groups").on("click", function () {
+    for (let i = 0; i < chart.data.datasets.length; i++) {
+      let meta = chart.getDatasetMeta(i);
+      if (meta.hidden !== true) {
+        meta.hidden = true;
+      }
+    }
+    chart.update();
+  });
+
+  $("#btn__open-all-txn-groups").on("click", function () {
+    for (let i = 0; i < chart.data.datasets.length; i++) {
+      let meta = chart.getDatasetMeta(i);
+      if (meta.hidden === true) {
+        meta.hidden = null;
+      }
+    }
+    chart.update();
+  });
+</script>
+{% endblock %}
