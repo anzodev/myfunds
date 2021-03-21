@@ -312,3 +312,107 @@ def delete_transaction():
             url_for("page.balance_transactions", balance_id=balance.id),
         )
     )
+
+
+@auth.login_required
+def add_transaction_group_limit():
+    balance_id = int(request.form["balance_id"])
+    txn_group = int(request.form["txn_group"])
+    month_limit = float(request.form["month_limit"])
+
+    balance = models.Balance.get_or_none(id=balance_id, account=g.account)
+    if balance is None:
+        alerts.error(f"Баланс ({balance_id}) не найден.")
+        return redirect(session.get("last_page", url_for("page.balances")))
+
+    txn_group = models.TransactionGroup.get_or_none(
+        id=txn_group,
+        account=g.account,
+        type_=TransactionType.WITHDRAWAL,
+    )
+    if txn_group is None:
+        alerts.error(f"Группа ({txn_group}) не найдена.")
+        return redirect(
+            session.get(
+                "last_page",
+                url_for("page.balance_transaction_group_limits", balance_id=balance.id),
+            )
+        )
+
+    limit = models.TransactionGroupLimit.create(
+        balance=balance,
+        group=txn_group,
+        month_limit=int(month_limit * (10 ** balance.currency.base)),
+    )
+    alerts.info(f"Лимит ({limit.id}) добавлен.")
+
+    return redirect(
+        session.get(
+            "last_page",
+            url_for("page.balance_transaction_group_limits", balance_id=balance.id),
+        )
+    )
+
+
+@auth.login_required
+def update_transaction_group_limit():
+    balance_id = int(request.form["balance_id"])
+    limit_id = int(request.form["limit_id"])
+    month_limit = float(request.form["month_limit"])
+
+    balance = models.Balance.get_or_none(id=balance_id, account=g.account)
+    if balance is None:
+        alerts.error(f"Баланс ({balance_id}) не найден.")
+        return redirect(session.get("last_page", url_for("page.balances")))
+
+    limit = models.TransactionGroupLimit.get_or_none(id=limit_id, balance=balance)
+    if limit is None:
+        alerts.error(f"Лимит ({limit_id}) не найден.")
+        return redirect(
+            session.get(
+                "last_page",
+                url_for("page.balance_transaction_group_limits", balance_id=balance.id),
+            )
+        )
+
+    limit.month_limit = int(month_limit * (10 ** balance.currency.base))
+    limit.save()
+    alerts.info(f"Лимит ({limit.id}) обновлен.")
+
+    return redirect(
+        session.get(
+            "last_page",
+            url_for("page.balance_transaction_group_limits", balance_id=balance.id),
+        )
+    )
+
+
+@auth.login_required
+def delete_transaction_group_limit():
+    balance_id = int(request.form["balance_id"])
+    limit_id = int(request.form["limit_id"])
+
+    balance = models.Balance.get_or_none(id=balance_id, account=g.account)
+    if balance is None:
+        alerts.error(f"Баланс ({balance_id}) не найден.")
+        return redirect(session.get("last_page", url_for("page.balances")))
+
+    limit = models.TransactionGroupLimit.get_or_none(id=limit_id, balance=balance)
+    if limit is None:
+        alerts.error(f"Лимит ({limit_id}) не найден.")
+        return redirect(
+            session.get(
+                "last_page",
+                url_for("page.balance_transaction_group_limits", balance_id=balance.id),
+            )
+        )
+
+    limit.delete_instance()
+    alerts.info(f"Лимит ({limit_id}) удален.")
+
+    return redirect(
+        session.get(
+            "last_page",
+            url_for("page.balance_transaction_group_limits", balance_id=balance.id),
+        )
+    )

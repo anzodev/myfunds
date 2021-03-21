@@ -13,7 +13,7 @@ _bp = flask.Blueprint("form", __name__, url_prefix="/forms/")
 
 @_bp.errorhandler(Exception)
 def _errorhandler(e: Exception):
-    if isinstance(e, auth.NotAuthorizedError):
+    if isinstance(e, (auth.NotAuthorizedError, auth.ForbiddenError)):
         auth.clear_session()
         return flask.redirect(flask.url_for("page.login"))
 
@@ -41,6 +41,8 @@ _routes = [
     ("/logout", "logout", hs.authorization.logout),
 
     ("/add-account", "add_account", hs.accounts.add_account),
+    ("/update-password", "update_password", hs.accounts.update_password),
+    ("/update-ip-whitelist", "update_ip_whitelist", hs.accounts.update_ip_whitelist),
 
     ("/add-currency", "add_currency", hs.currencies.add_currency),
     ("/update-currency", "update_currency", hs.currencies.update_currency),
@@ -53,6 +55,9 @@ _routes = [
     ("/import-transactions", "import_transactions", hs.balances.import_transactions),
     ("/update-transaction", "update_transaction", hs.balances.update_transaction),
     ("/delete-transaction", "delete_transaction", hs.balances.delete_transaction),
+    ("/add-transaction-group-limit", "add_transaction_group_limit", hs.balances.add_transaction_group_limit),  # noqa: E501
+    ("/update-transaction-group-limit", "update_transaction_group_limit", hs.balances.update_transaction_group_limit),  # noqa: E501
+    ("/delete-transaction-group-limit", "delete_transaction_group_limit", hs.balances.delete_transaction_group_limit),  # noqa: E501
 
     ("/add-txn-group", "add_txn_group", hs.txn_groups.add_txn_group),
     ("/update-txn-group", "update_txn_group", hs.txn_groups.update_txn_group),

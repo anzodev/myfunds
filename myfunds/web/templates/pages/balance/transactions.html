@@ -4,9 +4,26 @@
 
 {% block content %}
 <div class="mb-4">
-  <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-    data-target="#transactions-import-modal">Импорт транзакций</button>
-  <button type="button" class="btn btn-sm btn-primary ml-1">Выгрузка</button>
+  <div class="row">
+    <div class="col-9">
+      <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+        data-target="#transactions-import-modal">Импорт транзакций</button>
+      <button type="button" class="btn btn-sm btn-primary ml-1">Выгрузка</button>
+    </div>
+    <div class="col-3">
+      <div class="d-flex">
+        <div class="input-group input-group-sm">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i data-feather="plus"></i></span>
+          </div>
+          <input type="text" id="txn-amount-addition-field" class="form-control form-control-sm" placeholder="0.00"
+            value="0.00" readonly>
+        </div>
+        <button type="button" id="txn-amount-addition-refresh" class="btn btn-sm btn-primary ml-1"><i
+            data-feather="refresh-cw"></i></button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="mb-4">
   <form action="{{ url_for('page.balance_transactions', balance_id=g.balance.id, **request.args) }}" class="mb-3"
@@ -45,7 +62,7 @@
         <div class="form-group m-0">
           <label class="mb-1" for="f0__created-at-range">Дата создания:</label>
           <input type="text" name="created_at_range" id="f0__created-at-range" class="form-control form-control-sm"
-            value="{{ form_filter_values.created_at_range }}">
+            value="{{ form_filter_values.created_at_range }}" data-mask="00.00.0000 00:00:00 - 00.00.0000 00:00:00">
         </div>
       </div>
     </div>
@@ -61,6 +78,9 @@
       <th class="w-1">Группа</th>
       <th>Комментарий</th>
       <th class="w-1">Дата создания</th>
+      <th class="w-1 text-nowrap">
+        <i data-feather="plus"></i>
+      </th>
       <th class="w-1"></th>
     </tr>
   </thead>
@@ -93,6 +113,9 @@
       <td class="text-truncate" style="max-width: 1px;" data-toggle="tooltip" data-placement="bottom"
         title="{{ txn.comment }}">{{ txn.comment or "-" }}</td>
       <td class="text-nowrap">{{ txn.created_at | utc_dt_to_local_dt }}</td>
+      <td class="align-middle text-center">
+        <div><input type="checkbox" class="ev__txn-amount-addition" data-add-amount="{{ txn.amount_repr() }}"></div>
+      </td>
       <td class="px-2"><a href="#" class="d-block ev__transaction-edit-btn" data-toggle="modal"
           data-target="#transaction-edit-modal"><i data-feather="edit"></i></a></td>
     </tr>
@@ -268,7 +291,7 @@
 
   let f4TxnId = $('#f4__txn-id');
 
-  txnEditButtons.on('click', function () {
+  txnEditButtons.on('checked', function () {
     let $this = $(this);
     let $parent = $(this).parents('tr');
 
@@ -295,6 +318,27 @@
     f3Comment.val($parent.attr('data-txn-comment'));
 
     f4TxnId.val($parent.attr('data-txn-id'));
+  });
+
+  let txnAmountAdditionField = $('#txn-amount-addition-field');
+  let txnAmountAdditionRefresh = $('#txn-amount-addition-refresh');
+  let txnAmountAdditionEventCheckbox = $('.ev__txn-amount-addition');
+
+  txnAmountAdditionRefresh.on('click', function () {
+    txnAmountAdditionField.val('0.00');
+    txnAmountAdditionEventCheckbox.prop('checked', false);
+  });
+
+  txnAmountAdditionEventCheckbox.on('click', function () {
+    let $this = $(this);
+    let value = parseFloat(txnAmountAdditionField.val());
+    if ($this.prop('checked')) {
+      value += parseFloat($this.attr('data-add-amount'));
+    } else {
+      value -= parseFloat($this.attr('data-add-amount'));
+    }
+
+    txnAmountAdditionField.val(value.toFixed(2));
   });
 </script>
 {% endblock %}

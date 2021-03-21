@@ -1,3 +1,4 @@
+from . import account  # noqa: F401
 from . import entry  # noqa: F401
 from . import balance  # noqa: F401
 from . import balances  # noqa: F401

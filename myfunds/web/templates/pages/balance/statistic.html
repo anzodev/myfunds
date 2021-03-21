@@ -2,25 +2,99 @@
 
 
 {% block content %}
-<div class="border p-2">
-  <table class="table table-sm table-borderless m-0">
-    <tbody>
-      {% for i in txns_by_groups %}
-      <tr>
-        <td class="text-nowrap w-1">
-          <span
-            style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }};">
-          </span>
-          <span class="ml-2"><a href="{{ url_for('page.balance_transactions', balance_id=g.balance.id, txn_type=i.type, txn_group=i.group_id, created_at_range=form_filter_values.stats_range) }}">{{ i.group }}</a></span>
-        </td>
-        <td class="w-1 pl-3">{{ i.amount_sum }}</td>
-        <td class="w-1 pl-3">{{ i.amount_pct }}%</td>
-        <td class="pl-3 align-middle">
-          <div style="width: {{ i.amount_pct }}%; height: 16px; background-color: {{ i.color_sign }};"></div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="mb-4">
+  <form action="{{ url_for('page.balance_statistic', balance_id=g.balance.id, **request.args) }}" autocomplete="off">
+    <div class="row">
+      <div class="col-3">
+        <div class="form-group m-0">
+          <label class="mb-1" for="f0__month">Месяц:</label>
+          <select name="month" id="f0__month" class="form-control form-control-sm px-1">
+            {% for idx, name in form_filter_data.months_options.items() %}
+            <option value="{{ idx }}" {% if form_filter_values.month == idx %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
+<table class="table table-sm table-borderless">
+  <tbody>
+    <tr>
+      <td class="w-1 text-nowrap pl-0">Баланс:</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.start_balance }}</td>
+      <td class="w-1 text-nowrap pl-3">100%</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="w-1 text-nowrap pl-0">Сумма затрат:</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.withdrawals_sum }}</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.withdrawals_sum_pct }}%</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="w-1 text-nowrap pl-0">Сбережения:</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.savings }}</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.savings_pct }}%</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="w-1 text-nowrap pl-0">Сумма пополнений:</td>
+      <td class="w-1 pl-3">{{ amount_stats.replenishments_sum }}</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% if withdrawals_chart %}
+<table class="table table-sm table-bordered m-0">
+  <thead>
+    <tr>
+      <th rowspan="2" class="align-middle text-center">Группа</th>
+      <th colspan="3" class="text-center">Затраты</th>
+      <th colspan="2" class="text-center">Лимит</th>
+      <th rowspan="2" class="align-middle text-center">Соотношение по затратам</th>
+    </tr>
+    <tr>
+      <th>Сумма</th>
+      <th class="text-nowrap">% от баланса</th>
+      <th class="text-nowrap">% от затрат</th>
+      <th class="text-nowrap">Остаток</th>
+      <th class="text-nowrap">% использ.</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in withdrawals_chart %}
+    <tr>
+      <td class="text-nowrap w-1">
+        <span
+          style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }}; vertical-align: middle;">
+        </span>
+        <span class="ml-1 align-middle"><a
+            href="{{ url_for('page.balance_transactions', balance_id=g.balance.id, txn_type=i.type, txn_group=i.group_id, created_at_range=metadata.created_at_range) }}">{{ i.group }}</a></span>
+      </td>
+      <td class="w-1 align-middle">{{ i.amount_sum }}</td>
+      <td class="w-1 align-middle">{{ i.to_start_balance_pct }}%</td>
+      <td class="w-1 align-middle">{{ i.to_withdrawals_sum_pct }}%</td>
+      <td class="w-1">{{ i.limit }}</td>
+      <td class="w-1 {{ i.limit_class }}">{{ i.limit_pct }}</td>
+      <td class="align-middle p-0">
+        <div style="width: {{ i.to_withdrawals_sum_pct }}%; height: 30px; background-color: {{ i.color_sign }};"></div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="mt-4">Данные о затратах отсутствуют.</p>
+{% endif %}
+{% endblock %}
+
+
+{% block js %}
+<script>
+  $("#f0__month").on("change", function () {
+    this.form.submit();
+  });
+</script>
 {% endblock %}

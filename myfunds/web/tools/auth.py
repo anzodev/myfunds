@@ -1,7 +1,10 @@
 from collections import namedtuple
 from functools import wraps
 
+from flask import abort
+from flask import current_app
 from flask import g
+from flask import request
 from flask import session
 
 from ...domain import models
@@ -11,6 +14,10 @@ AccountInfo = namedtuple("AccountInfo", ["id", "username"])
 
 
 class NotAuthorizedError(Exception):
+    pass
+
+
+class ForbiddenError(Exception):
     pass
 
 
@@ -33,9 +40,18 @@ def login_required(f):
         if account_id is None:
             raise NotAuthorizedError()
 
-        g.account = models.Account.get_or_none(id=account_id)
-        if g.account is None:
+        account = models.Account.get_or_none(id=account_id)
+        if account is None:
             raise NotAuthorizedError()
+
+        if (
+            len(account.ip_whitelist) != 0
+            and request.remote_addr not in account.ip_whitelist
+        ):
+            raise ForbiddenError()
+
+        g.account = account
+        g.is_superuser = g.account.username == current_app.config["SUPERUSER"]
 
         return f(*args, **kwargs)
 

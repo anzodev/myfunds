@@ -19,7 +19,7 @@ def _after_request(res: flask.Response):
 
 @_bp.errorhandler(Exception)
 def _errorhandler(e: Exception):
-    if isinstance(e, auth.NotAuthorizedError):
+    if isinstance(e, (auth.NotAuthorizedError, auth.ForbiddenError)):
         auth.clear_session()
         return flask.redirect(flask.url_for(".login"))
 
@@ -47,6 +47,8 @@ _routes = [
     ("/new-account", "new_account", hs.entry.new_account),
     ("/", "index", hs.entry.index),
 
+    ("/account/edit", "account_edit", hs.account.edit),
+
     ("/currencies", "currencies", hs.currencies.main),
     ("/currencies/new", "currencies_new", hs.currencies.new),
     ("/currencies/<int:currency_id>/edit", "currency_edit", hs.currency.edit),
@@ -59,6 +61,7 @@ _routes = [
     ("/balances/<int:balance_id>/replenishment", "balance_replenishment", hs.balance.replenishment),  # noqa:E501
     ("/balances/<int:balance_id>/withdrawal", "balance_withdrawal", hs.balance.withdrawal),  # noqa:E501
     ("/balances/<int:balance_id>/statistic", "balance_statistic", hs.balance.statistic),  # noqa:E501
+    ("/balances/<int:balance_id>/transaction-group-limits", "balance_transaction_group_limits", hs.balance.transaction_group_limits),  # noqa:E501
 
     ("/transaction-groups", "txn_groups", hs.txn_groups.main),
     ("/transaction-groups/new", "txn_groups_new", hs.txn_groups.new),

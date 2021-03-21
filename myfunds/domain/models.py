@@ -1,4 +1,5 @@
 import peewee as pw
+from playhouse.sqlite_ext import JSONField
 
 
 database = pw.DatabaseProxy()
@@ -23,6 +24,8 @@ class Account(_BaseModel):
         table_name = "accounts"
 
     username = pw.CharField(unique=True, max_length=80)
+    password_hash = pw.TextField()
+    ip_whitelist = JSONField(default=list)
     created_at = pw.DateTimeField()
 
 
@@ -37,9 +40,12 @@ class Balance(_BaseModel):
     amount = pw.IntegerField()
     created_at = pw.DateTimeField()
 
-    def amount_repr(self) -> str:
+    def to_amount_repr(self, value: int) -> str:
         base = self.currency.base
-        return f"{self.amount / (10 ** base):.{base}f}"
+        return f"{value / (10 ** base):.{base}f}"
+
+    def amount_repr(self) -> str:
+        return self.to_amount_repr(self.amount)
 
 
 class TransactionGroup(_BaseModel):
@@ -50,6 +56,19 @@ class TransactionGroup(_BaseModel):
     type_ = pw.CharField(column_name="type", index=True)
     name = pw.CharField()
     color_sign = pw.CharField()
+
+
+class TransactionGroupLimit(_BaseModel):
+    class Meta:
+        table_name = "transaction_group_limits"
+        indexes = ((("balance_id", "group_id"), True),)
+
+    balance = pw.ForeignKeyField(Balance)
+    group = pw.ForeignKeyField(TransactionGroup)
+    month_limit = pw.IntegerField()
+
+    def month_limit_repr(self) -> str:
+        return self.balance.to_amount_repr(self.month_limit)
 
 
 class Transaction(_BaseModel):
@@ -65,12 +84,10 @@ class Transaction(_BaseModel):
     created_at = pw.DateTimeField(index=True)
 
     def amount_repr(self) -> str:
-        base = self.balance.currency.base
-        return f"{self.amount / (10 ** base):.{base}f}"
+        return self.balance.to_amount_repr(self.amount)
 
     def balance_remainder_repr(self) -> str:
-        base = self.balance.currency.base
-        return f"{self.balance_remainder / (10 ** base):.{base}f}"
+        return self.balance.to_amount_repr(self.balance_remainder)
 
 
 class Plan(_BaseModel):

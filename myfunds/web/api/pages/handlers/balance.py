@@ -1,5 +1,6 @@
 import itertools
 import logging
+import datetime
 from functools import wraps
 
 import peewee as pw
@@ -92,7 +93,7 @@ def transactions():
         _logger.exception("unexpected error while 'created_at_range' paramter parsing")
         param_created_at_range = None
 
-    _logger.debug(f"since_dt={since_dt}, until_dt={until_dt}")
+    # _logger.debug(f"since_dt={since_dt}, until_dt={until_dt}")
 
     query = (
         models.Transaction.select(
@@ -168,16 +169,6 @@ def transactions():
             )
         }
     }
-    # print(
-    #     list(
-    #         (
-    #             models.TransactionGroup.select(models.TransactionGroup)
-    #             .where((models.TransactionGroup.account == g.account))
-    #             .order_by(models.TransactionGroup.name)
-    #         ).dicts()
-    #     )
-    # )
-    print(form_txn_edit_data)
 
     return render_template(
         "pages/balance/transactions.html",
@@ -229,316 +220,213 @@ def withdrawal():
 def statistic():
     tz = app.config["TIMEZONE"]
     dt_format = constants.DATETIME_FORMAT
+    utc_now = datetime.datetime.utcnow()
+    local_now = dates.make_local_from_utc(utc_now, tz)
+    months = [
+        "Январь",
+        "Февраль",
+        "Март",
+        "Апрель",
+        "Май",
+        "Июнь",
+        "Июль",
+        "Август",
+        "Сентябрь",
+        "Октябрь",
+        "Ноябрь",
+        "Декабрь",
+    ]
 
-    param_txn_type = request.args.get("txn_type", TransactionType.WITHDRAWAL)
-    param_stats_range = request.args.get("stats_range")
+    month_idx = request.args.get("month")
+    if month_idx is None:
+        month_idx = local_now.month
+    month_idx = int(month_idx)
 
-    if param_stats_range is None:
-        since_dt, until_dt = dates.make_local_range_since_first_month_day_to_now(tz)
-        param_stats_range = " - ".join(
-            [since_dt.strftime(dt_format), until_dt.strftime(dt_format)]
-        )
-
-    try:
-        since_dt_str, until_dt_str = param_stats_range.split(" - ")
-        since_dt = dates.make_utc_from_dt_str(since_dt_str, dt_format, tz)
-        until_dt = dates.make_utc_from_dt_str(until_dt_str, dt_format, tz)
-    except Exception:
-        param_stats_range = None
-
-    total_amount = 0
-
-    # fmt: off
-    total_amount_row = (
-        models.Transaction
-        .select(
-            pw.fn.SUM(models.Transaction.amount).alias("total_amount"),
-        )
-        .where(
-            (models.Transaction.balance == g.balance)
-            & (models.Transaction.created_at.between(since_dt, until_dt))
-            & (models.Transaction.type_ == param_txn_type)
-        )
-        .group_by(models.Transaction.type_)
-    ).first()
-    # fmt: on
-
-    if total_amount_row is not None:
-        total_amount = total_amount_row.total_amount
-
-    query = (
-        models.Transaction.select(
-            models.Transaction.group,
-            pw.fn.SUM(models.Transaction.amount).alias("amount_sum"),
-            pw.SQL(f"round(sum(amount) * 100.0 / {total_amount}, 2)").alias(
-                "amount_pct"
-            ),
-            models.TransactionGroup,
-        )
-        .join(models.TransactionGroup, pw.JOIN.LEFT_OUTER)
-        .switch(models.Transaction)
-        .where(
-            (models.Transaction.balance == g.balance)
-            & (models.Transaction.type_ == param_txn_type)
-            & (models.Transaction.created_at.between(since_dt, until_dt))
-        )
-        .group_by(models.Transaction.group)
-        .order_by(pw.SQL("amount_pct").desc())
+    local_since_dt = datetime.datetime(local_now.year, month_idx, 1)
+    local_until_dt = datetime.datetime(
+        (local_now.year + 1) if month_idx == 12 else local_now.year,
+        1 if month_idx == 12 else month_idx + 1,
+        1,
     )
 
-    ccy_base = g.balance.currency.base
+    since_dt = dates.make_utc_from_dt(local_since_dt, tz)
+    until_dt = dates.make_utc_from_dt(local_until_dt, tz)
 
-    txns_by_groups = []
-    for i in query:
-        if i.group is None:
-            txns_by_groups.append(
-                {
-                    "group": "Без группы",
-                    "color_sign": "#ddd",
-                    "amount_sum": f"{i.amount_sum / (10 ** ccy_base):.{ccy_base}f}",
-                    "amount_pct": i.amount_pct,
-                    "type": "NOTSET",
-                    "group_id": "NO_GROUP",
-                }
-            )
-            continue
+    months_options = {
+        idx + 1: name for idx, name in enumerate(months[: local_now.month])
+    }
 
-        txns_by_groups.append(
+    first_txn = (
+        models.Transaction.select()
+        .where(
+            (models.Transaction.balance == g.balance)
+            & (models.Transaction.created_at.between(since_dt, until_dt))
+        )
+        .order_by(models.Transaction.created_at)
+        .first()
+    )
+
+    replenishments = list(
+        models.Transaction.select()
+        .where(
+            (models.Transaction.balance == g.balance)
+            & (models.Transaction.type_ == TransactionType.REPLENISHMENT)
+            & (models.Transaction.created_at.between(since_dt, until_dt))
+        )
+        .order_by(models.Transaction.created_at)
+    )
+
+    withdrawals = list(
+        models.Transaction.select(models.Transaction, models.TransactionGroup)
+        .join(models.TransactionGroup, pw.JOIN.LEFT_OUTER)
+        .where(
+            (models.Transaction.balance == g.balance)
+            & (models.Transaction.type_ == TransactionType.WITHDRAWAL)
+            & (models.Transaction.created_at.between(since_dt, until_dt))
+        )
+        .order_by(models.Transaction.created_at)
+    )
+
+    start_balance = 0
+    if first_txn is not None:
+        if first_txn.type_ == TransactionType.REPLENISHMENT:
+            start_balance = first_txn.balance_remainder - first_txn.amount
+        else:
+            start_balance = first_txn.balance_remainder + first_txn.amount
+
+    withdrawals_sum = sum(txn.amount for txn in withdrawals)
+    replenishments_sum = sum(txn.amount for txn in replenishments)
+    savings = start_balance - withdrawals_sum
+
+    withdrawals_sum_pct = f"{withdrawals_sum * 100 / (start_balance or 1):.2f}"
+    savings_pct = f"{savings * 100 / (start_balance or 1):.2f}"
+
+    amount_status = {
+        "start_balance": g.balance.to_amount_repr(start_balance),
+        "withdrawals_sum": g.balance.to_amount_repr(withdrawals_sum),
+        "withdrawals_sum_pct": withdrawals_sum_pct,
+        "savings": g.balance.to_amount_repr(savings),
+        "savings_pct": savings_pct,
+        "replenishments_sum": g.balance.to_amount_repr(replenishments_sum),
+    }
+
+    chart_data = {}
+    for txn in withdrawals:
+        chart_data[txn.group] = chart_data.get(txn.group, [])
+        chart_data[txn.group].append(txn)
+
+    withdrawals_chart = []
+
+    no_group_txns = chart_data.pop(None, None)
+    if no_group_txns is not None:
+        amount_sum = sum(txn.amount for txn in no_group_txns)
+        to_withdrawals_sum_pct = amount_sum * 100.0 / (withdrawals_sum or 1)
+        to_start_balance_pct = amount_sum * 100.0 / (start_balance or 1)
+        withdrawals_chart.append(
             {
-                "group": i.group.name,
-                "color_sign": i.group.color_sign,
-                "amount_sum": f"{i.amount_sum / (10 ** ccy_base):.{ccy_base}f}",
-                "amount_pct": i.amount_pct,
-                "type": i.group.type_,
-                "group_id": i.group.id,
+                "sort_field": to_withdrawals_sum_pct,
+                "group": "Без группы",
+                "color_sign": "#ddd",
+                "amount_sum": g.balance.to_amount_repr(amount_sum),
+                "to_withdrawals_sum_pct": f"{to_withdrawals_sum_pct:.2f}",
+                "to_start_balance_pct": f"{to_start_balance_pct:.2f}",
+                "type": "NOTSET",
+                "group_id": "NO_GROUP",
+                "limit": "",
+                "limit_pct": "",
+                "limit_class": "",
             }
         )
 
+    for txn_group, txns in chart_data.items():
+        amount_sum = sum(txn.amount for txn in txns)
+        to_withdrawals_sum_pct = amount_sum * 100.0 / (withdrawals_sum or 1)
+        to_start_balance_pct = amount_sum * 100.0 / (start_balance or 1)
+
+        limit = ""
+        limit_pct = 0
+        limit_class = ""
+        limit_row = (
+            models.TransactionGroupLimit.select()
+            .where(
+                (models.TransactionGroupLimit.balance == g.balance)
+                & (models.TransactionGroupLimit.group == txn_group)
+            )
+            .first()
+        )
+        if limit_row is not None:
+            limit_left = limit_row.month_limit - amount_sum
+            limit_pct = 100 - (limit_left * 100.0 / limit_row.month_limit)
+            limit = g.balance.to_amount_repr(limit_left)
+            limit_class = (
+                "text-success"
+                if limit_pct < 80.0
+                else ("text-danger" if limit_pct >= 100.0 else "text-warning")
+            )
+
+        withdrawals_chart.append(
+            {
+                "sort_field": to_withdrawals_sum_pct,
+                "group": txn_group.name,
+                "color_sign": txn_group.color_sign,
+                "amount_sum": g.balance.to_amount_repr(amount_sum),
+                "to_withdrawals_sum_pct": f"{to_withdrawals_sum_pct:.2f}",
+                "to_start_balance_pct": f"{to_start_balance_pct:.2f}",
+                "type": txn_group.type_,
+                "group_id": txn_group.id,
+                "limit": limit,
+                "limit_pct": f"{limit_pct:.2f}%" if limit_pct != 0 else "",
+                "limit_class": limit_class,
+            }
+        )
+
+    withdrawals_chart = list(
+        reversed(sorted(withdrawals_chart, key=lambda data: data["sort_field"]))
+    )
+
+    form_filter_data = {
+        "months_options": months_options,
+    }
+
     form_filter_values = {
-        "stats_range": param_stats_range,
+        "month": month_idx,
+    }
+
+    metadata = {
+        "created_at_range": (
+            f"{local_since_dt.strftime(dt_format)} - "
+            f"{local_until_dt.strftime(dt_format)}"
+        )
     }
 
     return render_template(
         "pages/balance/statistic.html",
+        form_filter_data=form_filter_data,
         form_filter_values=form_filter_values,
-        txns_by_groups=txns_by_groups,
+        metadata=metadata,
+        amount_stats=amount_status,
+        withdrawals_chart=withdrawals_chart,
     )
 
-    # txns_with_group = (
-    #     models.Transaction.select(
-    #         pw.fn.SUM(models.Transaction.amount).alias("total"),
-    #         models.TransactionGroup.id,
-    #         models.TransactionGroup.name,
-    #         models.TransactionGroup.color,
-    #     )
-    #     .join(models.TransactionGroup)
-    #     .where(
-    #         (models.Transaction.balance == g.balance)
-    #         & (models.Transaction.type_ == TransactionType.WITHDRAWAL)
-    #         & (models.Transaction.created_at.between(since_dt, until_dt))
-    #     )
-    #     .group_by(models.TransactionGroup.id)
-    # )
 
-    # row_total_of_txns_without_groups = (
-    #     models.Transaction.select(pw.fn.SUM(models.Transaction.amount).alias("total"))
-    #     .where(
-    #         (models.Transaction.balance == g.balance)
-    #         & (models.Transaction.type_ == TransactionType.WITHDRAWAL)
-    #         & (models.Transaction.group.is_null())
-    #         & (models.Transaction.created_at.between(since_dt, until_dt))
-    #     )
-    #     .group_by(models.Transaction.group)
-    #     .first()
-    # )
+@auth.login_required
+@_page_init
+def transaction_group_limits():
+    txn_group_limits = models.TransactionGroupLimit.select().where(
+        models.TransactionGroupLimit.balance == g.balance
+    )
+    used_groups_ids = [limit.group_id for limit in txn_group_limits]
 
-    # form_filter_values = {"stats_range": param_stats_range}
+    unused_txn_groups = models.TransactionGroup.select().where(
+        (models.TransactionGroup.account == g.account)
+        & (models.TransactionGroup.type_ == TransactionType.WITHDRAWAL)
+        & (models.TransactionGroup.id.not_in(used_groups_ids))
+    )
 
-    # chart_data = {
-    #     "txn_group_ids": [],
-    #     "labels": [],
-    #     "background_colors": [],
-    #     "data": [],
-    # }
+    add_form_data = {"txn_groups": unused_txn_groups}
 
-    # for txn in txns_with_group:
-    #     chart_data["txn_group_ids"].append(txn.group.id)
-    #     chart_data["labels"].append(txn.group.name)
-    #     chart_data["background_colors"].append(txn.group.color)
-    #     chart_data["data"].append(round(txn.total, 2))
-
-    # if row_total_of_txns_without_groups is not None:
-    #     chart_data["txn_group_ids"].append("NO_GROUP")
-    #     chart_data["labels"].append("Без группы")
-    #     chart_data["background_colors"].append("#dddddd")
-    #     chart_data["data"].append(round(row_total_of_txns_without_groups.total, 2))
-
-
-# @auth.login_required
-# @_page_init
-# def stats_total():
-#     tz = app.config["TIMEZONE"]
-#     dt_format = constants.DATETIME_FORMAT
-
-#     param_stats_range = request.args.get("stats_range")
-
-#     if param_stats_range is None:
-#         since_dt, until_dt = dates.make_local_range_since_first_month_day_to_now(tz)
-#         param_stats_range = " - ".join(
-#             [since_dt.strftime(dt_format), until_dt.strftime(dt_format)]
-#         )
-
-#     try:
-#         since_dt_str, until_dt_str = param_stats_range.split(" - ")
-#         since_dt = dates.make_utc_from_dt_str(since_dt_str, dt_format, tz)
-#         until_dt = dates.make_utc_from_dt_str(until_dt_str, dt_format, tz)
-#     except Exception:
-#         param_stats_range = None
-
-# txns_with_group = (
-#     models.Transaction.select(
-#         pw.fn.SUM(models.Transaction.amount).alias("total"),
-#         models.TransactionGroup.id,
-#         models.TransactionGroup.name,
-#         models.TransactionGroup.color,
-#     )
-#     .join(models.TransactionGroup)
-#     .where(
-#         (models.Transaction.balance == g.balance)
-#         & (models.Transaction.type_ == TransactionType.WITHDRAWAL)
-#         & (models.Transaction.created_at.between(since_dt, until_dt))
-#     )
-#     .group_by(models.TransactionGroup.id)
-# )
-
-# row_total_of_txns_without_groups = (
-#     models.Transaction.select(pw.fn.SUM(models.Transaction.amount).alias("total"))
-#     .where(
-#         (models.Transaction.balance == g.balance)
-#         & (models.Transaction.type_ == TransactionType.WITHDRAWAL)
-#         & (models.Transaction.group.is_null())
-#         & (models.Transaction.created_at.between(since_dt, until_dt))
-#     )
-#     .group_by(models.Transaction.group)
-#     .first()
-# )
-
-# form_filter_values = {"stats_range": param_stats_range}
-
-# chart_data = {
-#     "txn_group_ids": [],
-#     "labels": [],
-#     "background_colors": [],
-#     "data": [],
-# }
-
-# for txn in txns_with_group:
-#     chart_data["txn_group_ids"].append(txn.group.id)
-#     chart_data["labels"].append(txn.group.name)
-#     chart_data["background_colors"].append(txn.group.color)
-#     chart_data["data"].append(round(txn.total, 2))
-
-# if row_total_of_txns_without_groups is not None:
-#     chart_data["txn_group_ids"].append("NO_GROUP")
-#     chart_data["labels"].append("Без группы")
-#     chart_data["background_colors"].append("#dddddd")
-#     chart_data["data"].append(round(row_total_of_txns_without_groups.total, 2))
-
-#     return render_template(
-#         "pages/balance/stats_total.html",
-#         form_filter_values=form_filter_values,
-#         chart_data=chart_data,
-#     )
-
-
-# @auth.login_required
-# @_page_init
-# def stats_txns():
-#     tz = app.config["TIMEZONE"]
-#     dt_format = constants.DATETIME_FORMAT
-
-#     param_stats_range = request.args.get("stats_range")
-
-#     if param_stats_range is None:
-#         since_dt, until_dt = dates.make_local_range_since_first_month_day_to_now(tz)
-#         param_stats_range = " - ".join(
-#             [since_dt.strftime(dt_format), until_dt.strftime(dt_format)]
-#         )
-
-#     try:
-#         since_dt_str, until_dt_str = param_stats_range.split(" - ")
-#         since_dt = dates.make_utc_from_dt_str(since_dt_str, dt_format, tz)
-#         until_dt = dates.make_utc_from_dt_str(until_dt_str, dt_format, tz)
-#     except Exception:
-#         param_stats_range = None
-
-#     query = (
-#         models.Transaction.select(models.Transaction, models.TransactionGroup)
-#         .join(models.TransactionGroup, pw.JOIN.LEFT_OUTER)
-#         .where(
-#             (models.Transaction.balance == g.balance)
-#             & (models.Transaction.created_at.between(since_dt, until_dt))
-#         )
-#     )
-
-#     form_filter_values = {"stats_range": param_stats_range}
-
-#     chart_data = {
-#         "datasets": {},
-#         "ticks_min": since_dt_str,
-#         "ticks_max": until_dt_str,
-#         "balance_currency": g.balance.currency.code_alpha,
-#     }
-
-#     for txn in query.iterator():
-#         if txn.group is not None:
-#             dataset = chart_data["datasets"].get(str(txn.group_id))
-#             if dataset is None:
-#                 dataset = {
-#                     "label": txn.group.name,
-#                     "color": txn.group.color,
-#                     "data": [],
-#                 }
-#                 chart_data["datasets"][str(txn.group_id)] = dataset
-#             dataset["data"].append(
-#                 {
-#                     "x": dates.make_local_from_utc(txn.created_at, tz).strftime(
-#                         constants.DATETIME_FORMAT
-#                     ),
-#                     "y": (
-#                         -txn.amount
-#                         if txn.type_ == TransactionType.WITHDRAWAL
-#                         else txn.amount
-#                     ),
-#                     "comment": txn.comment or "-",
-#                 }
-#             )
-
-#         else:
-#             dataset = chart_data["datasets"].get("OTHER")
-#             if dataset is None:
-#                 dataset = {
-#                     "label": "Other",
-#                     "color": "#999999",
-#                     "data": [],
-#                 }
-#                 chart_data["datasets"]["OTHER"] = dataset
-#             dataset["data"].append(
-#                 {
-#                     "x": dates.make_local_from_utc(txn.created_at, tz).strftime(
-#                         constants.DATETIME_FORMAT
-#                     ),
-#                     "y": (
-#                         -txn.amount
-#                         if txn.type_ == TransactionType.WITHDRAWAL
-#                         else txn.amount
-#                     ),
-#                     "comment": txn.comment or "-",
-#                 }
-#             )
-
-#     return render_template(
-#         "pages/balance/stats_txns.html",
-#         form_filter_values=form_filter_values,
-#         chart_data=chart_data,
-#     )
+    return render_template(
+        "pages/balance/transaction_group_limits.html",
+        limits=txn_group_limits,
+        add_form_data=add_form_data,
+    )

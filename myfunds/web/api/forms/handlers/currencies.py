@@ -12,7 +12,7 @@ from myfunds.web.tools import auth
 @auth.login_required
 def add_currency():
     code_alpha = request.form["code_alpha"].upper()
-    code_num = int(request.form["code_num"])
+    code_num = request.form["code_num"]
     base = int(request.form["base"])
 
     business.create_currency(

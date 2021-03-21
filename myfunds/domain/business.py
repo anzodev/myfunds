@@ -53,7 +53,6 @@ def create_currency(
     val.verify(code_alpha, [val.is_instance(str), val.match(r"^[A-Z]{3}$")])
     val.verify(code_num, [val.is_instance(str), val.match(r"^[0-9]{3}$")])
     val.verify(base, [val.is_instance(int)])
-    val.verify(base % 100, [val.eq(0)])
 
     return models.Currency.create(
         code_alpha=code_alpha,
@@ -62,7 +61,7 @@ def create_currency(
     )
 
 
-def create_account(username: str) -> models.Account:
+def create_account(username: str, password: str) -> models.Account:
     val.verify(username, [val.is_instance(str)])
     val.verify(len(username), [val.gt(0), val.le(80)])
 

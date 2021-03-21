@@ -15,6 +15,9 @@ class DefaultVal:
 
 @dataclass
 class Config:
+    SUPERUSER: str
+    PH_ITERATIONS: int
+    PH_SALT_LENGTH: int
     DB_NAME: str
     SECRET_KEY: str
     TEMPLATES_AUTO_RELOAD: bool
@@ -32,6 +35,9 @@ def from_env(filepath: Optional[str] = None) -> Config:
     with env.prefixed("MYFUNDS_WEB_"):
         # fmt: off
         return Config(
+            SUPERUSER=env.str("SUPERUSER"),
+            PH_ITERATIONS=env.int("PH_ITERATIONS"),
+            PH_SALT_LENGTH=env.int("PH_SALT_LENGTH"),
             DB_NAME=env.str("DB_NAME"),
             SECRET_KEY=env.str("SECRET_KEY"),
             TEMPLATES_AUTO_RELOAD=env.bool("TEMPLATES_AUTO_RELOAD", DefaultVal.TEMPLATES_AUTO_RELOAD),  # noqa: E501

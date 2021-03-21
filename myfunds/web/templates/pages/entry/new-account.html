@@ -7,11 +7,21 @@
     <div class="col-3 border-right">
       <form action="{{ url_for('form.add_account') }}" method="POST" autocomplete="off">
         <div class="form-group">
-          <label for="ff__username" class="mb-1">Имя пользователя:</label>
-          <input type="text" name="username" id="ff__username" class="form-control form-control-sm" required>
+          <label for="f0__username" class="mb-1">Имя пользователя:</label>
+          <input type="text" name="username" id="f0__username" class="form-control form-control-sm"
+            {% if request.args.username %}value="{{ request.args.username }}"{% endif %} required>
+        </div>
+        <div class="form-group">
+          <label for="f0__password" class="mb-1">Пароль:</label>
+          <input type="password" name="password" id="f0__password" class="form-control form-control-sm" required>
+        </div>
+        <div class="form-group">
+          <label for="f0__password-copy" class="mb-1">Повторите пароль:</label>
+          <input type="password" name="password_copy" id="f0__password-copy" class="form-control form-control-sm"
+            required>
         </div>
         <div class="form-group m-0">
-          <button type="submit" class="btn btn-sm btn-primary ">Добавить</button>
+          <button type="submit" class="btn btn-sm btn-primary">Добавить пользователя</button>
         </div>
       </form>
     </div>
