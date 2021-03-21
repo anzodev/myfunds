@@ -5,6 +5,7 @@ from environs import Env
 
 
 class DefaultVal:
+    PERMANENT_SESSION_LIFETIME = 172800
     TEMPLATES_AUTO_RELOAD = True
     RUN_HOST = "localhost"
     RUN_PORT = 5000
@@ -20,6 +21,7 @@ class Config:
     PH_SALT_LENGTH: int
     DB_NAME: str
     SECRET_KEY: str
+    PERMANENT_SESSION_LIFETIME: int
     TEMPLATES_AUTO_RELOAD: bool
     RUN_HOST: str
     RUN_PORT: int
@@ -40,6 +42,7 @@ def from_env(filepath: Optional[str] = None) -> Config:
             PH_SALT_LENGTH=env.int("PH_SALT_LENGTH"),
             DB_NAME=env.str("DB_NAME"),
             SECRET_KEY=env.str("SECRET_KEY"),
+            PERMANENT_SESSION_LIFETIME=env.int("PERMANENT_SESSION_LIFETIME", DefaultVal.PERMANENT_SESSION_LIFETIME),  # noqa: E501
             TEMPLATES_AUTO_RELOAD=env.bool("TEMPLATES_AUTO_RELOAD", DefaultVal.TEMPLATES_AUTO_RELOAD),  # noqa: E501
             RUN_HOST=env.str("RUN_HOST", DefaultVal.RUN_HOST),
             RUN_PORT=env.int("RUN_PORT", DefaultVal.RUN_PORT),
