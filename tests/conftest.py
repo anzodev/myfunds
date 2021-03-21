@@ -29,7 +29,7 @@ def models_defaults():
         },
         "txn_group": {
             "name": "transfer",
-            "color": "#d9534f",
+            "color_sign": "#d9534f",
         },
         "txn": {
             "balance_remainder": 1025,
@@ -72,6 +72,7 @@ def new_account(models_defaults):
         defaults = models_defaults["account"]
         return models.Account.create(
             username=username or defaults["username"],
+            password_hash="0000",
             created_at=created_at or defaults["created_at"],
         )
 
@@ -105,14 +106,14 @@ def _create_txn_group(models_defaults):
         type_: str,
         account: models.Account,
         name: Optional[str] = None,
-        color: Optional[str] = None,
+        color_sign: Optional[str] = None,
     ):
         defaults = models_defaults["txn_group"]
         return models.TransactionGroup.create(
             account=account,
             type_=type_,
             name=name or defaults["name"],
-            color=color or defaults["color"],
+            color_sign=color_sign or defaults["color_sign"],
         )
 
     return __create_txn_group
