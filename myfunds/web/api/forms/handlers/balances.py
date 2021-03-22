@@ -212,6 +212,9 @@ def import_transactions():
         if source == "Privat24":
             report = report_parser.Privat24Report(filepath)
 
+        if source == "Monobank":
+            report = report_parser.MonobankReport(filepath, balance.currency.code_alpha)
+
         if report is None:
             alerts.error("Неизвестный источник.")
             return redirect(redirect_url)

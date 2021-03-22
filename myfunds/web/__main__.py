@@ -1,6 +1,5 @@
 import argparse
-import json
-import logging.config as logging_cfg
+import logging.config as logging_config
 
 from myfunds.domain import business
 from myfunds.domain import models
@@ -16,19 +15,19 @@ parser.add_argument("-e", "--env", dest="env_path", type=str, default=None, help
 
 args = parser.parse_args()
 
-cfg = config.from_env(args.env_path)
-app = create_app(cfg)
+web_config = config.from_env(args.env_path)
+app = create_app(web_config)
 
-if cfg.LOGGING_DICT_CONFIG and cfg.LOGGING_DICT_CONFIG != "{}":
-    logging_cfg.dictConfig(json.loads(cfg.LOGGING_DICT_CONFIG))
+if web_config.LOGGING_DICT_CONFIG and web_config.LOGGING_DICT_CONFIG != "{}":
+    logging_config.dictConfig(web_config.LOGGING_DICT_CONFIG)
 
-database = business.init_database(cfg.DB_NAME)
+database = business.init_database(web_config.DB_NAME)
 
 with business.database_ctx(database):
     models.database.create_tables(business.model_list())
     app.run(
-        host=cfg.RUN_HOST,
-        port=cfg.RUN_PORT,
-        use_reloader=cfg.RUN_USE_RELOADER,
+        host=web_config.RUN_HOST,
+        port=web_config.RUN_PORT,
+        use_reloader=web_config.RUN_USE_RELOADER,
         threaded=True,
     )

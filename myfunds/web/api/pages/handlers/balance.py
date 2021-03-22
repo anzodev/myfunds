@@ -151,6 +151,7 @@ def transactions():
     form_txns_import_data = {
         "sources": [
             {"value": "Privat24", "name": "Privat24"},
+            {"value": "Monobank", "name": "Monobank"},
         ],
     }
 

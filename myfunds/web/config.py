@@ -11,7 +11,7 @@ class DefaultVal:
     RUN_PORT = 5000
     RUN_USE_RELOADER = True
     TIMEZONE = "UTC"
-    LOGGING_DICT_CONFIG = "{}"
+    LOGGING_DICT_CONFIG = {}
 
 
 @dataclass
@@ -27,7 +27,7 @@ class Config:
     RUN_PORT: int
     RUN_USE_RELOADER: bool
     TIMEZONE: str
-    LOGGING_DICT_CONFIG: str
+    LOGGING_DICT_CONFIG: dict
 
 
 def from_env(filepath: Optional[str] = None) -> Config:
@@ -48,6 +48,6 @@ def from_env(filepath: Optional[str] = None) -> Config:
             RUN_PORT=env.int("RUN_PORT", DefaultVal.RUN_PORT),
             RUN_USE_RELOADER=env.bool("RUN_USE_RELOADER", DefaultVal.RUN_USE_RELOADER),  # noqa: E501
             TIMEZONE=env.str("TIMEZONE", DefaultVal.TIMEZONE),
-            LOGGING_DICT_CONFIG=env.str("LOGGING_DICT_CONFIG", DefaultVal.LOGGING_DICT_CONFIG),  # noqa: E501
+            LOGGING_DICT_CONFIG=env.json("LOGGING_DICT_CONFIG", DefaultVal.LOGGING_DICT_CONFIG),  # noqa: E501
         )
         # fmt: on

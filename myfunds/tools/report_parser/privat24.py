@@ -8,7 +8,7 @@ from ._base import Withdrawal
 
 
 SHEET_NAME = "Виписки"
-HEADING = [
+HEADER = [
     "Дата",
     "Час",
     "Категорія",
@@ -35,9 +35,9 @@ class Report(ReportInterface):
         rows = (sheet.row_values(i) for i in range(sheet.nrows))
 
         next(rows)
-        heading = next(rows)
-        if heading != HEADING:
-            raise ValueError(f"Unexpected heading ({heading}).")
+        header = next(rows)
+        if header != HEADER:
+            raise ValueError(f"Unexpected header ({header}).")
 
         for row in rows:
             amount = round(row[5] * 100)
@@ -47,6 +47,7 @@ class Report(ReportInterface):
             created_at = dates.make_utc_from_dt_str(dt_str, DATETIME_FORMAT, TIMEZONE)
 
             if amount > 0:
-                yield Replenishment(abs(amount), created_at, comment)
-            else:
+                yield Replenishment(amount, created_at, comment)
+
+            if amount < 0:
                 yield Withdrawal(abs(amount), created_at, comment)
