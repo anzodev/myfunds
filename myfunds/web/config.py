@@ -11,7 +11,7 @@ class DefaultVal:
     RUN_PORT = 5000
     RUN_USE_RELOADER = True
     TIMEZONE = "UTC"
-    LOGGING_DICT_CONFIG = {}
+    LOGGING_DICT_CONFIG = "{}"
 
 
 @dataclass
@@ -27,7 +27,7 @@ class Config:
     RUN_PORT: int
     RUN_USE_RELOADER: bool
     TIMEZONE: str
-    LOGGING_DICT_CONFIG: dict
+    LOGGING_DICT_CONFIG: str
 
 
 def from_env(filepath: Optional[str] = None) -> Config:

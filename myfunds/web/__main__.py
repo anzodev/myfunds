@@ -18,7 +18,7 @@ args = parser.parse_args()
 web_config = config.from_env(args.env_path)
 app = create_app(web_config)
 
-if web_config.LOGGING_DICT_CONFIG and web_config.LOGGING_DICT_CONFIG != "{}":
+if web_config.LOGGING_DICT_CONFIG and web_config.LOGGING_DICT_CONFIG != {}:
     logging_config.dictConfig(web_config.LOGGING_DICT_CONFIG)
 
 database = business.init_database(web_config.DB_NAME)
