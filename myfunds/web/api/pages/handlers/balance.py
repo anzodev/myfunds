@@ -360,6 +360,8 @@ def statistic():
         "savings_pct": savings_pct,
         "replenishments_sum": g.balance.to_amount_repr(replenishments_sum),
     }
+    if month_idx == local_now.month:
+        amount_status["finish_balance"] = translates.N_A
 
     chart_data = {}
     for txn in withdrawals:
