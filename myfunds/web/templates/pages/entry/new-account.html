@@ -4,8 +4,8 @@
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col-3 border-right">
-      <form action="{{ url_for('form.add_account') }}" method="POST" autocomplete="off">
+    <div class="col-3">
+      <form action="{{ url_for('form.add_account') }}" method="POST" class="mb-5" autocomplete="off">
         <div class="form-group">
           <label for="f0__username" class="mb-1">Имя пользователя:</label>
           <input type="text" name="username" id="f0__username" class="form-control form-control-sm"
@@ -24,8 +24,6 @@
           <button type="submit" class="btn btn-sm btn-primary">Добавить пользователя</button>
         </div>
       </form>
-    </div>
-    <div class="col-3">
       <div><a href="{{ url_for('page.login') }}">Войти</a></div>
     </div>
   </div>

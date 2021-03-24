@@ -11,25 +11,28 @@
 
 {% block content %}
 {% if currencies %}
-<table class="table table-sm table-bordered table-hover m-0">
-  <thead>
-    <tr>
-      <th>Алф. код</th>
-      <th>Числ. код</th>
-      <th>Точность</th>
-      <th class="w-1"></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for c in currencies %}
-    <tr>
-      <td>{{ c.code_alpha }}</td>
-      <td>{{ c.code_num }}</td>
-      <td>{{ c.base }}</td>
-      <td class="px-2"><a href="{{ url_for('page.currency_edit', currency_id=c.id) }}" class="d-block"><i data-feather="edit"></i></a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="overflow-x-auto">
+  <table class="table table-sm table-bordered table-hover m-0">
+    <thead>
+      <tr>
+        <th>Алф. код</th>
+        <th>Числ. код</th>
+        <th>Точность</th>
+        <th class="w-1"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in currencies %}
+      <tr>
+        <td>{{ c.code_alpha }}</td>
+        <td>{{ c.code_num }}</td>
+        <td>{{ c.base }}</td>
+        <td class="px-2"><a href="{{ url_for('page.currency_edit', currency_id=c.id) }}" class="d-block"><i
+              data-feather="edit"></i></a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endif %}
 {% endblock %}

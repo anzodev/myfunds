@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="row">
-  <div class="col-3">
+  <div class="col-lg-3 mb-4 mb-lg-0">
     <form action="{{ url_for('form.update_txn_group') }}" method="POST" class="border p-2 rounded" autocomplete="off">
       <input type="hidden" name="txn_group_id" value="{{ g.txn_group.id }}" required>
       <div class="form-group">
@@ -33,7 +33,7 @@
       </div>
     </form>
   </div>
-  <div class="col-3">
+  <div class="col-lg-3">
     <form action="{{ url_for('form.delete_txn_group') }}" method="POST" autocomplete="off">
       <input type="hidden" name="txn_group_id" value="{{ g.txn_group.id }}" required>
       <div class="form-group">

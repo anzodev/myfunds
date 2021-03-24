@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="row">
-  <div class="col-3">
+  <div class="col-lg-3">
     <form action="{{ url_for('form.update_currency') }}" method="POST" class="border p-2 rounded" autocomplete="off">
       <input type="hidden" name="currency_id" value="{{ g.currency.id }}" required>
       <div class="form-group">

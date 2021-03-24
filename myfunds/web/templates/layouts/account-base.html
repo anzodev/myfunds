@@ -2,49 +2,48 @@
 
 
 {% block body %}
-<div class="container">
-  {% if g.account %}
-  <header class="py-3">
-    <div class="mb-3">
-      <form action="{{ url_for('form.logout') }}" method="POST" class="m-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="font-italic">Пользователь: <a href="{{ url_for('page.account_edit') }}">{{ g.account.username }}</a></div>
-          <div>
-            <button type="submit" class="btn btn-sm btn-primary">Выйти</button>
-          </div>
+{% if g.account %}
+<header class="py-3">
+  <div class="mb-3">
+    <form action="{{ url_for('form.logout') }}" method="POST" class="m-0">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="font-italic">Пользователь: <a href="{{ url_for('page.account_edit') }}">{{ g.account.username }}</a>
         </div>
-      </form>
-    </div>
-    <div>
-      <ul class="d-flex m-0">
-        <li>
-          <a href="{{ url_for('page.balances') }}"
-            class="{% if request.endpoint == 'page.balances' %}active{% endif %}">Балансы</a>
-        </li>
-        <li>
-          <a href="{{ url_for('page.txn_groups') }}"
-            class="ml-4 {% if request.endpoint == 'page.txn_groups' %}active{% endif %}">Группы транзакций</a>
-        </li>
-        {% if g.is_superuser %}
-        <li>
-          <a href="{{ url_for('page.currencies') }}"
-            class="ml-4 {% if request.endpoint == 'page.currencies' %}active{% endif %}">Валюты</a>
-        </li>
-        {% endif %}
-      </ul>
-    </div>
-  </header>
-  <hr class="m-0 mb-4">
-  {% endif %}
-  <section>
-    <div class="mb-3">
-      <h5 class="text-black-50 m-0">{% block heading %}{% endblock %}</h5>
-      <div>{% block heading_extra %}{% endblock %}</div>
-    </div>
-    <div class="mb-4">
-      {% block heading_links %}{% endblock %}
-    </div>
-    {% block content %}{% endblock %}
-  </section>
-</div>
+        <div>
+          <button type="submit" class="btn btn-sm btn-primary">Выйти</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <ul class="d-flex m-0">
+      <li>
+        <a href="{{ url_for('page.balances') }}"
+          class="{% if request.endpoint == 'page.balances' %}active{% endif %}">Балансы</a>
+      </li>
+      <li>
+        <a href="{{ url_for('page.txn_groups') }}"
+          class="ml-4 {% if request.endpoint == 'page.txn_groups' %}active{% endif %}">Группы транзакций</a>
+      </li>
+      {% if g.is_superuser %}
+      <li>
+        <a href="{{ url_for('page.currencies') }}"
+          class="ml-4 {% if request.endpoint == 'page.currencies' %}active{% endif %}">Валюты</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</header>
+<hr class="m-0 mb-4">
+{% endif %}
+<section>
+  <div class="mb-3">
+    <h5 class="text-black-50 m-0">{% block heading %}{% endblock %}</h5>
+    <div>{% block heading_extra %}{% endblock %}</div>
+  </div>
+  <div class="mb-4">
+    {% block heading_links %}{% endblock %}
+  </div>
+  {% block content %}{% endblock %}
+</section>
 {% endblock %}

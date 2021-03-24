@@ -16,16 +16,32 @@
 
 
 {% block heading_links %}
-<a href="{{ url_for('page.balances') }}" class="pr-4 border-right">Вернуться к списку</a>
-<a href="{{ url_for('page.balance_transactions', balance_id=g.balance.id) }}"
-  class="ml-4 {% if request.endpoint == 'page.balance_transactions' %} active{% endif %}">Транзакции</a>
-<a href="{{ url_for('page.balance_replenishment', balance_id=g.balance.id) }}"
-  class="ml-4 {% if request.endpoint == 'page.balance_replenishment' %} active{% endif %}">Пополнение</a>
-<a href="{{ url_for('page.balance_withdrawal', balance_id=g.balance.id) }}"
-  class="ml-4 {% if request.endpoint == 'page.balance_withdrawal' %} active{% endif %}">Вывод</a>
-<a href="{{ url_for('page.balance_transaction_group_limits', balance_id=g.balance.id) }}"
-  class="ml-4 {% if request.endpoint == 'page.balance_transaction_group_limits' %} active{% endif %}">Лимиты на
-  вывод</a>
-<a href="{{ url_for('page.balance_statistic', balance_id=g.balance.id) }}"
-  class="ml-4 {% if request.endpoint == 'page.balance_statistic' %} active{% endif %}">Статистика</a>
+<div class="d-none d-lg-block">
+  <a href="{{ url_for('page.balances') }}" class="pr-4 border-right">Вернуться к списку</a>
+  <a href="{{ url_for('page.balance_transactions', balance_id=g.balance.id) }}"
+    class="ml-4 {% if request.endpoint == 'page.balance_transactions' %} active{% endif %}">Транзакции</a>
+  <a href="{{ url_for('page.balance_replenishment', balance_id=g.balance.id) }}"
+    class="ml-4 {% if request.endpoint == 'page.balance_replenishment' %} active{% endif %}">Пополнение</a>
+  <a href="{{ url_for('page.balance_withdrawal', balance_id=g.balance.id) }}"
+    class="ml-4 {% if request.endpoint == 'page.balance_withdrawal' %} active{% endif %}">Вывод</a>
+  <a href="{{ url_for('page.balance_transaction_group_limits', balance_id=g.balance.id) }}"
+    class="ml-4 {% if request.endpoint == 'page.balance_transaction_group_limits' %} active{% endif %}">Лимиты на
+    вывод</a>
+  <a href="{{ url_for('page.balance_statistic', balance_id=g.balance.id) }}"
+    class="ml-4 {% if request.endpoint == 'page.balance_statistic' %} active{% endif %}">Статистика</a>
+</div>
+
+<div class="d-lg-none">
+  <a href="{{ url_for('page.balances') }}">Вернуться к списку</a>
+  <div>
+    <select name="menu" class="form-control" onchange="location = this.value;">
+      <option value="{{ url_for('page.balance_transactions', balance_id=g.balance.id) }}"{% if request.endpoint == 'page.balance_transactions' %} selected{% endif %}>Транзакции</option>
+      <option value="{{ url_for('page.balance_replenishment', balance_id=g.balance.id) }}"{% if request.endpoint == 'page.balance_replenishment' %} selected{% endif %}>Пополнение</option>
+      <option value="{{ url_for('page.balance_withdrawal', balance_id=g.balance.id) }}"{% if request.endpoint == 'page.balance_withdrawal' %} selected{% endif %}>Вывод</option>
+      <option value="{{ url_for('page.balance_transaction_group_limits', balance_id=g.balance.id) }}"{% if request.endpoint == 'page.balance_transaction_group_limits' %} selected{% endif %}>Лимиты на вывод</option>
+      <option value="{{ url_for('page.balance_statistic', balance_id=g.balance.id) }}"{% if request.endpoint == 'page.balance_statistic' %} selected{% endif %}>Статистика</option>
+    </select>
+  </div>
+</div>
+
 {% endblock %}

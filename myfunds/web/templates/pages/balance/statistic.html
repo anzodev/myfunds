@@ -2,6 +2,12 @@
 
 
 {% block content %}
+<div class="mb-5">
+  <div class="mb-2">Сегодня {{ date_options.today_date }} (до конца месяца {{ date_options.days_left }} дней)</div>
+  <div class="progress">
+    <div class="progress-bar" role="progressbar" style="width: {{ date_options.days_left_pct }}%;" aria-valuenow="{{ date_options.days_left_pct }}" aria-valuemin="0" aria-valuemax="100">{{ date_options.days_left_pct }}%</div>
+  </div>
+</div>
 <div class="mb-4">
   <form action="{{ url_for('page.balance_statistic', balance_id=g.balance.id, **request.args) }}" autocomplete="off">
     <div class="row">
@@ -18,30 +24,36 @@
     </div>
   </form>
 </div>
-<table class="table table-sm table-borderless">
+<table class="table table-sm table-borderless mb-4">
   <tbody>
     <tr>
-      <td class="w-1 text-nowrap pl-0">Баланс:</td>
+      <td class="w-1 text-nowrap pl-0">Баланс на начало месяца:</td>
       <td class="w-1 text-nowrap pl-3">{{ amount_stats.start_balance }}</td>
-      <td class="w-1 text-nowrap pl-3">100%</td>
+      <td></td>
       <td></td>
     </tr>
     <tr>
       <td class="w-1 text-nowrap pl-0">Сумма затрат:</td>
       <td class="w-1 text-nowrap pl-3">{{ amount_stats.withdrawals_sum }}</td>
-      <td class="w-1 text-nowrap pl-3">{{ amount_stats.withdrawals_sum_pct }}%</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td class="w-1 text-nowrap pl-0">Сбережения:</td>
-      <td class="w-1 text-nowrap pl-3">{{ amount_stats.savings }}</td>
-      <td class="w-1 text-nowrap pl-3">{{ amount_stats.savings_pct }}%</td>
+      <td class="w-1 text-nowrap pl-3">({{ amount_stats.withdrawals_sum_pct }}% от начального баланса)</td>
       <td></td>
     </tr>
     <tr>
       <td class="w-1 text-nowrap pl-0">Сумма пополнений:</td>
       <td class="w-1 pl-3">{{ amount_stats.replenishments_sum }}</td>
       <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="w-1 text-nowrap pl-0">Баланс на конец месяца:</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.finish_balance }}</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="w-1 text-nowrap pl-0">Сбережения:</td>
+      <td class="w-1 text-nowrap pl-3">{{ amount_stats.savings }}</td>
+      <td class="w-1 text-nowrap pl-3">({{ amount_stats.savings_pct }}% от начального баланса)</td>
       <td></td>
     </tr>
   </tbody>
@@ -51,16 +63,15 @@
   <thead>
     <tr>
       <th rowspan="2" class="align-middle text-center">Группа</th>
-      <th colspan="3" class="text-center">Затраты</th>
+      <th colspan="2" class="text-center">Затраты</th>
       <th colspan="2" class="text-center">Лимит</th>
       <th rowspan="2" class="align-middle text-center">Соотношение по затратам</th>
     </tr>
     <tr>
+      <th class="text-nowrap text-center">%</th>
       <th>Сумма</th>
-      <th class="text-nowrap">% от баланса</th>
-      <th class="text-nowrap">% от затрат</th>
+      <th class="text-nowrap text-center">%</th>
       <th class="text-nowrap">Остаток</th>
-      <th class="text-nowrap">% использ.</th>
     </tr>
   </thead>
   <tbody>
@@ -73,11 +84,10 @@
         <span class="ml-1 align-middle"><a
             href="{{ url_for('page.balance_transactions', balance_id=g.balance.id, txn_type=i.type, txn_group=i.group_id, created_at_range=metadata.created_at_range) }}">{{ i.group }}</a></span>
       </td>
-      <td class="w-1 align-middle">{{ i.amount_sum }}</td>
-      <td class="w-1 align-middle">{{ i.to_start_balance_pct }}%</td>
       <td class="w-1 align-middle">{{ i.to_withdrawals_sum_pct }}%</td>
-      <td class="w-1">{{ i.limit }}</td>
+      <td class="w-1 align-middle">{{ i.amount_sum }}</td>
       <td class="w-1 {{ i.limit_class }}">{{ i.limit_pct }}</td>
+      <td class="w-1">{{ i.limit }}</td>
       <td class="align-middle p-0">
         <div style="width: {{ i.to_withdrawals_sum_pct }}%; height: 30px; background-color: {{ i.color_sign }};"></div>
       </td>

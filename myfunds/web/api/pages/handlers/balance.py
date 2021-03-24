@@ -1,6 +1,7 @@
+import calendar
+import datetime
 import itertools
 import logging
-import datetime
 from functools import wraps
 
 import peewee as pw
@@ -218,6 +219,29 @@ def withdrawal():
 
 @auth.login_required
 @_page_init
+def transaction_group_limits():
+    txn_group_limits = models.TransactionGroupLimit.select().where(
+        models.TransactionGroupLimit.balance == g.balance
+    )
+    used_groups_ids = [limit.group_id for limit in txn_group_limits]
+
+    unused_txn_groups = models.TransactionGroup.select().where(
+        (models.TransactionGroup.account == g.account)
+        & (models.TransactionGroup.type_ == TransactionType.WITHDRAWAL)
+        & (models.TransactionGroup.id.not_in(used_groups_ids))
+    )
+
+    add_form_data = {"txn_groups": unused_txn_groups}
+
+    return render_template(
+        "pages/balance/transaction_group_limits.html",
+        limits=txn_group_limits,
+        add_form_data=add_form_data,
+    )
+
+
+@auth.login_required
+@_page_init
 def statistic():
     tz = app.config["TIMEZONE"]
     dt_format = constants.DATETIME_FORMAT
@@ -257,6 +281,17 @@ def statistic():
         idx + 1: name for idx, name in enumerate(months[: local_now.month])
     }
 
+    today_date = local_now.strftime(constants.DATE_FORMAT)
+    last_day = calendar.monthrange(local_now.year, local_now.month)[1]
+    days_left = last_day - local_now.day
+    days_left_pct = round(local_now.day * 100 / last_day, 2)
+
+    date_options = {
+        "today_date": today_date,
+        "days_left": days_left,
+        "days_left_pct": f"{days_left_pct:.2f}",
+    }
+
     first_txn = (
         models.Transaction.select()
         .where(
@@ -264,6 +299,16 @@ def statistic():
             & (models.Transaction.created_at.between(since_dt, until_dt))
         )
         .order_by(models.Transaction.created_at)
+        .first()
+    )
+
+    last_txn = (
+        models.Transaction.select()
+        .where(
+            (models.Transaction.balance == g.balance)
+            & (models.Transaction.created_at.between(since_dt, until_dt))
+        )
+        .order_by(models.Transaction.created_at.desc())
         .first()
     )
 
@@ -295,6 +340,10 @@ def statistic():
         else:
             start_balance = first_txn.balance_remainder + first_txn.amount
 
+    finish_balance = 0
+    if last_txn is not None:
+        finish_balance = last_txn.balance_remainder
+
     withdrawals_sum = sum(txn.amount for txn in withdrawals)
     replenishments_sum = sum(txn.amount for txn in replenishments)
     savings = start_balance - withdrawals_sum
@@ -304,6 +353,7 @@ def statistic():
 
     amount_status = {
         "start_balance": g.balance.to_amount_repr(start_balance),
+        "finish_balance": g.balance.to_amount_repr(finish_balance),
         "withdrawals_sum": g.balance.to_amount_repr(withdrawals_sum),
         "withdrawals_sum_pct": withdrawals_sum_pct,
         "savings": g.balance.to_amount_repr(savings),
@@ -404,30 +454,8 @@ def statistic():
         "pages/balance/statistic.html",
         form_filter_data=form_filter_data,
         form_filter_values=form_filter_values,
+        date_options=date_options,
         metadata=metadata,
         amount_stats=amount_status,
         withdrawals_chart=withdrawals_chart,
-    )
-
-
-@auth.login_required
-@_page_init
-def transaction_group_limits():
-    txn_group_limits = models.TransactionGroupLimit.select().where(
-        models.TransactionGroupLimit.balance == g.balance
-    )
-    used_groups_ids = [limit.group_id for limit in txn_group_limits]
-
-    unused_txn_groups = models.TransactionGroup.select().where(
-        (models.TransactionGroup.account == g.account)
-        & (models.TransactionGroup.type_ == TransactionType.WITHDRAWAL)
-        & (models.TransactionGroup.id.not_in(used_groups_ids))
-    )
-
-    add_form_data = {"txn_groups": unused_txn_groups}
-
-    return render_template(
-        "pages/balance/transaction_group_limits.html",
-        limits=txn_group_limits,
-        add_form_data=add_form_data,
     )

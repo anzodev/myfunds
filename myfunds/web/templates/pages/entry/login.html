@@ -2,13 +2,14 @@
 
 
 {% block content %}
-<div class="container">
+<div class="w-100">
   <div class="row">
-    <div class="col-3 border-right">
-      <form action="{{ url_for('form.login') }}" method="POST" autocomplete="off">
+    <div class="col-lg-3">
+      <form action="{{ url_for('form.login') }}" method="POST" class="mb-5" autocomplete="off">
         <div class="form-group">
           <label for="ff__username" class="mb-1">Имя пользователя:</label>
-          <input type="text" name="username" id="ff__username" class="form-control form-control-sm" {% if request.args.username %}value="{{ request.args.username }}"{% endif %} required>
+          <input type="text" name="username" id="ff__username" class="form-control form-control-sm"
+            {% if request.args.username %}value="{{ request.args.username }}" {% endif %} required>
         </div>
         <div class="form-group">
           <label for="ff__password" class="mb-1">Пароль:</label>
@@ -18,8 +19,6 @@
           <button type="submit" class="btn btn-sm btn-primary">Войти</button>
         </div>
       </form>
-    </div>
-    <div class="col-3">
       <div><a href="{{ url_for('page.new_account') }}">Добавить пользователя</a></div>
     </div>
   </div>

@@ -18,25 +18,23 @@
 
 <body>
 
-  <main class="main-container mb-5">
+  <main class="container pb-5">
     {% block body %}{% endblock %}
   </main>
 
   <div class="fixed-bottom">
-    <div class="main-container">
-      <div class="container">
-        <div class="row">
-          <div id="alerts" class="col-6">
-            {% for message_color, message in get_flashed_messages(with_categories=true) %}
-            <div
-              class="alert alert-dismissible fade show d-flex justify-content-between align-items-center shadow-sm border bg-white mb-3 px-3 py-1">
-              <p class="m-0 mr-4 text-{{ message_color }}">{{ message }}</p>
-              <button type="button" class="btn btn-transparent pr-0" data-dismiss="alert">
-                <i data-feather="x"></i>
-              </button>
-            </div>
-            {% endfor %}
+    <div class="container">
+      <div class="row">
+        <div id="alerts" class="col-6">
+          {% for message_color, message in get_flashed_messages(with_categories=true) %}
+          <div
+            class="alert alert-dismissible fade show d-flex justify-content-between align-items-center shadow-sm border bg-white mb-3 px-3 py-1">
+            <p class="m-0 mr-4 text-{{ message_color }}">{{ message }}</p>
+            <button type="button" class="btn btn-transparent pr-0" data-dismiss="alert">
+              <i data-feather="x"></i>
+            </button>
           </div>
+          {% endfor %}
         </div>
       </div>
     </div>
