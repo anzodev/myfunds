@@ -67,8 +67,9 @@ _routes = [
     ("/balances/<int:balance_id>/transactions", "balance_transactions", hs.balance.transactions),  # noqa: E501
     ("/balances/<int:balance_id>/replenishment", "balance_replenishment", hs.balance.replenishment),  # noqa:E501
     ("/balances/<int:balance_id>/withdrawal", "balance_withdrawal", hs.balance.withdrawal),  # noqa:E501
-    ("/balances/<int:balance_id>/statistic", "balance_statistic", hs.balance.statistic),  # noqa:E501
+    ("/balances/<int:balance_id>/transaction-group-transfer", "balance_transaction_group_transfer", hs.balance.transaction_group_transfer),  # noqa:E501
     ("/balances/<int:balance_id>/transaction-group-limits", "balance_transaction_group_limits", hs.balance.transaction_group_limits),  # noqa:E501
+    ("/balances/<int:balance_id>/statistic", "balance_statistic", hs.balance.statistic),  # noqa:E501
 
     ("/transaction-groups", "txn_groups", hs.txn_groups.main),
     ("/transaction-groups/new", "txn_groups_new", hs.txn_groups.new),

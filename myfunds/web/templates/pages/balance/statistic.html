@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="mb-5">
-  <div class="mb-2">Сегодня {{ date_options.today_date }} (до конца месяца {{ date_options.days_left }} дней)</div>
+  <div class="mb-2">Сегодняшняя дата: {{ date_options.today_date }} ({{ date_options.days_left }})</div>
   <div class="progress">
     <div class="progress-bar" role="progressbar" style="width: {{ date_options.days_left_pct }}%;" aria-valuenow="{{ date_options.days_left_pct }}" aria-valuemin="0" aria-valuemax="100">{{ date_options.days_left_pct }}%</div>
   </div>

@@ -61,11 +61,14 @@ _routes = [
     ("/make-replenishment", "make_replenishment", hs.balances.make_replenishment),
     ("/make-withdrawal", "make_withdrawal", hs.balances.make_withdrawal),
     ("/import-transactions", "import_transactions", hs.balances.import_transactions),
+    ("/download-transactions", "download_transactions", hs.balances.download_transactions),
     ("/update-transaction", "update_transaction", hs.balances.update_transaction),
     ("/delete-transaction", "delete_transaction", hs.balances.delete_transaction),
     ("/add-transaction-group-limit", "add_transaction_group_limit", hs.balances.add_transaction_group_limit),  # noqa: E501
     ("/update-transaction-group-limit", "update_transaction_group_limit", hs.balances.update_transaction_group_limit),  # noqa: E501
     ("/delete-transaction-group-limit", "delete_transaction_group_limit", hs.balances.delete_transaction_group_limit),  # noqa: E501
+    ("/change-replenishment-group", "change_replenishment_group", hs.balances.change_replenishment_group),  # noqa: E501
+    ("/change-withdrawal-group", "change_withdrawal_group", hs.balances.change_withdrawal_group),  # noqa: E501
 
     ("/add-txn-group", "add_txn_group", hs.txn_groups.add_txn_group),
     ("/update-txn-group", "update_txn_group", hs.txn_groups.update_txn_group),

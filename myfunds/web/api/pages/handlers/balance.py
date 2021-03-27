@@ -242,6 +242,53 @@ def transaction_group_limits():
 
 @auth.login_required
 @_page_init
+def transaction_group_transfer():
+    txn_group_transactions = (
+        models.TransactionGroup.select(
+            models.TransactionGroup,
+            pw.fn.COUNT(models.Transaction.id).alias("transactions"),
+        )
+        .join(models.Transaction)
+        .where(
+            (models.TransactionGroup.account == g.account)
+            & (models.Transaction.balance == g.balance)
+        )
+        .group_by(models.TransactionGroup.id)
+        .order_by(models.TransactionGroup.name)
+    )
+
+    replenishment_groups = (
+        models.TransactionGroup.select()
+        .where(
+            (models.TransactionGroup.type_ == TransactionType.REPLENISHMENT)
+            & (models.TransactionGroup.account == g.account)
+        )
+        .order_by(models.TransactionGroup.name)
+    )
+
+    withdrawal_groups = (
+        models.TransactionGroup.select()
+        .where(
+            (models.TransactionGroup.type_ == TransactionType.WITHDRAWAL)
+            & (models.TransactionGroup.account == g.account)
+        )
+        .order_by(models.TransactionGroup.name)
+    )
+
+    form_data = {
+        "replenishment_groups": replenishment_groups,
+        "withdrawal_groups": withdrawal_groups,
+    }
+
+    return render_template(
+        "pages/balance/transaction_group_transfer.html",
+        txn_group_transactions=txn_group_transactions,
+        form_data=form_data,
+    )
+
+
+@auth.login_required
+@_page_init
 def statistic():
     tz = app.config["TIMEZONE"]
     dt_format = constants.DATETIME_FORMAT

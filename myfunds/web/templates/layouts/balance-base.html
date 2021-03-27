@@ -24,6 +24,8 @@
     class="ml-4 {% if request.endpoint == 'page.balance_replenishment' %} active{% endif %}">Пополнение</a>
   <a href="{{ url_for('page.balance_withdrawal', balance_id=g.balance.id) }}"
     class="ml-4 {% if request.endpoint == 'page.balance_withdrawal' %} active{% endif %}">Вывод</a>
+  <a href="{{ url_for('page.balance_transaction_group_transfer', balance_id=g.balance.id) }}"
+    class="ml-4 {% if request.endpoint == 'page.balance_transaction_group_transfer' %} active{% endif %}">Замена группы</a>
   <a href="{{ url_for('page.balance_transaction_group_limits', balance_id=g.balance.id) }}"
     class="ml-4 {% if request.endpoint == 'page.balance_transaction_group_limits' %} active{% endif %}">Лимиты на
     вывод</a>
