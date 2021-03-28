@@ -23,6 +23,7 @@ if web_config.LOGGING_DICT_CONFIG and web_config.LOGGING_DICT_CONFIG != {}:
 
 database = business.init_database(web_config.DB_NAME)
 models.database.initialize(database)
+models.database.create_tables(business.model_list())
 
 app = web.create_app(web_config)
 
