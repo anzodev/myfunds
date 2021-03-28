@@ -27,10 +27,10 @@ def main():
         .where(models.TransactionGroup.account == g.account)
         .order_by(models.TransactionGroup.type_, models.TransactionGroup.name)
     )
-    return render_template("pages/txn_groups/main.html", txn_groups=txn_groups)
+    return render_template("pages/txn-groups/main.html", txn_groups=txn_groups)
 
 
 @auth.login_required
 def new():
     form_data = {"txn_types": translates.TXN_TYPES}
-    return render_template("pages/txn_groups/new.html", form_data=form_data)
+    return render_template("pages/txn-groups/new.html", form_data=form_data)

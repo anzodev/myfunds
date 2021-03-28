@@ -61,7 +61,7 @@ _routes = [
     ("/make-replenishment", "make_replenishment", hs.balances.make_replenishment),
     ("/make-withdrawal", "make_withdrawal", hs.balances.make_withdrawal),
     ("/import-transactions", "import_transactions", hs.balances.import_transactions),
-    ("/download-transactions", "download_transactions", hs.balances.download_transactions),
+    ("/download-transactions", "download_transactions", hs.balances.download_transactions),  # noqa: E501
     ("/update-transaction", "update_transaction", hs.balances.update_transaction),
     ("/delete-transaction", "delete_transaction", hs.balances.delete_transaction),
     ("/add-transaction-group-limit", "add_transaction_group_limit", hs.balances.add_transaction_group_limit),  # noqa: E501
@@ -74,8 +74,9 @@ _routes = [
     ("/update-txn-group", "update_txn_group", hs.txn_groups.update_txn_group),
     ("/delete-txn-group", "delete_txn_group", hs.txn_groups.delete_txn_group),
 
-    # ("/create-plan", "create_plan", hs.plans.create_plan),
-    # ("/delete-plan", "delete_plan", hs.plans.delete_plan),
+    ("/add-crypto-balance", "add_crypto_balance", hs.crypto_balances.add_crypto_balance),  # noqa: E501
+    ("/update-crypto-balance", "update_crypto_balance", hs.crypto_balances.update_crypto_balance),  # noqa: E501
+    ("/delete-crypto-balance", "delete_crypto_balance", hs.crypto_balances.delete_crypto_balance),  # noqa: E501
 ]
 # fmt: on
 for rule, endpoint, handler in _routes:

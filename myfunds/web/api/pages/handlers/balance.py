@@ -234,7 +234,7 @@ def transaction_group_limits():
     add_form_data = {"txn_groups": unused_txn_groups}
 
     return render_template(
-        "pages/balance/transaction_group_limits.html",
+        "pages/balance/transaction-group-limits.html",
         limits=txn_group_limits,
         add_form_data=add_form_data,
     )
@@ -281,7 +281,7 @@ def transaction_group_transfer():
     }
 
     return render_template(
-        "pages/balance/transaction_group_transfer.html",
+        "pages/balance/transaction-group-transfer.html",
         txn_group_transactions=txn_group_transactions,
         form_data=form_data,
     )

@@ -1,5 +1,5 @@
 import peewee as pw
-from flask import g, abort
+from flask import g
 from flask import render_template
 
 from myfunds.domain import models

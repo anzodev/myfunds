@@ -4,5 +4,7 @@ from . import currency  # noqa: F401
 from . import currencies  # noqa: F401
 from . import balance  # noqa: F401
 from . import balances  # noqa: F401
+from . import crypto_balance  # noqa: F401
+from . import crypto_balances  # noqa: F401
 from . import txn_groups  # noqa: F401
 from . import txn_group  # noqa: F401

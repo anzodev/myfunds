@@ -74,6 +74,10 @@ _routes = [
     ("/transaction-groups", "txn_groups", hs.txn_groups.main),
     ("/transaction-groups/new", "txn_groups_new", hs.txn_groups.new),
     ("/transaction-groups/<int:txn_group_id>/edit", "txn_group_edit", hs.txn_group.edit),  # noqa:E501
+
+    ("/crypto-balances", "crypto_balances", hs.crypto_balances.main),
+    ("/crypto-balances/new", "crypto_balances_new", hs.crypto_balances.new),
+    ("/crypto-balances/<int:crypto_balance_id>/edit", "crypto_balance_edit", hs.crypto_balance.edit),  # noqa: E501
 ]
 # fmt: on
 

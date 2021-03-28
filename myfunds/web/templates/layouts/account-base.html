@@ -19,18 +19,22 @@
     <ul class="d-flex m-0">
       <li>
         <a href="{{ url_for('page.balances') }}"
-          class="{% if request.endpoint == 'page.balances' %}active{% endif %}">Балансы</a>
+          class="mr-4 {% if request.endpoint == 'page.balances' %}active{% endif %}">Балансы</a>
       </li>
       <li>
         <a href="{{ url_for('page.txn_groups') }}"
-          class="ml-4 {% if request.endpoint == 'page.txn_groups' %}active{% endif %}">Группы транзакций</a>
+          class="mr-4 {% if request.endpoint == 'page.txn_groups' %}active{% endif %}">Группы транзакций</a>
       </li>
       {% if g.is_superuser %}
       <li>
         <a href="{{ url_for('page.currencies') }}"
-          class="ml-4 {% if request.endpoint == 'page.currencies' %}active{% endif %}">Валюты</a>
+          class="mr-4 {% if request.endpoint == 'page.currencies' %}active{% endif %}">Валюты</a>
       </li>
       {% endif %}
+      <li class="border-left">
+        <a href="{{ url_for('page.crypto_balances') }}"
+          class="ml-4 {% if request.endpoint == 'page.crypto_balances' %}active{% endif %}">Крипто-балансы</a>
+      </li>
     </ul>
   </div>
 </header>

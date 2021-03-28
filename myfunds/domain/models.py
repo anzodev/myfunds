@@ -90,14 +90,23 @@ class Transaction(_BaseModel):
         return self.balance.to_amount_repr(self.balance_remainder)
 
 
-class Plan(_BaseModel):
+class CryptoBalance(_BaseModel):
     class Meta:
-        table_name = "plans"
+        table_name = "crypto_balances"
+        indexes = ((("account_id", "name"), True),)
 
     account = pw.ForeignKeyField(Account)
-    balance = pw.ForeignKeyField(Balance, on_delete="CASCADE")
     name = pw.CharField()
-    description = pw.TextField(null=True)
-    target_amount = pw.IntegerField()
-    target_date = pw.DateTimeField()
+    symbol = pw.CharField()
+    cmc_symbol_id = pw.IntegerField(null=True)
+    amount = pw.IntegerField(default=0)
+    amount_usd = pw.IntegerField(null=True)
     created_at = pw.DateTimeField()
+
+    def amount_repr(self) -> str:
+        return f"{self.amount / (10 ** 8):.8f}"
+
+    def amount_usd_repr(self) -> str:
+        if self.amount_usd is None:
+            return "-"
+        return f"{self.amount_usd / (10 ** 2):.2f}"

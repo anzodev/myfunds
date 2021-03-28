@@ -1,0 +1,51 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Редактирование крипто-баланса: {{ g.crypto_balance.name }}{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.crypto_balances') }}">Вернуться к списку</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-3 mb-4 mb-lg-0">
+    <form action="{{ url_for('form.update_crypto_balance') }}" method="POST" class="border rounded p-2" autocomplete="off">
+      <input type="hidden" name="crypto_balance_id" value="{{ g.crypto_balance.id }}" required>
+      <div class="form-group">
+        <label for="f0__name" class="mb-1">Название:</label>
+        <input type="text" name="name" id="f0__name" class="form-control form-control-sm" value="{{ g.crypto_balance.name }}">
+      </div>
+      <div class="form-group">
+        <label for="f0__symbol" class="mb-1">Код валюты:</label>
+        <input type="text" name="symbol" id="f0__symbol" class="form-control form-control-sm" value="{{ g.crypto_balance.symbol }}">
+      </div>
+      <div class="form-group">
+        <label for="f0__cmc-symbol-id" class="mb-1">ID на CoinMarketCup:</label>
+        <input type="text" name="cmc_symbol_id" id="f0__cmc-symbol-id" class="form-control form-control-sm" value="{{ g.crypto_balance.cmc_symbol_id }}">
+      </div>
+      <div class="form-group">
+        <label for="f0__amount" class="mb-1">Сумма:</label>
+        <input type="text" name="amount" id="f0__amount" class="form-control" placeholder="245.{{ '0' * 8 }}"
+          pattern="\d+(\.\d{1,8})?" value="{{ g.crypto_balance.amount_repr() }}">
+      </div>
+      <div class="form-group mb-0">
+        <button type="submit" class="btn btn-sm btn-primary w-100">Обновить запись</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-lg-3">
+    <form action="{{ url_for('form.delete_crypto_balance') }}" method="POST" autocomplete="off">
+      <input type="hidden" name="crypto_balance_id" value="{{ g.crypto_balance.id }}" required>
+      <div class="form-group">
+        <button type="button" class="btn btn-sm btn-outline-info w-100 mb-2 display-toggler"
+          data-target="delete-group-acknowledge">Удалить баланс</button>
+        <button type="submit" id="delete-group-acknowledge"
+          class="btn btn-sm btn-danger w-100 d-none">Подтвердить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

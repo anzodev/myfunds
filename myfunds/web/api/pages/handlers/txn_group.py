@@ -27,4 +27,4 @@ def _page_init(f):
 @auth.login_required
 @_page_init
 def edit():
-    return render_template("pages/txn_group/edit.html")
+    return render_template("pages/txn-group/edit.html")
