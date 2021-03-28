@@ -108,5 +108,5 @@ class CryptoBalance(_BaseModel):
 
     def amount_usd_repr(self) -> str:
         if self.amount_usd is None:
-            return "-"
+            return "0.00"
         return f"{self.amount_usd / (10 ** 2):.2f}"

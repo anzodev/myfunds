@@ -14,7 +14,8 @@ def main():
     )
 
     return render_template(
-        "pages/crypto-balances/main.html", crypto_balances=crypto_balances
+        "pages/crypto-balances/main.html",
+        crypto_balances=crypto_balances,
     )
 
 
