@@ -308,11 +308,10 @@ def download_transactions():
             )
             yield "\n"
 
-    filename = f"myfunds_{since_dt_str}_{until_dt_str}.csv"
     return Response(
         generate_content(),
         mimetype="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={"Content-Disposition": 'attachment; filename="transactions.csv"'},
     )
 
 
