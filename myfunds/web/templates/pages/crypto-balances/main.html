@@ -35,8 +35,9 @@
       <tr>
         <th>Название</th>
         <th>Код</th>
-        <th>Сумма</th>
-        <th>Сумма в USD</th>
+        <th>Цена (USD)</th>
+        <th>Кол-во</th>
+        <th>Сумма (USD)</th>
         <th class="w-1 text-nowrap align-middle">
           <div class="d-flex align-items-center">
             <i data-feather="plus"></i>
@@ -51,6 +52,7 @@
       <tr>
         <td>{{ b.name }}</td>
         <td>{{ b.symbol }}</td>
+        <td>{{ b.price_repr() }}</td>
         <td>{{ b.amount_repr() }}</td>
         <td>{{ b.amount_usd_repr() }}</td>
         <td class="align-middle text-center">

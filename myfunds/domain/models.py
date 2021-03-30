@@ -101,6 +101,7 @@ class CryptoBalance(_BaseModel):
     cmc_symbol_id = pw.IntegerField(null=True)
     amount = pw.IntegerField(default=0)
     amount_usd = pw.IntegerField(null=True)
+    price = pw.IntegerField(null=True, default=0)
     created_at = pw.DateTimeField()
 
     def amount_repr(self) -> str:
@@ -110,3 +111,8 @@ class CryptoBalance(_BaseModel):
         if self.amount_usd is None:
             return "0.00"
         return f"{self.amount_usd / (10 ** 2):.2f}"
+
+    def price_repr(self) -> str:
+        if self.price is None:
+            return "0.00"
+        return f"{self.price / (10 ** 2):.2f}"

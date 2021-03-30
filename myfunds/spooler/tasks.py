@@ -22,6 +22,7 @@ def update_crypto_balances_usd_price(*args):
             continue
 
         i.amount_usd = round(float(i.amount_repr()) * price * (10 ** 2))
+        i.price = round(price * (10 ** 2))
         i.save()
 
     return uwsgi.SPOOL_OK
