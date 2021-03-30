@@ -10,7 +10,7 @@ def main():
     crypto_balances = (
         models.CryptoBalance.select(models.CryptoBalance)
         .where(models.CryptoBalance.account == g.account)
-        .order_by(models.CryptoBalance.name)
+        .order_by(models.CryptoBalance.amount_usd.desc())
     )
 
     return render_template(
