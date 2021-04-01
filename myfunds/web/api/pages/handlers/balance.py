@@ -422,6 +422,7 @@ def statistic():
         amount_sum = sum(txn.amount for txn in no_group_txns)
         to_withdrawals_sum_pct = amount_sum * 100.0 / (withdrawals_sum or 1)
         to_start_balance_pct = amount_sum * 100.0 / (start_balance or 1)
+
         withdrawals_chart.append(
             {
                 "sort_field": to_withdrawals_sum_pct,
@@ -479,6 +480,21 @@ def statistic():
                 "limit_class": limit_class,
             }
         )
+
+    if len(withdrawals_chart) != 0:
+        top_amount_withdrawal = max(
+            withdrawals_chart, key=lambda i: float(i["to_withdrawals_sum_pct"])
+        )
+        top_withdrawal_sum_pct = top_amount_withdrawal["to_withdrawals_sum_pct"]
+        for i in withdrawals_chart:
+            chart_bar_to_withdrawals_sum_pct = (
+                float(i["to_withdrawals_sum_pct"])
+                * 100.0
+                / float(top_withdrawal_sum_pct)
+            )
+            i[
+                "chart_bar_to_withdrawals_sum_pct"
+            ] = f"{chart_bar_to_withdrawals_sum_pct:.2f}"
 
     withdrawals_chart = list(
         reversed(sorted(withdrawals_chart, key=lambda data: data["sort_field"]))
