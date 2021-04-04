@@ -5,7 +5,9 @@
 <div class="mb-5">
   <div class="mb-2">Сегодняшняя дата: {{ date_options.today_date }} ({{ date_options.days_left }})</div>
   <div class="progress">
-    <div class="progress-bar" role="progressbar" style="width: {{ date_options.days_left_pct }}%;" aria-valuenow="{{ date_options.days_left_pct }}" aria-valuemin="0" aria-valuemax="100">{{ date_options.days_left_pct }}%</div>
+    <div class="progress-bar" role="progressbar" style="width: {{ date_options.days_left_pct }}%;"
+      aria-valuenow="{{ date_options.days_left_pct }}" aria-valuemin="0" aria-valuemax="100">{{
+      date_options.days_left_pct }}%</div>
   </div>
 </div>
 <div class="mb-4">
@@ -16,7 +18,7 @@
           <label class="mb-1" for="f0__month">Месяц:</label>
           <select name="month" id="f0__month" class="form-control form-control-sm px-1">
             {% for idx, name in form_filter_data.months_options.items() %}
-            <option value="{{ idx }}" {% if form_filter_values.month == idx %}selected{% endif %}>{{ name }}</option>
+            <option value="{{ idx }}" {% if form_filter_values.month==idx %}selected{% endif %}>{{ name }}</option>
             {% endfor %}
           </select>
         </div>
@@ -58,6 +60,35 @@
     </tr>
   </tbody>
 </table>
+{% if ignored_groups_list %}
+<div class="mb-3">
+  <form id="ignore-groups-form" action="GET">
+    {% for k, v in request.args.items() %}
+    <input type="hidden" name="{{ k }}" value="{{ v }}">
+    {% endfor %}
+  </form>
+  <div class="d-flex">
+    <div>
+      <span class="d-block px-2 py-1">Игнорировать:</span>
+    </div>
+    <div>
+      {% for i in ignored_groups_list %}
+      <div class="d-inline-block ml-1 mb-2">
+        <span class="d-flex align-items-center border rounded px-2 py-1" style="background-color: #fdfdfd;">
+          <span
+            style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }}; vertical-align: middle;">
+          </span>
+          <span class="ml-1">{{ i.name }}</span>
+          <button class="btn btn-sm btn-link p-0 ml-2"><a
+              href="{{ url_for('page.balance_statistic', balance_id=g.balance.id, **i.req_args) }}"><i
+                data-feather="x"></i></a></button>
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
 {% if withdrawals_chart %}
 <table class="table table-sm table-bordered m-0">
   <thead>
@@ -66,6 +97,7 @@
       <th colspan="2" class="text-center">Затраты</th>
       <th colspan="2" class="text-center">Лимит</th>
       <th rowspan="2" class="align-middle text-center">Соотношение по затратам</th>
+      <th rowspan="2" class="align-middle text-center w-1"></th>
     </tr>
     <tr>
       <th class="text-nowrap text-center">%</th>
@@ -82,15 +114,21 @@
           style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }}; vertical-align: middle;">
         </span>
         <span class="ml-1 align-middle"><a
-            href="{{ url_for('page.balance_transactions', balance_id=g.balance.id, txn_type=i.type, txn_group=i.group_id, created_at_range=metadata.created_at_range) }}">{{ i.group }}</a></span>
+            href="{{ url_for('page.balance_transactions', balance_id=g.balance.id, txn_type=i.type, txn_group=i.group_id, created_at_range=metadata.created_at_range) }}">{{
+            i.group }}</a></span>
       </td>
       <td class="w-1 align-middle">{{ i.to_withdrawals_sum_pct }}%</td>
       <td class="w-1 align-middle">{{ i.amount_sum }}</td>
       <td class="w-1 {{ i.limit_class }}">{{ i.limit_pct }}</td>
       <td class="w-1">{{ i.limit }}</td>
       <td class="align-middle p-0">
-        <div style="width: {{ i.chart_bar_to_withdrawals_sum_pct }}%; height: 30px; background-color: {{ i.color_sign }};"></div>
+        <div
+          style="width: {{ i.chart_bar_to_withdrawals_sum_pct }}%; height: 30px; background-color: {{ i.color_sign }};">
+        </div>
       </td>
+      <td class="align-middle px-2"><a
+          href="{{ url_for('page.balance_statistic', balance_id=g.balance.id, **i.req_args) }}"><i
+            data-feather="x"></i></a></td>
     </tr>
     {% endfor %}
   </tbody>

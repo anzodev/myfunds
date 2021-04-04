@@ -369,12 +369,64 @@ def statistic():
         .order_by(models.Transaction.created_at)
     )
 
+    ignore_groups = request.args.get("ignore_groups", "")
+    ignore_groups_set = set(ignore_groups.split(","))
+    ignore_groups_set.discard("")
+
+    ignore_no_group = False
+    if "NO_GROUP" in ignore_groups_set:
+        ignore_no_group = True
+
+    ignore_groups_ids = ignore_groups_set.copy()
+    ignore_groups_ids.discard("NO_GROUP")
+    ignore_groups_ids = [int(i) for i in ignore_groups_ids]
+
+    ignore_groups_condition = models.Transaction.group.not_in(
+        ignore_groups_ids
+    ) | models.Transaction.group.is_null(True)
+    if ignore_no_group:
+        ignore_groups_condition = models.Transaction.group.not_in(
+            ignore_groups_ids
+        ) & models.Transaction.group.is_null(False)
+
+    ignored_groups_list = []
+    for i in models.TransactionGroup.select().where(
+        (models.TransactionGroup.id << ignore_groups_ids)
+    ):
+        ignore_groups_query = ignore_groups_set.copy()
+        ignore_groups_query.discard(str(i.id))
+        req_args = request.args.copy()
+        req_args["ignore_groups"] = ",".join(ignore_groups_query)
+        ignored_groups_list.append(
+            {
+                "id": i.id,
+                "name": i.name,
+                "color_sign": i.color_sign,
+                "req_args": req_args,
+            }
+        )
+
+    if ignore_no_group:
+        ignore_groups_query = ignore_groups_set.copy()
+        ignore_groups_query.discard("NO_GROUP")
+        req_args = request.args.copy()
+        req_args["ignore_groups"] = ",".join(ignore_groups_query)
+        ignored_groups_list.append(
+            {
+                "id": "NO_GROUP",
+                "name": "Без группы",
+                "color_sign": "#ddd",
+                "req_args": req_args,
+            }
+        )
+
     withdrawals = list(
         models.Transaction.select(models.Transaction, models.TransactionGroup)
         .join(models.TransactionGroup, pw.JOIN.LEFT_OUTER)
         .where(
             (models.Transaction.balance == g.balance)
             & (models.Transaction.type_ == TransactionType.WITHDRAWAL)
+            & ignore_groups_condition
             & (models.Transaction.created_at.between(since_dt, until_dt))
         )
         .order_by(models.Transaction.created_at)
@@ -423,6 +475,11 @@ def statistic():
         to_withdrawals_sum_pct = amount_sum * 100.0 / (withdrawals_sum or 1)
         to_start_balance_pct = amount_sum * 100.0 / (start_balance or 1)
 
+        ignore_groups_query = ignore_groups_set.copy()
+        ignore_groups_query.add("NO_GROUP")
+        req_args = request.args.copy()
+        req_args["ignore_groups"] = ",".join(ignore_groups_query)
+
         withdrawals_chart.append(
             {
                 "sort_field": to_withdrawals_sum_pct,
@@ -436,6 +493,7 @@ def statistic():
                 "limit": "",
                 "limit_pct": "",
                 "limit_class": "",
+                "req_args": req_args,
             }
         )
 
@@ -465,6 +523,11 @@ def statistic():
                 else ("text-danger" if limit_pct >= 100.0 else "text-warning")
             )
 
+        ignore_groups_query = ignore_groups_set.copy()
+        ignore_groups_query.add(str(txn_group.id))
+        req_args = request.args.copy()
+        req_args["ignore_groups"] = ",".join(ignore_groups_query)
+
         withdrawals_chart.append(
             {
                 "sort_field": to_withdrawals_sum_pct,
@@ -478,6 +541,7 @@ def statistic():
                 "limit": limit,
                 "limit_pct": f"{limit_pct:.2f}%" if limit_pct != 0 else "",
                 "limit_class": limit_class,
+                "req_args": req_args,
             }
         )
 
@@ -523,4 +587,5 @@ def statistic():
         metadata=metadata,
         amount_stats=amount_status,
         withdrawals_chart=withdrawals_chart,
+        ignored_groups_list=sorted(ignored_groups_list, key=lambda i: i["name"]),
     )
