@@ -21,6 +21,10 @@ class ForbiddenError(Exception):
     pass
 
 
+class NotSuperUserError(Exception):
+    pass
+
+
 def authorize_account(account: models.Account) -> None:
     session["aid"] = account.id
 
@@ -52,6 +56,17 @@ def login_required(f):
 
         g.account = account
         g.is_superuser = g.account.username == current_app.config["SUPERUSER"]
+
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
+def superuser_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not g.is_superuser:
+            raise NotSuperUserError()
 
         return f(*args, **kwargs)
 

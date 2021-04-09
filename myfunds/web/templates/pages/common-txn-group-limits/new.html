@@ -1,0 +1,40 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Новый общий лимит на вывод{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.common_txn_group_limits') }}">Вернуться к списку</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-3">
+    <form action="{{ url_for('form.add_common_txn_group_limit') }}" method="POST" class="border rounded p-2" autocomplete="off">
+      <div class="form-group">
+        <label for="f0__name" class="mb-1">Название:</label>
+        <input type="text" name="name" id="f0__name" class="form-control form-control-sm" required>
+      </div>
+      <div class="form-group">
+        <label for="f0__currency" class="mb-1">Валюта:</label>
+        <select name="ccy_code_alpha" id="f0__currency" class="form-control form-control-sm px-1" required>
+          <option value="NOTSET">-</option>
+          {% for ccy in form_data.currencies %}
+          <option value="{{ ccy.code_alpha }}">{{ ccy.code_alpha }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="f0__month-limit" class="mb-1 d-block">Месячный лимит:</label>
+        <input type="text" name="month_limit" id="f0__month-limit" class="form-control form-control-sm"
+          placeholder="100" pattern="\d+" required>
+      </div>
+      <div class="form-group mb-0">
+        <button type="submit" class="btn btn-sm btn-primary w-100">Добавить лимит</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

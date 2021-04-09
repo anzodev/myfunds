@@ -1,0 +1,40 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Редактирование общего лимита: {{ g.limit.name }}{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.common_txn_group_limits') }}">Вернуться к списку</a>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-3 mb-4 mb-lg-0">
+    <div class="form-group">
+      <label class="mb-1">Название:</label>
+      <input type="text" class="form-control form-control-sm" value="{{ g.limit.name }}" readonly>
+    </div>
+    <div class="form-group">
+      <label class="mb-1">Валюта:</label>
+      <input type="text" class="form-control form-control-sm" value="{{ g.limit_currency.code_alpha }}" readonly>
+    </div>
+    <div class="form-group">
+      <label class="mb-1 d-block">Месячный лимит:</label>
+      <input type="text" class="form-control form-control-sm" value="{{ g.limit.month_limit_repr() }}" readonly>
+    </div>
+  </div>
+  <div class="col-lg-3">
+    <form action="{{ url_for('form.delete_common_txn_group_limit') }}" method="POST" autocomplete="off">
+      <input type="hidden" name="limit_id" value="{{ g.limit.id }}" required>
+      <div class="form-group">
+        <button type="button" class="btn btn-sm btn-outline-info w-100 mb-2 display-toggler"
+          data-target="delete-group-acknowledge">Удалить лимит</button>
+        <button type="submit" id="delete-group-acknowledge"
+          class="btn btn-sm btn-danger w-100 d-none">Подтвердить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

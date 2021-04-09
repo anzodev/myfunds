@@ -7,6 +7,7 @@ from werkzeug.exceptions import HTTPException
 
 from myfunds.web.api.pages import handlers as hs
 from myfunds.web.tools import auth
+from myfunds.web.tools import alerts
 
 
 _bp = flask.Blueprint("page", __name__)
@@ -27,6 +28,13 @@ def _errorhandler(e: Exception):
         logger.error(repr(e))
         auth.clear_session()
         return flask.redirect(flask.url_for(".login"))
+
+    if isinstance(e, auth.NotSuperUserError):
+        logger.error(repr(e))
+        alerts.error("Доступ запрещен!")
+        return flask.redirect(
+            flask.session.get("last_page", flask.url_for("page.index"))
+        )
 
     http_status = HTTPStatus.INTERNAL_SERVER_ERROR
     status_code, description = http_status.value, http_status.description
@@ -57,10 +65,6 @@ _routes = [
 
     ("/account/edit", "account_edit", hs.account.edit),
 
-    ("/currencies", "currencies", hs.currencies.main),
-    ("/currencies/new", "currencies_new", hs.currencies.new),
-    ("/currencies/<int:currency_id>/edit", "currency_edit", hs.currency.edit),
-
     ("/balances", "balances", hs.balances.main),
     ("/balances/new", "balances_new", hs.balances.new),
     ("/balances/<int:balance_id>/edit", "balance_edit", hs.balance.edit),
@@ -74,6 +78,15 @@ _routes = [
     ("/transaction-groups", "txn_groups", hs.txn_groups.main),
     ("/transaction-groups/new", "txn_groups_new", hs.txn_groups.new),
     ("/transaction-groups/<int:txn_group_id>/edit", "txn_group_edit", hs.txn_group.edit),  # noqa:E501
+
+    ("/common-transaction-group-limits", "common_txn_group_limits", hs.common_txn_group_limits.main),  # noqa: E501
+    ("/common-transaction-group-limits/new", "common_txn_group_limits_new", hs.common_txn_group_limits.new),  # noqa: E501
+    ("/common-transaction-group-limits/<int:limit_id>/edit", "common_txn_group_limit_edit", hs.common_txn_group_limit.edit),  # noqa:E501
+    ("/common-transaction-group-limits/<int:limit_id>/participants", "common_txn_group_limit_participants", hs.common_txn_group_limit.participants),  # noqa:E501
+
+    ("/currencies", "currencies", hs.currencies.main),
+    ("/currencies/new", "currencies_new", hs.currencies.new),
+    ("/currencies/<int:currency_id>/edit", "currency_edit", hs.currency.edit),
 
     ("/crypto-balances", "crypto_balances", hs.crypto_balances.main),
     ("/crypto-balances/new", "crypto_balances_new", hs.crypto_balances.new),

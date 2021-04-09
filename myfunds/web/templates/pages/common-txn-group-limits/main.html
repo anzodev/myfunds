@@ -1,0 +1,44 @@
+{% extends 'layouts/account-base.html' %}
+
+
+{% block heading %}Общие лимиты на вывод{% endblock %}
+
+
+{% block heading_links %}
+<a href="{{ url_for('page.common_txn_group_limits_new') }}">Добавить лимит</a>
+{% endblock %}
+
+
+{% block content %}
+{% if limits %}
+<div class="overflow-x-auto">
+  <table class="table table-sm table-bordered table-hover m-0">
+    <thead>
+      <tr class="border-bottom">
+        <th>Название</th>
+        <th>Валюта</th>
+        <th>Месячный лимит</th>
+        <th class="w-1"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in limits %}
+      <tr>
+        <td>{{ l.name }}</td>
+        <td>{{ l.currency.code_alpha }}</td>
+        <td>{{ l.month_limit_repr() }}</td>
+        <td class="px-2 text-nowrap">
+          <a href="{{ url_for('page.common_txn_group_limit_edit', limit_id=l.id) }}">
+            <i data-feather="edit"></i>
+          </a>
+          <a href="{{ url_for('page.common_txn_group_limit_participants', limit_id=l.id) }}" class="ml-3">
+            <i data-feather="more-horizontal"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

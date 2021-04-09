@@ -30,6 +30,10 @@
         <a href="{{ url_for('page.currencies') }}"
           class="mr-4 {% if request.endpoint == 'page.currencies' %}active{% endif %}">Валюты</a>
       </li>
+      <li>
+        <a href="{{ url_for('page.common_txn_group_limits') }}"
+          class="mr-4 {% if request.endpoint == 'page.common_txn_group_limits' %}active{% endif %}">Общие лимиты ны вывод</a>
+      </li>
       {% endif %}
       <li class="border-left">
         <a href="{{ url_for('page.crypto_balances') }}"

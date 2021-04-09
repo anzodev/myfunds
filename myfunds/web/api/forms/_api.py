@@ -7,6 +7,7 @@ from werkzeug.exceptions import HTTPException
 
 from myfunds.web.api.forms import handlers as hs
 from myfunds.web.tools import auth
+from myfunds.web.tools import alerts
 
 
 _bp = flask.Blueprint("form", __name__, url_prefix="/forms/")
@@ -21,6 +22,13 @@ def _errorhandler(e: Exception):
         logger.error(repr(e))
         auth.clear_session()
         return flask.redirect(flask.url_for("page.login"))
+
+    if isinstance(e, auth.NotSuperUserError):
+        logger.error(repr(e))
+        alerts.error("Доступ запрещен!")
+        return flask.redirect(
+            flask.session.get("last_page", flask.url_for("page.index"))
+        )
 
     http_status = HTTPStatus.INTERNAL_SERVER_ERROR
     status_code, description = http_status.value, http_status.description
@@ -52,9 +60,6 @@ _routes = [
     ("/update-password", "update_password", hs.accounts.update_password),
     ("/update-ip-whitelist", "update_ip_whitelist", hs.accounts.update_ip_whitelist),
 
-    ("/add-currency", "add_currency", hs.currencies.add_currency),
-    ("/update-currency", "update_currency", hs.currencies.update_currency),
-
     ("/add-balance", "add_balance", hs.balances.add_balance),
     ("/update-balance", "update_balance", hs.balances.update_balance),
     ("/delete-balance", "delete_balance", hs.balances.delete_balance),
@@ -73,6 +78,13 @@ _routes = [
     ("/add-txn-group", "add_txn_group", hs.txn_groups.add_txn_group),
     ("/update-txn-group", "update_txn_group", hs.txn_groups.update_txn_group),
     ("/delete-txn-group", "delete_txn_group", hs.txn_groups.delete_txn_group),
+
+    ("/add-common-txn-group-limit", "add_common_txn_group_limit", hs.common_txn_group_limits.add_common_txn_group_limit),  # noqa: E501
+    ("/delete-common-txn-group-limit", "delete_common_txn_group_limit", hs.common_txn_group_limits.delete_common_txn_group_limit),  # noqa: E501
+    ("/add-common-limit-participant", "add_common_limit_participant", hs.common_txn_group_limits.add_common_limit_participant),  # noqa: E501
+
+    ("/add-currency", "add_currency", hs.currencies.add_currency),
+    ("/update-currency", "update_currency", hs.currencies.update_currency),
 
     ("/add-crypto-balance", "add_crypto_balance", hs.crypto_balances.add_crypto_balance),  # noqa: E501
     ("/update-crypto-balance", "update_crypto_balance", hs.crypto_balances.update_crypto_balance),  # noqa: E501

@@ -71,6 +71,31 @@ class TransactionGroupLimit(_BaseModel):
         return self.balance.to_amount_repr(self.month_limit)
 
 
+class CommonTransactionGroupLimit(_BaseModel):
+    class Meta:
+        table_name = "common_txn_group_limits"
+
+    name = pw.CharField(unique=True)
+    currency = pw.ForeignKeyField(Currency)
+    month_limit = pw.IntegerField()
+
+    def month_limit_repr(self) -> str:
+        base = self.currency.base
+        return f"{self.month_limit / 10 ** base:.{base}f}"
+
+
+class CommonTransactionGroupLimitRelation(_BaseModel):
+    class Meta:
+        talbe_name = "common_txn_group_limit_relations"
+        indexes = ((("balance_id", "group_id"), True),)
+
+    limit = pw.ForeignKeyField(
+        CommonTransactionGroupLimit, backref="relations", on_delete="CASCADE"
+    )
+    balance = pw.ForeignKeyField(Balance)
+    group = pw.ForeignKeyField(TransactionGroup)
+
+
 class Transaction(_BaseModel):
     class Meta:
         table_name = "transactions"

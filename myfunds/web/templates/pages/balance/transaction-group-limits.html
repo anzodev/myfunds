@@ -54,8 +54,7 @@
                     <label for="f0__txn-group" class="mb-1">Группа:</label>
                     <select name="txn_group" id="f0__txn-group" class="form-control form-control-sm px-1" required>
                       {% for txn_group in add_form_data.txn_groups %}
-                      <option value="{{ txn_group.id }}" style="color: {{ txn_group.color_sign }};">{{ txn_group.name }}
-                      </option>
+                      <option value="{{ txn_group.id }}">{{ txn_group.name }}</option>
                       {% endfor %}
                     </select>
                   </div>

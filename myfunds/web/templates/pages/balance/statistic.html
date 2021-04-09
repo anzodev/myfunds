@@ -90,7 +90,7 @@
 </div>
 {% endif %}
 {% if withdrawals_chart %}
-<table class="table table-sm table-bordered table-hover m-0">
+<table class="table table-sm table-bordered table-hover mb-4">
   <thead>
     <tr>
       <th rowspan="2" class="align-middle text-center">Группа</th>
@@ -129,6 +129,44 @@
       <td class="align-middle px-2"><a
           href="{{ url_for('page.balance_statistic', balance_id=g.balance.id, **i.req_args) }}"><i
             data-feather="x"></i></a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="mt-4">Данные о затратах отсутствуют.</p>
+{% endif %}
+{% if common_limits %}
+<table class="table table-sm table-bordered table-hover m-0">
+  <thead>
+    <tr>
+      <th rowspan="2" class="align-middle text-center">Группа</th>
+      <th rowspan="2" class="align-middle text-center">Общий лимит</th>
+      <th rowspan="2" class="align-middle text-center">Участники</th>
+      <th rowspan="2" class="align-middle text-center">Зараты участников</th>
+      <th colspan="3" class="text-center">Лимит</th>
+    </tr>
+    <tr>
+      <th class="text-nowrap text-center">Значение</th>
+      <th class="text-nowrap text-center">%</th>
+      <th class="text-nowrap">Остаток</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in common_limits %}
+    <tr>
+      <td class="text-nowrap w-1">
+        <span
+          style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }}; vertical-align: middle;">
+        </span>
+        <span class="ml-1 align-middle">{{ i.txn_group }}</span>
+      </td>
+      <td>{{ i.name }}</td>
+      <td>{{ i.participants_qty }}</td>
+      <td>{{ i.other_sum }}</td>
+      <td>{{ i.limit_value }}</td>
+      <td class="{{ i.limit_class }}">{{ i.limit_pct }}</td>
+      <td>{{ i.limit_left }}</td>
     </tr>
     {% endfor %}
   </tbody>

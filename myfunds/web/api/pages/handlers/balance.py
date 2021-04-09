@@ -564,6 +564,68 @@ def statistic():
         reversed(sorted(withdrawals_chart, key=lambda data: data["sort_field"]))
     )
 
+    limit_relations = (
+        models.CommonTransactionGroupLimitRelation.select()
+        .join(models.CommonTransactionGroupLimit)
+        .switch()
+        .join(models.Balance)
+        .switch()
+        .join(models.TransactionGroup)
+        .where(models.Balance.account_id == g.account.id)
+    )
+    common_limits = []
+    for i in limit_relations:
+        relations = i.limit.relations
+        participants_qty = len(relations) - 1
+
+        total_widthdrawals_sum = models.Transaction.select(
+            pw.fn.SUM(models.Transaction.amount).alias("sum")
+        ).where(
+            (models.Transaction.group_id << [i.group_id for i in relations])
+            & (models.Transaction.created_at.between(since_dt, until_dt))
+        )
+        total_widthdrawals_sum = total_widthdrawals_sum.first().sum
+        if total_widthdrawals_sum is None:
+            total_widthdrawals_sum = 0
+
+        my_withdrawals_sum = models.Transaction.select(
+            pw.fn.SUM(models.Transaction.amount).alias("sum")
+        ).where(
+            (models.Transaction.group_id == i.group_id)
+            & (models.Transaction.created_at.between(since_dt, until_dt))
+        )
+        my_withdrawals_sum = my_withdrawals_sum.first().sum
+        if my_withdrawals_sum is None:
+            my_withdrawals_sum = 0
+
+        base = i.limit.currency.base
+
+        other_sum = total_widthdrawals_sum - my_withdrawals_sum
+        other_sum = f"{other_sum / (10 ** base):.{base}f}"
+
+        limit_left = i.limit.month_limit - total_widthdrawals_sum
+        limit_pct = 100 - (limit_left * 100.0 / i.limit.month_limit)
+        limit_left = f"{limit_left / (10 ** base):.{base}f}"
+        limit_class = (
+            "text-success"
+            if limit_pct < 80.0
+            else ("text-danger" if limit_pct >= 100.0 else "text-warning")
+        )
+
+        common_limits.append(
+            {
+                "name": f"{i.limit.name} ({i.limit.id})",
+                "participants_qty": participants_qty,
+                "txn_group": i.group.name,
+                "color_sign": i.group.color_sign,
+                "other_sum": other_sum,
+                "limit_value": i.limit.month_limit_repr(),
+                "limit_left": limit_left,
+                "limit_pct": f"{limit_pct:.2f}%" if limit_pct != 0 else "",
+                "limit_class": limit_class,
+            }
+        )
+
     form_filter_data = {
         "months_options": months_options,
     }
@@ -588,4 +650,5 @@ def statistic():
         amount_stats=amount_status,
         withdrawals_chart=withdrawals_chart,
         ignored_groups_list=sorted(ignored_groups_list, key=lambda i: i["name"]),
+        common_limits=common_limits,
     )
