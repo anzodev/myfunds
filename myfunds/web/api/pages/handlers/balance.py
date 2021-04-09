@@ -571,7 +571,7 @@ def statistic():
         .join(models.Balance)
         .switch()
         .join(models.TransactionGroup)
-        .where(models.Balance.account_id == g.account.id)
+        .where(models.Balance == g.balance)
     )
     common_limits = []
     for i in limit_relations:
