@@ -40,6 +40,7 @@ def participants():
         .join(models.Account)
         .switch()
         .join(models.TransactionGroup)
+        .where(models.CommonTransactionGroupLimitRelation.limit == g.limit)
         .order_by(models.Account.id)
     )
 
