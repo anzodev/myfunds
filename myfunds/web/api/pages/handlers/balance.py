@@ -339,13 +339,13 @@ def statistic():
         "days_left_pct": f"{days_left_pct:.2f}",
     }
 
-    first_txn = (
+    last_txn_of_prev_month = (
         models.Transaction.select()
         .where(
             (models.Transaction.balance == g.balance)
-            & (models.Transaction.created_at.between(since_dt, until_dt))
+            & (models.Transaction.created_at < since_dt)
         )
-        .order_by(models.Transaction.created_at)
+        .order_by(models.Transaction.created_at.desc())
         .first()
     )
 
@@ -433,11 +433,8 @@ def statistic():
     )
 
     start_balance = 0
-    if first_txn is not None:
-        if first_txn.type_ == TransactionType.REPLENISHMENT:
-            start_balance = first_txn.balance_remainder - first_txn.amount
-        else:
-            start_balance = first_txn.balance_remainder + first_txn.amount
+    if last_txn_of_prev_month is not None:
+        start_balance = last_txn_of_prev_month.balance_remainder
 
     finish_balance = 0
     if last_txn is not None:
