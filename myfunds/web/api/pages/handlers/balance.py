@@ -94,8 +94,6 @@ def transactions():
         _logger.exception("unexpected error while 'created_at_range' paramter parsing")
         param_created_at_range = None
 
-    # _logger.debug(f"since_dt={since_dt}, until_dt={until_dt}")
-
     query = (
         models.Transaction.select(
             models.Transaction.id,
@@ -315,10 +313,13 @@ def statistic():
     month_idx = int(month_idx)
 
     local_since_dt = datetime.datetime(local_now.year, month_idx, 1)
-    local_until_dt = datetime.datetime(
-        (local_now.year + 1) if month_idx == 12 else local_now.year,
-        1 if month_idx == 12 else month_idx + 1,
-        1,
+    local_until_dt = (
+        datetime.datetime(
+            (local_now.year + 1) if month_idx == 12 else local_now.year,
+            1 if month_idx == 12 else month_idx + 1,
+            1,
+        )
+        - datetime.timedelta(seconds=1)
     )
 
     since_dt = dates.make_utc_from_dt(local_since_dt, tz)
