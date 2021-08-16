@@ -37,13 +37,6 @@ def models_defaults():
             "comment": "transfer to card 4444111122223333",
             "created_at": dt,
         },
-        "plan": {
-            "name": "new pc",
-            "description": "new pc with top config",
-            "target_amount": 250000,
-            "target_date": dt + datetime.timedelta(days=20),
-            "created_at": dt,
-        },
     }
 
 
@@ -180,34 +173,6 @@ def new_withdrawal(_create_txn):
     return _new_withdrawal
 
 
-@pytest.fixture
-def new_plan(models_defaults):
-    def _new_plan(
-        account: models.Account,
-        balance: models.Balance,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        target_amount: Optional[int] = None,
-        target_date: Optional[datetime.datetime] = None,
-        created_at: Optional[datetime.datetime] = None,
-    ):
-        defaults = models_defaults["plan"]
-        return models.Plan.create(
-            account=account,
-            balance=balance,
-            name=name or defaults["name"],
-            description=description or defaults["description"],
-            target_amount=target_amount or defaults["target_amount"],
-            target_date=target_date or defaults["target_date"],
-            created_at=created_at or defaults["created_at"],
-        )
-
-    return _new_plan
-
-
-# ---
-
-
 @pytest.fixture(scope="module", autouse=True)
 def _init_database():
     database = pw.SqliteDatabase(":memory:", pragmas=[("foreign_keys", 1)])
@@ -219,7 +184,6 @@ def _init_database():
             models.Balance,
             models.TransactionGroup,
             models.Transaction,
-            models.Plan,
         ]
     )
     return database
