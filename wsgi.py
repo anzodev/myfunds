@@ -4,10 +4,10 @@ import logging.config as logging_config
 from uwsgidecorators import spool
 
 from myfunds import web
-from myfunds.domain import business
 from myfunds.domain import models
 from myfunds.spooler import tasks
 from myfunds.web import config
+from myfunds.web import database
 
 
 # fmt: off
@@ -21,9 +21,9 @@ web_config = config.from_env(args.env_path)
 if web_config.LOGGING_DICT_CONFIG and web_config.LOGGING_DICT_CONFIG != {}:
     logging_config.dictConfig(web_config.LOGGING_DICT_CONFIG)
 
-database = business.init_database(web_config.DB_NAME)
-models.database.initialize(database)
-models.database.create_tables(business.model_list())
+db = database.init_database(web_config.DB_NAME)
+models.database.initialize(db)
+models.database.create_tables(models.get_models())
 
 app = web.create_app(web_config)
 

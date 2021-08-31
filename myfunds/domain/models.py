@@ -1,3 +1,5 @@
+import inspect
+
 import peewee as pw
 from playhouse.sqlite_ext import JSONField
 
@@ -141,3 +143,12 @@ class CryptoBalance(_BaseModel):
         if self.price is None:
             return "0.00"
         return f"{self.price / (10 ** 2):.2f}"
+
+
+def get_models() -> list[_BaseModel]:
+    # fmt: off
+    return [
+        i for i in globals().values()
+        if (inspect.isclass(i) and issubclass(i, _BaseModel))
+    ]
+    # fmt: on

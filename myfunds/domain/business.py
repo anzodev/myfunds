@@ -1,7 +1,4 @@
 import datetime
-import inspect
-from contextlib import contextmanager
-from typing import List
 from typing import Optional
 
 import peewee as pw
@@ -10,39 +7,6 @@ from myfunds.tools import val
 
 from . import models
 from .constants import TransactionType
-
-
-def model_list() -> List[pw.Model]:
-    result = []
-    for k, v in vars(models).items():
-        if (
-            inspect.isclass(v)
-            and issubclass(v, models._BaseModel)
-            and v is not models._BaseModel
-        ):
-            result.append(v)
-    return result
-
-
-def init_database(db_path: str) -> pw.SqliteDatabase:
-    return pw.SqliteDatabase(
-        db_path,
-        pragmas=[
-            ("cache_size", -1024 * 64),
-            ("journal_mode", "wal"),
-            ("foreign_keys", 1),
-        ],
-    )
-
-
-@contextmanager
-def database_ctx(db: pw.Database) -> None:
-    origin = models.database.obj
-    models.database.initialize(db)
-    try:
-        yield
-    finally:
-        models.database.initialize(origin)
 
 
 def create_currency(
