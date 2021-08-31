@@ -66,8 +66,8 @@
                     <label for="f0__month-limit" class="mb-1 d-block">Месячный лимит:</label>
                     <div class="input-group input-group-sm">
                       <input type="text" name="month_limit" id="f0__month-limit" class="form-control form-control-sm"
-                        placeholder="245.{{ '0' * g.balance.currency.base }}"
-                        pattern="\d+(\.\d{1,{{ g.balance.currency.base }}})?" required>
+                        placeholder="245.{{ '0' * g.balance.currency.precision }}"
+                        pattern="\d+(\.\d{1,{{ g.balance.currency.precision }}})?" required>
                       <div class="input-group-append">
                         <span class="input-group-text">{{ g.balance.currency.code_alpha }}</span>
                       </div>
@@ -112,8 +112,8 @@
                     <label for="f1__month-limit" class="mb-1 d-block">Месячный лимит:</label>
                     <div class="input-group input-group-sm">
                       <input type="text" name="month_limit" id="f1__month-limit" class="form-control form-control-sm"
-                        placeholder="245.{{ '0' * g.balance.currency.base }}"
-                        pattern="\d+(\.\d{1,{{ g.balance.currency.base }}})?">
+                        placeholder="245.{{ '0' * g.balance.currency.precision }}"
+                        pattern="\d+(\.\d{1,{{ g.balance.currency.precision }}})?">
                       <div class="input-group-append">
                         <span class="input-group-text">{{ g.balance.currency.code_alpha }}</span>
                       </div>

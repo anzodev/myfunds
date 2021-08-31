@@ -596,14 +596,14 @@ def statistic():
         if my_withdrawals_sum is None:
             my_withdrawals_sum = 0
 
-        base = i.limit.currency.base
+        precision = i.limit.currency.precision
 
         other_sum = total_widthdrawals_sum - my_withdrawals_sum
-        other_sum = f"{other_sum / (10 ** base):.{base}f}"
+        other_sum = f"{other_sum / (10 ** precision):.{precision}f}"
 
         limit_left = i.limit.month_limit - total_widthdrawals_sum
         limit_pct = 100 - (limit_left * 100.0 / i.limit.month_limit)
-        limit_left = f"{limit_left / (10 ** base):.{base}f}"
+        limit_left = f"{limit_left / (10 ** precision):.{precision}f}"
         limit_class = (
             "text-success"
             if limit_pct < 80.0

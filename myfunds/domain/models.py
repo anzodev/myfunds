@@ -16,7 +16,7 @@ class Currency(_BaseModel):
 
     code_alpha = pw.FixedCharField(max_length=3, unique=True)
     code_num = pw.FixedCharField(max_length=3, unique=True)
-    base = pw.IntegerField()
+    precision = pw.IntegerField()
 
 
 class Account(_BaseModel):
@@ -41,8 +41,8 @@ class Balance(_BaseModel):
     created_at = pw.DateTimeField()
 
     def to_amount_repr(self, value: int) -> str:
-        base = self.currency.base
-        return f"{value / (10 ** base):.{base}f}"
+        precision = self.currency.precision
+        return f"{value / (10 ** precision):.{precision}f}"
 
     def amount_repr(self) -> str:
         return self.to_amount_repr(self.amount)
@@ -80,8 +80,8 @@ class CommonTransactionGroupLimit(_BaseModel):
     month_limit = pw.IntegerField()
 
     def month_limit_repr(self) -> str:
-        base = self.currency.base
-        return f"{self.month_limit / 10 ** base:.{base}f}"
+        precision = self.currency.precision
+        return f"{self.month_limit / 10 ** precision:.{precision}f}"
 
 
 class CommonTransactionGroupLimitRelation(_BaseModel):

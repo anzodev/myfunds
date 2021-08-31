@@ -119,7 +119,7 @@ def make_replenishment():
 
     business.make_replenishment(
         balance=balance,
-        amount=int(amount * (10 ** balance.currency.base)),
+        amount=int(amount * (10 ** balance.currency.precision)),
         txn_group=txn_group,
         comment=comment,
         created_at=utc_created_at,
@@ -170,7 +170,7 @@ def make_withdrawal():
 
     business.make_withdrawal(
         balance=balance,
-        amount=int(amount * (10 ** balance.currency.base)),
+        amount=int(amount * (10 ** balance.currency.precision)),
         txn_group=txn_group,
         comment=comment,
         created_at=utc_created_at,
@@ -559,7 +559,7 @@ def add_transaction_group_limit():
     limit = models.TransactionGroupLimit.create(
         balance=balance,
         group=txn_group,
-        month_limit=int(month_limit * (10 ** balance.currency.base)),
+        month_limit=int(month_limit * (10 ** balance.currency.precision)),
     )
     alerts.info(f"Лимит ({limit.id}) добавлен.")
 
@@ -592,7 +592,7 @@ def update_transaction_group_limit():
             )
         )
 
-    limit.month_limit = int(month_limit * (10 ** balance.currency.base))
+    limit.month_limit = int(month_limit * (10 ** balance.currency.precision))
     limit.save()
     alerts.info(f"Лимит ({limit.id}) обновлен.")
 

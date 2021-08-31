@@ -12,8 +12,8 @@
             <label for="ff__amount" class="mb-1">Сумма:</label>
             <div class="input-group input-group-sm">
               <input type="text" name="amount" id="ff__amount" class="form-control"
-                placeholder="245.{{ '0' * g.balance.currency.base }}"
-                pattern="\d+(\.\d{1,{{ g.balance.currency.base }}})?"
+                placeholder="245.{{ '0' * g.balance.currency.precision }}"
+                pattern="\d+(\.\d{1,{{ g.balance.currency.precision }}})?"
                 {% if request.args.amount %}value="{{ request.args.amount }}" {% endif %} required>
               <div class="input-group-append">
                 <span class="input-group-text">{{ g.balance.currency.code_alpha }}</span>

@@ -13,12 +13,12 @@ from myfunds.web.tools import auth
 def add_currency():
     code_alpha = request.form["code_alpha"].upper()
     code_num = request.form["code_num"]
-    base = int(request.form["base"])
+    precision = int(request.form["precision"])
 
     business.create_currency(
         code_alpha=code_alpha,
         code_num=code_num,
-        base=int(base),
+        precision=int(precision),
     )
     alerts.success("Новая валюта успешно добавлена.")
 
@@ -30,7 +30,7 @@ def update_currency():
     currency_id = int(request.form["currency_id"])
     code_alpha = request.form["code_alpha"].upper()
     code_num = int(request.form["code_num"])
-    base = int(request.form["base"])
+    precision = int(request.form["precision"])
 
     currency = models.Currency.get_or_none(id=currency_id)
     if currency is None:
@@ -39,12 +39,12 @@ def update_currency():
 
     currency.code_alpha = code_alpha
     currency.code_num = code_num
-    currency.base = base
+    currency.precision = precision
     currency.save(
         only=[
             models.Currency.code_alpha,
             models.Currency.code_num,
-            models.Currency.base,
+            models.Currency.precision,
         ]
     )
     alerts.info(f"Валюта ({currency.id}) обновлена.")

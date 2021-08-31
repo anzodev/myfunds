@@ -48,16 +48,16 @@ def database_ctx(db: pw.Database) -> None:
 def create_currency(
     code_alpha: str,
     code_num: str,
-    base: int = 100,
+    precision: int = 100,
 ) -> models.Currency:
     val.verify(code_alpha, [val.is_instance(str), val.match(r"^[A-Z]{3}$")])
     val.verify(code_num, [val.is_instance(str), val.match(r"^[0-9]{3}$")])
-    val.verify(base, [val.is_instance(int)])
+    val.verify(precision, [val.is_instance(int)])
 
     return models.Currency.create(
         code_alpha=code_alpha,
         code_num=code_num,
-        base=base,
+        precision=precision,
     )
 
 

@@ -16,7 +16,7 @@ def models_defaults():
         "currency": {
             "code_num": "840",
             "code_alpha": "USD",
-            "base": 10,
+            "precision": 10,
         },
         "account": {
             "username": "developer",
@@ -45,13 +45,13 @@ def new_currency(models_defaults):
     def _new_currency(
         code_num: Optional[str] = None,
         code_alpha: Optional[str] = None,
-        base: Optional[int] = None,
+        precision: Optional[int] = None,
     ):
         defaults = models_defaults["currency"]
         return models.Currency.create(
             code_num=code_num or defaults["code_num"],
             code_alpha=code_alpha or defaults["code_alpha"],
-            base=base or defaults["base"],
+            precision=precision or defaults["precision"],
         )
 
     return _new_currency
