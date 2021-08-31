@@ -142,3 +142,6 @@ cython_debug/
 
 # Development stuff
 .development
+
+# SQLite database
+**/*.db*
