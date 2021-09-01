@@ -1,0 +1,242 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3 m-0">Categories</h1>
+  <div class="d-flex">
+    <button type="button" id="add-expense-category" class="btn btn-success me-3" data-bs-toggle="modal"
+      data-bs-target="#add-category-modal">Add
+      expense category</button>
+    <button type="button" id="add-income-category" class="btn btn-success text-uppercase" data-bs-toggle="modal"
+      data-bs-target="#add-category-modal"><small>Add Income Category</small></button>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<section>
+  <div class="row">
+    <div class="col-6">
+
+      <div class="lead mb-4">Expense categories</div>
+
+      {% if exepnse_categories %}
+      <div class="card overflow-hidden">
+        <table class="table table-borderless shadow-none m-0 fs-6">
+          <tbody>
+            {% for category in exepnse_categories %}
+            <tr class="category-row hover-bg-light" data-category-id="{{ category.id }}"
+              data-category-direction-name="{{ g.funds_direction.get(category.direction).meta.name }}"
+              data-category-name="{{ category.name }}" data-category-color-sign="{{ category.color_sign }}">
+              <td class="align-middle">
+                <div class="d-flex align-items-center">
+                  <div
+                    style="position: relative; width: 16px; height: 16px; border-radius: 50%; background-color: {{ category.color_sign }};">
+                  </div>
+                  <div class="ms-3">{{ category.name }}</div>
+                </div>
+              </td>
+              <td class="py-2 align-middle" style="width: 1px;">
+                <div class="d-flex">
+                  <button class="edit-category btn btn-sm btn-outline-info me-3" data-bs-toggle="modal"
+                    data-bs-target="#edit-category-modal">
+                    <i data-feather="edit"></i>
+                  </button>
+                  <button class="delete-category btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#delete-category-confirmation-modal">
+                    <i data-feather="trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">You don't have any expense categories.</p>
+      {% endif %}
+
+    </div>
+    <div class="col-6">
+
+      <div class="lead mb-4">Income categories</div>
+
+      {% if income_categories %}
+      <div class="card overflow-hidden">
+        <table class="table table-borderless shadow-none m-0 fs-6">
+          <tbody>
+            {% for category in income_categories %}
+            <tr class="category-row hover-bg-light" data-category-id="{{ category.id }}"
+              data-category-direction-name="{{ g.funds_direction.get(category.direction).meta.name }}"
+              data-category-name="{{ category.name }}" data-category-color-sign="{{ category.color_sign }}">
+              <td class="align-middle">
+                <div class="d-flex align-items-center">
+                  <div
+                    style="position: relative; width: 16px; height: 16px; border-radius: 50%; background-color: {{ category.color_sign }};">
+                  </div>
+                  <div class="ms-3">{{ category.name }}</div>
+                </div>
+              </td>
+              <td class="py-2 align-middle" style="width: 1px;">
+                <div class="d-flex">
+                  <button class="edit-category btn btn-sm btn-outline-info me-3" data-bs-toggle="modal"
+                    data-bs-target="#edit-category-modal">
+                    <i data-feather="edit"></i>
+                  </button>
+                  <button class="delete-category btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#delete-category-confirmation-modal">
+                    <i data-feather="trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">You don't have any income categories.</p>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+
+<div class="modal fade show" id="add-category-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('categories.new') }}" method="POST" autocomplete="off">
+        <input type="hidden" name="direction" id="add-category-direction">
+        <div class="modal-header">
+          <h5 class="modal-title">New <span id="add-category-direction-name"></span> Category</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="f1-name" class="form-label small">Name</label>
+            <input type="text" name="name" id="f1-name" class="form-control px-3" required>
+          </div>
+          <div>
+            <label for="f1-color-sign" class="form-label small">Color sign</label>
+            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+              <input type="color" name="color_sign" id="f1-color-sign"
+                style="width: 200%; height: 200%; border: 0; padding: 0; transform: translate(-25%, -25%);" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-info">Add Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade show" id="edit-category-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('categories.edit') }}" method="POST" autocomplete="off">
+        <input type="hidden" name="category_id" id="f2-category-id" required>
+        <div class="modal-header">
+          <h5 class="modal-title">Edit <span id="edit-category-direction-name"></span> Category</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="f2-name" class="form-label small">Name</label>
+            <input type="text" name="name" id="f2-name" class="form-control px-3" required>
+          </div>
+          <div>
+            <label for="f2-color-sign" class="form-label small">Color sign</label>
+            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+              <input type="color" name="color_sign" id="f2-color-sign"
+                style="width: 200%; height: 200%; border: 0; padding: 0; transform: translate(-25%, -25%);" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-info">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="delete-category-confirmation-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('categories.delete') }}" method="POST" autocomplete="off">
+        <input type="hidden" name="category_id" id="deleted-category-id" required>
+        <div class="modal-header">
+          <h5 class="modal-title">Delete category</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Are you sure you want to delete <span id="deleted-category-name" class="fw-bold"></span>
+            category?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  (function () {
+    let addCategoryDirection = $('#add-category-direction');
+    let addCategoryDirectionName = $('#add-category-direction-name');
+    let addExpenseCategory = $('#add-expense-category');
+    let addIncomeCategory = $('#add-income-category');
+
+    addExpenseCategory.on('click', function () {
+      addCategoryDirection.val('{{ g.funds_direction.EXPENSE.value }}');
+      addCategoryDirectionName.text('{{ g.funds_direction.EXPENSE.meta.name }}');
+    });
+
+    addIncomeCategory.on('click', function () {
+      addCategoryDirection.val('{{ g.funds_direction.INCOME.value }}');
+      addCategoryDirectionName.text('{{ g.funds_direction.INCOME.meta.name }}');
+    });
+
+
+    let editCategoryDirectionName = $('#edit-category-direction-name');
+    let f2CategoryId = $('#f2-category-id');
+    let f2Name = $('#f2-name');
+    let f2ColorSign = $('#f2-color-sign');
+    let editCategoryButtons = $('.edit-category');
+
+    editCategoryButtons.on('click', function () {
+      let categoryRow = $(this).parents('.category-row');
+      editCategoryDirectionName.text(categoryRow.attr('data-category-direction-name'));
+      f2CategoryId.val(categoryRow.attr('data-category-id'));
+      f2Name.val(categoryRow.attr('data-category-name'));
+      f2ColorSign.val(categoryRow.attr('data-category-color-sign'));
+    });
+
+
+    let deletedCategoryId = $('#deleted-category-id');
+    let deletedCategoryName = $('#deleted-category-name');
+    let deleteCategoryButtons = $('.delete-category');
+
+    deleteCategoryButtons.on('click', function () {
+      let categoryRow = $(this).parents('.category-row');
+      deletedCategoryId.val(categoryRow.attr('data-category-id'));
+      deletedCategoryName.text(categoryRow.attr('data-category-name'));
+    });
+  })();
+</script>
+{% endblock %}

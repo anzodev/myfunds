@@ -1,0 +1,78 @@
+{% extends 'layouts/balance-page.html' %}
+
+
+{% block content %}
+<div class="card">
+
+  <section class="p-3 border-bottom">
+    <div class="lead">Withdrawal</div>
+  </section>
+
+  <section class="p-3">
+    <form action="">
+
+      <div class="row">
+        <div class="col-3">
+
+          <div class="mb-3">
+            <label for="" class="form-label small">Amount</label>
+            <input type="text" name="amount" id="" class="form-control px-3" placeholder="150.43" required>
+          </div>
+
+        </div>
+        <div class="col-3">
+
+          <div class="mb-3">
+            <label for="" class="form-label small">Category</label>
+            <select name="" id="" class="form-control px-3">
+              <option value="">No category</option>
+              <option value="">Products</option>
+              <option value="">Auto</option>
+              <option value="">Investments</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="col-6">
+
+          <div class="mb-3">
+            <label for="" class="form-label small">Time</label>
+            <input type="text" name="created_at_range" id="f1-created-at-range" class="form-control px-3"
+              data-mask="00.00.0000 00:00:00 - 00.00.0000 00:00:00">
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="" class="form-label small">Comment (optional)</label>
+        <input type="text" name="Comment" id="" class="form-control px-3" placeholder="..." required>
+      </div>
+
+      <div>
+        <button class="btn btn-info">Make Withdrawal</button>
+      </div>
+
+    </form>
+  </section>
+
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  (function () {
+    $('#f1-created-at-range').daterangepicker({
+      autoApply: true,
+      timePicker: true,
+      timePicker24Hour: true,
+      timePickerSeconds: true,
+      showCustomRangeLabel: false,
+      locale: {
+        format: 'YYYY-MM-DD HH:mm:ss'
+      }
+    });
+  })();
+</script>
+{% endblock %}

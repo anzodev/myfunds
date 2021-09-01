@@ -1,0 +1,47 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<ol class="breadcrumb shadow-none border-0 p-0 m-0 mb-3">
+  <li class="breadcrumb-item p-0 pe-3"><a href="{{ url_for('balances.index') }}" class="link-info">Balances</a></li>
+  <li class="breadcrumb-item p-0 active" aria-current="page">{{ g.balance.name }}</li>
+</ol>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 m-0">Balance: {{ g.balance.name }}</h1>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<section>
+
+  <div class="row">
+    <div class="col-3">
+
+      <div class="lead card p-3 mb-3 fw-bold">{{ amount_repr(g.balance.amount, g.currency.precision) }} {{
+        g.currency.code_alpha
+        }}</div>
+
+      <div class="list-group">
+        <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.transactions' %}disabled bg-info text-white{% endif%}">Transactions</a>
+        <a href="{{ url_for('balances.i.replenishment', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.replenishment' %}disabled bg-info text-white{% endif%}">Replenishment</a>
+        <a href="{{ url_for('balances.i.withdrawal', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.withdrawal' %}disabled bg-info text-white{% endif%}">Withdrawal</a>
+        <a href="#" class="list-group-item list-group-item-action p-3">Category Limits</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.statistics' %}disabled bg-info text-white{% endif%}">Statistics</a>
+      </div>
+
+    </div>
+    <div class="col-9">
+
+      {% block content %}{% endblock %}
+
+    </div>
+  </div>
+
+</section>
+{% endblock %}

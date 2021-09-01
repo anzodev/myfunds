@@ -1,0 +1,33 @@
+{% extends 'layouts/centered.html' %}
+
+
+{% block main %}
+<div class="container">
+  <div class="row">
+    <div class="col-6 offset-3">
+      <div class="row">
+        <div class="col-6 offset-3">
+
+          <form action="{{ url_for('access.login') }}" method="POST" autocomplete="off">
+            <legend class="mb-5 text-center">myfunds</legend>
+            <div class="mb-3">
+              <label for="username" class="form-label small">Username</label>
+              <input type="text" name="username" id="username" class="form-control px-3" pattern="^[a-zA-Z0-9_]{4,100}$"
+                required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label small">Password</label>
+              <input type="password" name="password" id="password" class="form-control px-3" minlength="6"
+                maxlength="100" required>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-info w-100">Login</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

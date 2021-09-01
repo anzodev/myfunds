@@ -1,30 +1,14 @@
-import argparse
-import logging.config as logging_config
-
-from uwsgidecorators import spool
-
-from myfunds import web
-from myfunds.domain import models
-from myfunds.spooler import tasks
-from myfunds.web import config
-from myfunds.web import database
+from myfunds.web import create_app
+from myfunds.web.config import init_config
+from myfunds.web.utils import parse_env_parser
 
 
-# fmt: off
-parser = argparse.ArgumentParser()
-parser.add_argument("-e", "--env", dest="env_path", type=str, default=None, help="environment config file path")  # noqa: E501
-# fmt: on
+args = parse_env_parser()
+config = init_config(args.env)
+app = create_app(config)
 
-args = parser.parse_args()
-web_config = config.from_env(args.env_path)
 
-if web_config.LOGGING_DICT_CONFIG and web_config.LOGGING_DICT_CONFIG != {}:
-    logging_config.dictConfig(web_config.LOGGING_DICT_CONFIG)
-
-db = database.init_database(web_config.DB_NAME)
-models.database.initialize(db)
-models.database.create_tables(models.get_models())
-
-app = web.create_app(web_config)
-
-spool(tasks.update_crypto_balances_usd_price)
+if __name__ == "__main__":
+    app.templates_auto_reload = True
+    app.jinja_options["auto_reload"] = True
+    app.run(use_reloader=True, threaded=True)

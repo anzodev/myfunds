@@ -1,0 +1,119 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3 m-0">Currencies</h1>
+  <button type="button" id="open-add-currency-modal" class="btn btn-success" data-bs-toggle="modal"
+    data-bs-target="#add-currency-modal">Add Currency</button>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<section>
+  {% if currencies %}
+  <table class="table table-borderless border fs-6">
+    <thead class="table-light">
+      <tr>
+        <th class="text-muted small">Alpha code</th>
+        <th class="text-muted small" colspan="2">Precision</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for currency in currencies %}
+      <tr class="currency-row hover-bg-light" data-currency-code-alpha="{{ currency.code_alpha }}"
+        data-currency-id="{{ currency.id }}">
+        <td>{{ currency.code_alpha }}</td>
+        <td>{{ currency.precision }}</td>
+        <td class="py-2 align-middle" style="width: 1px;">
+          <button class="delete-currency btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+            data-bs-target="#delete-currency-confirmation-modal">
+            <i data-feather="trash"></i>
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">You don't have any currencies.</p>
+  {% endif %}
+</section>
+
+
+<div class="modal fade" id="add-currency-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('currencies.new') }}" method="POST" autocomplete="off">
+        <div class="modal-header">
+          <h5 class="modal-title">New Currency</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-6">
+              <div>
+                <label for="code-alpha" class="form-label small">Alpha code (ISO 4217)</label>
+                <input type="text" name="code_alpha" id="code-alpha" class="form-control text-uppercase px-3"
+                  data-mask="SSS" minlength="3" maxlength="3" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div>
+                <label for="precision" class="form-label small">Precision</label>
+                <input type="text" name="precision" id="precision" class="form-control px-3" data-mask="#"
+                  pattern="^\d+$" required>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Add Currency</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="delete-currency-confirmation-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('currencies.delete') }}" method="POST" autocomplete="off">
+        <input type="hidden" name="currency_id" id="deleted-currency-id">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Currency</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Are you sure you want to delete <span id="deleted-currency-code-alpha"
+            class="fw-bold"></span> currency?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  (function () {
+    let deletedCurrencyId = $('#deleted-currency-id');
+    let deletedCurrencyCodeAlpha = $('#deleted-currency-code-alpha');
+    let deleteCurrencyButtons = $('.delete-currency');
+
+    deleteCurrencyButtons.on('click', function () {
+      let currencyRow = $(this).parents('.currency-row');
+      deletedCurrencyId.val(currencyRow.attr('data-currency-id'));
+      deletedCurrencyCodeAlpha.text(currencyRow.attr('data-currency-code-alpha'));
+    });
+  })();
+</script>
+{% endblock %}

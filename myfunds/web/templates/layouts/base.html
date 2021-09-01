@@ -4,35 +4,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>myfunds</title>
+  <title>myfunds{% block title %}{% endblock %}</title>
 
-  <link type="image/png" sizes="32x32" rel="icon" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
-  <link type="image/png" sizes="64x64" rel="icon" href="{{ url_for('static', filename='img/favicon-64x64.png') }}">
-  <link type="image/png" sizes="128x128" rel="icon" href="{{ url_for('static', filename='img/favicon-128x128.png') }}">
+  <link rel="icon" type="image/png" href="#">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='libs/normalize-8.0.1/normalize.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='libs/bootswatch-4.5.2/cerulean.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='libs/bootswatch-5.1.0/zephyr.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='libs/daterangepicker-3.1.0/daterangepicker.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
-
-  <main class="container pb-5">
-    {% block body %}{% endblock %}
-  </main>
+  {% block body %}{% endblock %}
 
   <div class="fixed-bottom">
     <div class="container">
       <div class="row">
-        <div id="alerts" class="col-6">
-          {% for message_color, message in get_flashed_messages(with_categories=true) %}
-          <div
-            class="alert alert-dismissible fade show d-flex justify-content-between align-items-center shadow-sm border bg-white mb-3 px-3 py-1">
-            <p class="m-0 mr-4 text-{{ message_color }}">{{ message }}</p>
-            <button type="button" class="btn btn-transparent pr-0" data-dismiss="alert">
-              <i data-feather="x"></i>
-            </button>
+        <div id="alerts" class="col-6 offset-3">
+          {% for cattegory, message in get_flashed_messages(with_categories=true) %}
+          <div class="alert alert-{{ cattegory }} alert-dismissible" role="alert">
+            <p class="m-0">{{ message }}</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
           {% endfor %}
         </div>
@@ -40,8 +32,9 @@
     </div>
   </div>
 
+
   <script src="{{ url_for('static', filename='libs/jquery-3.5.1/jquery.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='libs/bootstrap-4.5.2/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='libs/bootstrap-5.0.2/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ url_for('static', filename='libs/feather-4.28.0/feather.min.js') }}"></script>
   <script src="{{ url_for('static', filename='libs/moment-2.18.1/moment.min.js') }}"></script>
   <script src="{{ url_for('static', filename='libs/daterangepicker-3.1.0/daterangepicker.min.js') }}"></script>
@@ -50,7 +43,5 @@
   <script src="{{ url_for('static', filename='libs/bs-custom-file-input-1.3.4/bs-custom-file-input.min.js') }}">
   </script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
   {% block js %}{% endblock %}
-
 </body>

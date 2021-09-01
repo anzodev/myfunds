@@ -1,210 +1,153 @@
-import datetime
-import time
+import secrets
+from contextlib import contextmanager
+from datetime import datetime
 from typing import Optional
 
 import peewee as pw
 import pytest
 
-from myfunds.domain import models
-from myfunds.domain.constants import TransactionType
+from myfunds.core.constants import FundsDirection
+from myfunds.core.models import Account
+from myfunds.core.models import Balance
+from myfunds.core.models import Category
+from myfunds.core.models import Currency
+from myfunds.core.models import Transaction
+from myfunds.core.models import db_proxy
+from myfunds.core.models import get_models
 
 
 @pytest.fixture
-def models_defaults():
-    dt = datetime.datetime(2021, 1, 1, 12, 24, 48)
-    return {
-        "currency": {
-            "code_num": "840",
-            "code_alpha": "USD",
-            "precision": 10,
-        },
-        "account": {
-            "username": "developer",
-            "created_at": dt,
-        },
-        "balance": {
-            "name": "personal",
-            "amount": 0,
-            "created_at": dt,
-        },
-        "txn_group": {
-            "name": "transfer",
-            "color_sign": "#d9534f",
-        },
-        "txn": {
-            "balance_remainder": 1025,
-            "amount": 1025,
-            "comment": "transfer to card 4444111122223333",
-            "created_at": dt,
-        },
-    }
+def make_currency():
+    def _make_currency(code_alpha: str = "USD", precision: int = 2):
+        return Currency.create(code_alpha=code_alpha, precision=precision)
+
+    return _make_currency
 
 
 @pytest.fixture
-def new_currency(models_defaults):
-    def _new_currency(
-        code_num: Optional[str] = None,
-        code_alpha: Optional[str] = None,
-        precision: Optional[int] = None,
-    ):
-        defaults = models_defaults["currency"]
-        return models.Currency.create(
-            code_num=code_num or defaults["code_num"],
-            code_alpha=code_alpha or defaults["code_alpha"],
-            precision=precision or defaults["precision"],
-        )
+def make_account():
+    def _make_account(username: Optional[str] = None):
+        username = f"john_doe_{secrets.token_hex(8)}" if username is None else username
+        return Account.create(username=username, password_hash="********")
 
-    return _new_currency
+    return _make_account
 
 
 @pytest.fixture
-def new_account(models_defaults):
-    def _new_account(
-        username: Optional[str] = None, created_at: Optional[datetime.datetime] = None
-    ):
-        defaults = models_defaults["account"]
-        return models.Account.create(
-            username=username or defaults["username"],
-            password_hash="0000",
-            created_at=created_at or defaults["created_at"],
-        )
-
-    return _new_account
-
-
-@pytest.fixture
-def new_balance(models_defaults):
-    def _new_balance(
-        account: models.Account,
-        currency: models.Currency,
+def make_balance(make_account, make_currency):
+    def _make_balance(
+        account: Optional[Account] = None,
+        currency: Optional[Currency] = None,
         name: Optional[str] = None,
-        amount: Optional[int] = None,
-        created_at: Optional[datetime.datetime] = None,
+        amount: int = 0,
+        created_at: Optional[datetime] = None,
     ):
-        defaults = models_defaults["balance"]
-        return models.Balance.create(
-            account=account,
-            currency=currency,
-            name=name or defaults["name"],
-            amount=amount or defaults["amount"],
-            created_at=created_at or defaults["created_at"],
+        return Balance.create(
+            account=(make_account() if account is None else account),
+            currency=(
+                (Currency.get_or_none(code_alpha="USD") or make_currency())
+                if currency is None
+                else currency
+            ),
+            name=(f"test_balance_{secrets.token_hex(8)}" if name is None else name),
+            amount=amount,
+            created_at=(created_at or datetime.now()),
         )
 
-    return _new_balance
+    return _make_balance
 
 
 @pytest.fixture
-def _create_txn_group(models_defaults):
-    def __create_txn_group(
-        type_: str,
-        account: models.Account,
-        name: Optional[str] = None,
-        color_sign: Optional[str] = None,
+def make_category(make_account):
+    def _make_category(
+        direction: str,
+        account: Optional[Account] = None,
+        name: str = "test_category",
+        color_sign: str = "#000000",
     ):
-        defaults = models_defaults["txn_group"]
-        return models.TransactionGroup.create(
-            account=account,
-            type_=type_,
-            name=name or defaults["name"],
-            color_sign=color_sign or defaults["color_sign"],
+        return Category.create(
+            account=(make_account() if account is None else account),
+            direction=direction,
+            name=name,
+            color_sign=color_sign,
         )
 
-    return __create_txn_group
+    return _make_category
 
 
 @pytest.fixture
-def new_replenishment_group(_create_txn_group):
-    def _new_replenishment_group(**kwargs):
-        return _create_txn_group(TransactionType.REPLENISHMENT, **kwargs)
+def make_income_category(make_category):
+    def _make_income_category(**kwargs):
+        return make_category(FundsDirection.INCOME, **kwargs)
 
-    return _new_replenishment_group
-
-
-@pytest.fixture
-def new_withdrawal_group(_create_txn_group):
-    def _new_withdrawal_group(**kwargs):
-        return _create_txn_group(TransactionType.WITHDRAWAL, **kwargs)
-
-    return _new_withdrawal_group
+    return _make_income_category
 
 
 @pytest.fixture
-def _create_txn(models_defaults):
-    def __create_txn(
-        type_: str,
-        balance: models.Balance,
-        id_: Optional[int] = None,
-        balance_remainder: Optional[int] = None,
-        group: Optional[models.TransactionGroup] = None,
-        amount: Optional[int] = None,
+def make_expense_category(make_category):
+    def _make_expense_category(**kwargs):
+        return make_category(FundsDirection.EXPENSE, **kwargs)
+
+    return _make_expense_category
+
+
+@pytest.fixture
+def make_txn(make_balance):
+    def _make_txn(
+        direction: str,
+        balance: Optional[Balance] = None,
+        balance_remainder: int = 100,
+        category: Optional[Category] = None,
+        amount: int = 100,
         comment: Optional[str] = None,
-        created_at: Optional[datetime.datetime] = None,
+        created_at: Optional[datetime] = None,
     ):
-        defaults = models_defaults["txn"]
-        kwargs = {
-            "balance": balance,
-            "balance_remainder": balance_remainder or defaults["balance_remainder"],
-            "type_": type_,
-            "group": group,
-            "amount": amount or defaults["amount"],
-            "comment": comment or defaults["comment"],
-            "created_at": created_at or defaults["created_at"],
-        }
-        if id_ is not None:
-            kwargs["id"] = id_
-        return models.Transaction.create(**kwargs)
+        return Transaction.create(
+            balance=(make_balance if balance is None else balance),
+            balance_remainder=balance_remainder,
+            direction=direction,
+            category=category,
+            amount=amount,
+            comment=comment,
+            created_at=(created_at or datetime.now()),
+        )
 
-    return __create_txn
+    return _make_txn
 
 
 @pytest.fixture
-def new_replenishment(_create_txn):
-    def _new_replenishment(**kwargs):
-        return _create_txn(TransactionType.REPLENISHMENT, **kwargs)
+def make_replenishment(make_txn):
+    def _make_replenishment(**kwargs):
+        return make_txn(FundsDirection.INCOME, **kwargs)
 
-    return _new_replenishment
-
-
-@pytest.fixture
-def new_withdrawal(_create_txn):
-    def _new_withdrawal(**kwargs):
-        return _create_txn(TransactionType.WITHDRAWAL, **kwargs)
-
-    return _new_withdrawal
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _init_database():
-    database = pw.SqliteDatabase(":memory:", pragmas=[("foreign_keys", 1)])
-    models.database.initialize(database)
-    models.database.create_tables(
-        [
-            models.Currency,
-            models.Account,
-            models.Balance,
-            models.TransactionGroup,
-            models.Transaction,
-        ]
-    )
-    return database
+    return _make_replenishment
 
 
 @pytest.fixture
-def db_transaction_ctx():
-    with models.database.transaction() as txn:
+def make_withdrawal(make_txn):
+    def _make_withdrawal(**kwargs):
+        return make_txn(FundsDirection.EXPENSE, **kwargs)
+
+    return _make_withdrawal
+
+
+@pytest.fixture
+def models_db_init_context():
+    @contextmanager
+    def _models_db_init_context(db: pw.Database):
+        origin_db = db_proxy.obj
+        db_proxy.initialize(db)
+        try:
+            yield
+        finally:
+            db_proxy.initialize(origin_db)
+
+    return _models_db_init_context
+
+
+@pytest.fixture
+def with_memory_database(models_db_init_context):
+    db = pw.SqliteDatabase(":memory:")
+    with models_db_init_context(db):
+        db.create_tables(get_models())
         yield
-        txn.rollback()
-
-
-@pytest.fixture
-def execution_timing():
-    def _execution_timing(f):
-        def wrapper(*args, **kwargs):
-            t0 = time.time()
-            result = f(*args, **kwargs)
-            t1 = time.time()
-            return t0, t1, result
-
-        return wrapper
-
-    return _execution_timing

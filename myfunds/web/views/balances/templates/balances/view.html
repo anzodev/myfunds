@@ -1,0 +1,74 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3 m-0">Balances</h1>
+  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#add-balance-modal">Add
+    Balance</button>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<section>
+  {% if balances %}
+  <div class="row">
+    {% for balance in balances %}
+    <div class="col-3">
+
+      <a href="{{ url_for('balances.i.index', balance_id=balance.id) }}" class="card rounded list-group-item list-group-item-action p-3">
+        <div class="lead text-truncate text-end mb-3">{{ balance.name }}</div>
+        <div
+          class="text-end text-{% if balance.amount > 0 %}success{% elif balance.amount < 0 %}danger{% else %}muted{% endif %}">
+          {{ amount_repr(balance.amount, balance.currency.precision) }} {{ balance.currency.code_alpha }}
+        </div>
+      </a>
+
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">You don't have any balances.</p>
+  {% endif %}
+</section>
+
+
+<div class="modal fade show" id="add-balance-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('balances.new') }}" method="POST" autocomplete="off">
+        <div class="modal-header">
+          <h5 class="modal-title">New Balance</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% if currencies %}
+          <div class="mb-3">
+            <label for="name" class="form-label small">Name</label>
+            <input type="text" name="name" id="name" class="form-control px-3" required>
+          </div>
+          <div>
+            <label for="currency" class="form-label small">Currency</label>
+            <select name="currency" id="currency" class="form-control px-3" required>
+              {% for currency in currencies %}
+              <option value="{{ currency.code_alpha }}">{{ currency.code_alpha }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% else %}
+          <p>Please, add some {% if g.is_superuser %}<a href="{{ url_for('currencies.index') }}"
+              class="link-info">currenices</a>{% else %}currencies{% endif %} to create balance.</p>
+          {% endif %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          {% if currencies %}
+          <button type="submit" class="btn btn-info">Add Balance</button>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

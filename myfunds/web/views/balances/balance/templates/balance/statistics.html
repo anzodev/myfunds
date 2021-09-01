@@ -1,0 +1,151 @@
+{% extends 'layouts/balance-page.html' %}
+
+
+{% block content %}
+<div class="card">
+
+  <section class="p-3 border-bottom">
+    <div class="lead">Statistics</div>
+  </section>
+
+  <section class="p-3 mb-1">
+    <div class="d-flex align-items-center">
+      <div class="me-3">
+        <select name="" id="" class="form-control">
+          <option value="">2021</option>
+          <option value="">2020</option>
+          <option value="">2019</option>
+          <option value="">2018</option>
+          <option value="">2017</option>
+          <option value="">2016</option>
+        </select>
+      </div>
+      <div class="btn-group flex-grow-1">
+        <a href="#" class="btn btn-info">Jan</a>
+        <a href="#" class="btn btn-info">Feb</a>
+        <a href="#" class="btn btn-info active">Mar</a>
+        <a href="#" class="btn btn-info disabled">Apr</a>
+        <a href="#" class="btn btn-info disabled">May</a>
+        <a href="#" class="btn btn-info disabled">Jun</a>
+        <a href="#" class="btn btn-info disabled">Jul</a>
+        <a href="#" class="btn btn-info disabled">Aug</a>
+        <a href="#" class="btn btn-info disabled">Sep</a>
+        <a href="#" class="btn btn-info disabled">Oct</a>
+        <a href="#" class="btn btn-info disabled">Nov</a>
+        <a href="#" class="btn btn-info disabled">Dec</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="p-3">
+    <p class=" mb-2">Current date: <span class="fw-bold">23.08.2021</span></p>
+    <div class="progress">
+      <div class="progress-bar bg-info" role="progressbar" style="width: 85.43%;" aria-valuenow="85.43"
+        aria-valuemin="0" aria-valuemax="100">85.43%</div>
+    </div>
+  </section>
+
+  <section class="p-3">
+    <table class="table table-sm table-borderless shadow-none fs-6">
+      <tbody>
+        <tr>
+          <td class="text-nowrap ps-0" style="width: 1px;">Start balance:</td>
+          <td>71898.28</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0" style="width: 1px;">Expenses:</td>
+          <td>70704.65 (98.34% of start balance)</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0" style="width: 1px;">Income:</td>
+          <td>8436.34</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0" style="width: 1px;">End balance:</td>
+          <td>n/a</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0" style="width: 1px;">Savings:</td>
+          <td>1193.64 (1.66% of start balance)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+    <table class="table table-sm table-bordered shadow-none m-0">
+      <thead>
+        <tr class="bg-light">
+          <th rowspan="2" class="align-middle text-center text-muted py-2 small border-start-0">Category</th>
+          <th colspan="2" class="text-center text-muted py-2 small">Expenses</th>
+          <th colspan="2" class="text-center text-muted py-2 small">Limit</th>
+          <th rowspan="2" class="align-middle text-center text-muted py-2 small border-end-0">Expenses ratio</th>
+        </tr>
+        <tr class="bg-light">
+          <th class="text-muted text-center py-2 small">Amount</th>
+          <th class="text-nowrap text-center text-muted py-2 small">%</th>
+          <th class="text-nowrap text-center text-muted py-2 small">Remainder</th>
+          <th class="text-nowrap text-center text-muted py-2 small">Used (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hover:bg-light">
+          <td class="align-middle text-nowrap border-start-0">
+            <div class="d-flex">
+              <div
+                style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: green;">
+              </div>
+              <div class="ms-2"><a href="#" class="link-info">Products</a></div>
+            </div>
+          </td>
+          <td class="align-middle">4366.34</td>
+          <td class="align-middle">84.43%</td>
+          <td class="align-middle">420.85</td>
+          <td class="align-middle text-warning">95%</td>
+          <td class="align-middle p-0 border-end-0">
+            <div style="width: 84.32%; height: 38px; background-color: green;">
+            </div>
+          </td>
+        </tr>
+        <tr class="hover:bg-light">
+          <td class="align-middle border-bottom-0 text-nowrap border-start-0">
+            <div class="d-flex">
+              <div
+                style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: purple;">
+              </div>
+              <div class="ms-2">Auto</div>
+            </div>
+          </td>
+          <td class="align-middle border-bottom-0">4366.34</td>
+          <td class="align-middle border-bottom-0">84.43%</td>
+          <td class="align-middle border-bottom-0">420.85</td>
+          <td class="align-middle border-bottom-0 text-warning">95%</td>
+          <td class="align-middle border-bottom-0 p-0 border-end-0">
+            <div style="width: 32.54%; height: 38px; background-color: purple;">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  (function () {
+    $('#f1-created-at-range').daterangepicker({
+      autoApply: true,
+      timePicker: true,
+      timePicker24Hour: true,
+      timePickerSeconds: true,
+      showCustomRangeLabel: false,
+      locale: {
+        format: 'YYYY-MM-DD HH:mm:ss'
+      }
+    });
+  })();
+</script>
+{% endblock %}

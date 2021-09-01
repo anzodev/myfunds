@@ -1,31 +1,52 @@
 import logging
 
-import flask
-from flask import request as req
+from flask import Flask
+from flask import Response
+from flask import g
+from flask import redirect
+from flask import render_template
+from flask import url_for
+from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import NotFound
+
+from myfunds.web import auth
+from myfunds.web import constants
 
 
-def _log_request():
-    logger = logging.getLogger("myfunds.web")
-    logger.info(f"{req.remote_addr} - {req.method} {req.full_path}")
+def add_constants_to_globals():
+    g.funds_direction = constants.FundsDirection
 
 
-def _errorhandler_404(e: Exception):
-    logger = logging.getLogger("myfunds.web")
-    error_msg = repr(e)
-    status_code = e.code
-    description = e.description
-    return_url = flask.session.get("last_page")
+def errorhandler(exc: Exception) -> Response:
+    if isinstance(exc, auth.NotAuthorized):
+        return redirect(url_for("access.login"))
 
-    logger.error(error_msg)
+    if isinstance(exc, auth.SessionCorrupted):
+        auth.forget_account()
+        return redirect(url_for("access.login"))
 
-    return flask.render_template(
-        "pages/error.html",
-        status_code=status_code,
-        description=description,
-        return_url=return_url,
+    if isinstance(exc, auth.NotSuperUser):
+        exc = NotFound()
+
+    status_code = 500
+    description = (
+        "Sorry, something goes wrong."
+        " Try to repeat your request a few minutes later."
+    )
+
+    if isinstance(exc, HTTPException):
+        status_code = exc.code
+        description = exc.description
+
+    if status_code == 500:
+        logger = logging.getLogger(__name__)
+        logger.exception("unexpected error:")
+
+    return render_template(
+        "pages/error.html", status_code=status_code, description=description
     )
 
 
-def init_app(app: flask.Flask) -> None:
-    app.before_request(_log_request)
-    app.errorhandler(404)(_errorhandler_404)
+def init_app(app: Flask) -> None:
+    app.before_request(add_constants_to_globals)
+    app.errorhandler(Exception)(errorhandler)

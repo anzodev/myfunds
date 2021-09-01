@@ -1,0 +1,187 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3 m-0">Accounts</h1>
+  <button type="button" id="open-add-account-modal" class="btn btn-success" data-bs-toggle="modal"
+    data-bs-target="#add-account-modal">Add Account</button>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<section>
+  <table class="table table-borderless border fs-6">
+    <thead class="table-light">
+      <tr>
+        <th class="text-muted small" colspan="2">Username</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in accounts %}
+      <tr class="account-row hover-bg-light" data-account-username="{{ account.username }}"
+        data-account-id="{{ account.id }}">
+        <td>
+          <span>{{ account.username }}</span>
+          {% if account.username == config.SUPERUSER %}
+          <span class="text-black-50 small ms-4">Superuser</span>
+          {% endif %}
+        </td>
+        <td class="py-2 align-middle" style="width: 1px;">
+          <div class="d-flex justify-content-end">
+            <button class="update-password btn btn-sm btn-outline-info" data-bs-toggle="modal"
+              data-bs-target="#update-password-modal">
+              <i data-feather="key"></i>
+            </button>
+            {% if account.username != config.SUPERUSER %}
+            <button class="delete-account btn btn-sm btn-outline-danger ms-3" data-bs-toggle="modal"
+              data-bs-target="#delete-account-confirmation-modal">
+              <i data-feather="trash"></i>
+            </button>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+
+<div class="modal fade" id="add-account-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('accounts.new') }}" method="POST" autocomplete="off">
+        <div class="modal-header">
+          <h5 class="modal-title">New Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="f1-username" class="form-label small">Username</label>
+            <input type="text" name="username" id="f1-username" class="form-control px-3"
+              pattern="^[a-zA-Z0-9_]{4,100}$" required>
+          </div>
+          <div class="mb-3">
+            <label for="f1-password" class="form-label small">Password</label>
+            <input type="password" name="password" id="f1-password" class="form-control px-3" minlength="6"
+              maxlength="100" required>
+          </div>
+          <div>
+            <label for="f1-password-copy" class="form-label small">Repeat password</label>
+            <input type="password" name="password_copy" id="f1-password-copy" class="form-control px-3" minlength="6"
+              maxlength="100" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Add Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="update-password-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('accounts.update_password') }}" method="POST" autocomplete="off">
+        <input type="hidden" name="account_id" id="updated-password-account-id">
+        <div class="modal-header">
+          <h5 class="modal-title">Update password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="f2-username" class="form-label small">Username</label>
+            <input type="text" id="f2-username" class="form-control px-3" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="f2-old-password" class="form-label small">Old password</label>
+            <input type="password" name="old_password" id="f2-old-password" class="form-control px-3" minlength="6"
+              maxlength="100" required>
+          </div>
+          <div class="mb-3">
+            <label for="f2-new-passoword" class="form-label small">New password</label>
+            <input type="password" name="new_password" id="f2-new-passoword" class="form-control px-3" minlength="6"
+              maxlength="100" required>
+          </div>
+          <div>
+            <label for="f2-new-password-copy" class="form-label small">Repeat new password</label>
+            <input type="password" name="new_password_copy" id="f2-new-password-copy" class="form-control px-3"
+              minlength="6" maxlength="100" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="delete-account-confirmation-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('accounts.delete') }}" method="POST" autocomplete="off">
+        <input type="hidden" name="account_id" id="deleted-account-id">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="f3-username" class="form-label small">Username</label>
+            <input type="text" id="f3-username" class="form-control px-3" disabled>
+          </div>
+          <div>
+            <label for="f3-passphrase" class="form-label small">To verify, type <span class="noselect fw-bold">delete
+                this account</span> below</label>
+            <input type="text" name="passphrase" id="f3-passphrase" class="form-control px-3" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  (function () {
+    let f2Username = $('#f2-username');
+    let updatedPasswordAccountId = $('#updated-password-account-id');
+    let updatedPasswordAccountUsername = $('#updated-password-account-username');
+    let updatePasswordButtons = $('.update-password');
+
+    updatePasswordButtons.on('click', function () {
+      let accountRow = $(this).parents('.account-row');
+      f2Username.val(accountRow.attr('data-account-username'));
+      updatedPasswordAccountId.val(accountRow.attr('data-account-id'));
+      updatedPasswordAccountUsername.text(accountRow.attr('data-account-username'));
+    });
+
+
+    let f3Username = $('#f3-username');
+    let deletedAccountId = $('#deleted-account-id');
+    let deletedAccountUsername = $('#deleted-account-username');
+    let deleteAccountButtons = $('.delete-account');
+
+    deleteAccountButtons.on('click', function () {
+      let accountRow = $(this).parents('.account-row');
+      f3Username.val(accountRow.attr('data-account-username'));
+      deletedAccountId.val(accountRow.attr('data-account-id'));
+      deletedAccountUsername.text(accountRow.attr('data-account-username'));
+    });
+  })();
+</script>
+{% endblock %}

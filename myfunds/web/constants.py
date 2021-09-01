@@ -1,2 +1,40 @@
-DATE_FORMAT = "%d.%m.%Y"
-DATETIME_FORMAT = "%d.%m.%Y %H:%M:%S"
+from typing import Any
+from typing import Union
+
+from myfunds.core import constants
+
+
+class Constant:
+    def __init__(self, value: Union[int, str], **meta: Any):
+        self._value = value
+        self.meta = meta
+
+    def __repr__(self) -> str:
+        return f"Constant({repr(self.value)})"
+
+    @property
+    def value(self):
+        return self._value
+
+
+class ConstantGroup:
+    @classmethod
+    def constants(cls) -> list[Constant]:
+        return list(i for i in vars(cls).values() if isinstance(i, Constant))
+
+    @classmethod
+    def values(cls) -> list[Union[int, str]]:
+        return list(sorted(i.value for i in cls.constants()))
+
+    @classmethod
+    def to_dict(cls) -> dict[Union[str, int], Constant]:
+        return {i.value: i for i in cls.constants()}
+
+    @classmethod
+    def get(cls, value: Union[str, int]) -> Constant:
+        return cls.to_dict()[value]
+
+
+class FundsDirection(ConstantGroup):
+    EXPENSE = Constant(constants.FundsDirection.EXPENSE, name="Expense")
+    INCOME = Constant(constants.FundsDirection.INCOME, name="Income")
