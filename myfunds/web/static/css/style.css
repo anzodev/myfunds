@@ -1,5 +1,5 @@
 html {
-  /* font-size: 14px; */
+  font-size: 14px;
 }
 
 .container {
@@ -33,4 +33,10 @@ html {
 
 .table {
   /* table-layout: fixe/d; */
+}
+
+.daterangepicker td.active, .daterangepicker td.active:hover {
+  background-color: #287bb5;
+  border: 1px solid transparent;
+  border-radius: .2rem;
 }
