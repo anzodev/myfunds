@@ -38,3 +38,7 @@ class ConstantGroup:
 class FundsDirection(ConstantGroup):
     EXPENSE = Constant(constants.FundsDirection.EXPENSE, name="Expense")
     INCOME = Constant(constants.FundsDirection.INCOME, name="Income")
+
+
+DATETIME_FORMAT = Constant("%Y-%m-%d %H:%M:%S")
+DATETIME_PATTERN = Constant(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}")
