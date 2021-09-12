@@ -1,3 +1,4 @@
+from wtforms import DateTimeField
 from wtforms import Form
 from wtforms import IntegerField
 from wtforms import PasswordField
@@ -85,4 +86,14 @@ class AddTransactionForm(Form):
     amount = StringField(validators=[vals.InputRequired()])
     category_id = IntegerField(validators=[vals.Optional(), vals.NumberRange(min=1)])
     created_at = DateTimeField(validators=[vals.InputRequired()])
+    comment = StringField(validators=[vals.Optional()])
+
+
+class UpdateTransactionCategoryForm(Form):
+    txn_id = id_field()
+    category_id = IntegerField(validators=[vals.Optional(), vals.NumberRange(min=1)])
+
+
+class UpdateTransactionCommentForm(Form):
+    txn_id = id_field()
     comment = StringField(validators=[vals.Optional()])
