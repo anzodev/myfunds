@@ -79,3 +79,10 @@ class AddBalanceForm(Form):
     name = StringField(validators=[vals.InputRequired()])
     currency = StringField(validators=[vals.InputRequired(), vals.Regexp(r"^[A-Z]{3}$")])  # noqa: E501
     # fmt: on
+
+
+class AddTransactionForm(Form):
+    amount = StringField(validators=[vals.InputRequired()])
+    category_id = IntegerField(validators=[vals.Optional(), vals.NumberRange(min=1)])
+    created_at = DateTimeField(validators=[vals.InputRequired()])
+    comment = StringField(validators=[vals.Optional()])
