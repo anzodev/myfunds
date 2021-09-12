@@ -1,14 +1,15 @@
 (function () {
 
-  const NOTIFY_CLOSING_DELAY = 5000;
-
-
-  function featherReplace() {
-    feather.replace({
-      width: 16,
-      height: 16,
-    });
+  $.fn.daterangepicker.defaultOptions = {
+    timePicker: true,
+    timePicker24Hour: true,
+    timePickerSeconds: true,
+    cancelButtonClasses: 'btn btn-sm btn-light',
+    applyButtonClasses: 'btn btn-sm btn-info',
   }
+
+
+  const NOTIFY_CLOSING_DELAY = 5000;
 
   function closeNotifyAfter(ms) {
     setTimeout(function () {
@@ -29,15 +30,16 @@
     closeNotifyAfter(NOTIFY_CLOSING_DELAY);
   }
 
-  $('.display-toggler').on('click', function () {
-    let targetId = $(this).attr('data-target');
-    let target = $('#' + targetId);
-    $(this).toggleClass('active');
-    target.toggleClass('d-none');
-  });
-
-
   closeNotifyAfter(NOTIFY_CLOSING_DELAY);
+
+
+  function featherReplace() {
+    feather.replace({
+      width: 16,
+      height: 16,
+    });
+  }
+
   featherReplace();
 
 })();
