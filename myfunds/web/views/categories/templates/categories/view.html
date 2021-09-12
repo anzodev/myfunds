@@ -7,9 +7,9 @@
   <div class="d-flex">
     <button type="button" id="add-expense-category" class="btn btn-success me-3" data-bs-toggle="modal"
       data-bs-target="#add-category-modal">Add
-      expense category</button>
-    <button type="button" id="add-income-category" class="btn btn-success text-uppercase" data-bs-toggle="modal"
-      data-bs-target="#add-category-modal"><small>Add Income Category</small></button>
+      Expense Category</button>
+    <button type="button" id="add-income-category" class="btn btn-success" data-bs-toggle="modal"
+      data-bs-target="#add-category-modal">Add Income Category</button>
   </div>
 </div>
 {% endblock %}
@@ -22,11 +22,11 @@
 
       <div class="lead mb-4">Expense categories</div>
 
-      {% if exepnse_categories %}
+      {% if expense_categories %}
       <div class="card overflow-hidden">
         <table class="table table-borderless shadow-none m-0 fs-6">
           <tbody>
-            {% for category in exepnse_categories %}
+            {% for category in expense_categories %}
             <tr class="category-row hover-bg-light" data-category-id="{{ category.id }}"
               data-category-direction-name="{{ g.funds_direction.get(category.direction).meta.name }}"
               data-category-name="{{ category.name }}" data-category-color-sign="{{ category.color_sign }}">
@@ -162,7 +162,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-info">Save Changes</button>
+          <button type="submit" class="btn btn-info">Save changes</button>
         </div>
       </form>
     </div>
@@ -176,7 +176,7 @@
       <form action="{{ url_for('categories.delete') }}" method="POST" autocomplete="off">
         <input type="hidden" name="category_id" id="deleted-category-id" required>
         <div class="modal-header">
-          <h5 class="modal-title">Delete category</h5>
+          <h5 class="modal-title">Delete Category</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">

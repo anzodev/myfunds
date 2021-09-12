@@ -20,19 +20,25 @@ bp = Blueprint("categories", __name__, template_folder="templates")
 @bp.route("/categories")
 @auth.login_required
 def index():
-    exepnse_categories = (
+    expense_categories = (
         Category.select()
-        .where(Category.direction == FundsDirection.EXPENSE.value)
+        .where(
+            (Category.account == g.authorized_account)
+            & (Category.direction == FundsDirection.EXPENSE.value)
+        )
         .order_by(Category.name)
     )
     income_categories = (
         Category.select()
-        .where(Category.direction == FundsDirection.INCOME.value)
+        .where(
+            (Category.account == g.authorized_account)
+            & (Category.direction == FundsDirection.INCOME.value)
+        )
         .order_by(Category.name)
     )
     return render_template(
         "categories/view.html",
-        exepnse_categories=exepnse_categories,
+        expense_categories=expense_categories,
         income_categories=income_categories,
     )
 
