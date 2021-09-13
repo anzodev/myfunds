@@ -68,7 +68,7 @@
   </section>
 
   {% if txns %}
-  <table class="table table-borderless border-bottom shadow-none m-0">
+  <table class="table table-borderless shadow-none m-0">
     <thead>
       <tr class="bg-light border-bottom">
         <th class="align-middle text-muted py-2 small" style="width: 1px;">Time</th>
@@ -190,7 +190,8 @@
     </tbody>
   </table>
 
-  <section class="p-3">
+  {% if has_prev or has_next %}
+  <section class="p-3 border-top">
     {% set pagination_args = request.args.to_dict() %}
     {% set _ = pagination_args.pop("limit", None) %}
     {% set _ = pagination_args.pop("offset", None) %}
@@ -205,6 +206,8 @@
       {% endif %}
     </div>
   </section>
+  {% endif %}
+
   {% else %}
   <p class="p-3 m-0">Transactions not found.</p>
   {% endif %}
