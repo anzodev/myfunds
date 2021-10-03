@@ -31,7 +31,7 @@
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.replenishment' %}disabled bg-info text-white{% endif%}">Replenishment</a>
         <a href="{{ url_for('balances.i.withdrawal', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.withdrawal' %}disabled bg-info text-white{% endif%}">Withdrawal</a>
-        <a href="#" class="list-group-item list-group-item-action p-3">Category Limits</a>
+        <a href="#" class="list-group-item list-group-item-action p-3">Expense Limits</a>
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.statistics' %}disabled bg-info text-white{% endif%}">Statistics</a>
       </div>
