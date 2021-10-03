@@ -20,7 +20,7 @@
     </thead>
     <tbody>
       {% for account in accounts %}
-      <tr class="account-row hover-bg-light" data-account-username="{{ account.username }}"
+      <tr class="account-row hover:bg-light" data-account-username="{{ account.username }}"
         data-account-id="{{ account.id }}">
         <td>
           <span>{{ account.username }}</span>
@@ -30,14 +30,14 @@
         </td>
         <td class="py-2 align-middle" style="width: 1px;">
           <div class="d-flex justify-content-end">
-            <button class="update-password btn btn-sm btn-outline-info" data-bs-toggle="modal"
+            <button class="update-password btn shadow-none p-0 text-muted" data-bs-toggle="modal"
               data-bs-target="#update-password-modal">
-              <i data-feather="key"></i>
+              <i data-feather="key" width="18" height="18"></i>
             </button>
             {% if account.username != config.SUPERUSER %}
-            <button class="delete-account btn btn-sm btn-outline-danger ms-3" data-bs-toggle="modal"
+            <button class="delete-account btn shadow-none p-0 text-muted ms-3" data-bs-toggle="modal"
               data-bs-target="#delete-account-confirmation-modal">
-              <i data-feather="trash"></i>
+              <i data-feather="trash" width="18" height="18"></i>
             </button>
             {% endif %}
           </div>
