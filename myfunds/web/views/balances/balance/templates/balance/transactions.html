@@ -185,6 +185,14 @@
             </div>
           </div>
         </td>
+        <td class="align-middle p-0 px-3" style="width: 1px;">
+          <form action="{{ url_for('balances.i.delete_transaction', balance_id=g.balance.id, **request.args) }}" method="POST">
+            <input type="hidden" name="txn_id" value="{{ txn.id }}">
+            <button type="submit" class="btn shadow-none p-0 text-muted">
+              <i data-feather="trash" width="16" height="16"></i>
+            </button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>

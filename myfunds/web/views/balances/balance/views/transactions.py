@@ -13,12 +13,14 @@ from wtforms import validators as vals
 
 from myfunds.core.models import Category
 from myfunds.core.models import Transaction
+from myfunds.core.usecase.transactions import remove_transaction
 from myfunds.web import auth
 from myfunds.web import notify
 from myfunds.web import utils
 from myfunds.web.constants import DATETIME_FORMAT
 from myfunds.web.constants import DATETIME_PATTERN
 from myfunds.web.constants import FundsDirection
+from myfunds.web.forms import DeleteTransactionForm
 from myfunds.web.forms import UpdateTransactionCategoryForm
 from myfunds.web.forms import UpdateTransactionCommentForm
 from myfunds.web.views.balances.balance.views import bp
@@ -223,5 +225,31 @@ def update_transaction_comment():
 
     Transaction.update(comment=comment).where(Transaction.id == txn.id).execute()
     notify.info(f"Transaction {txn.id} updated successfully.")
+
+    return redirect(redirect_url)
+
+
+@bp.route("/transactions/delete", methods=["POST"])
+@auth.login_required
+@verify_balance
+def delete_transaction():
+    redirect_url = url_for(
+        "balances.i.transactions", balance_id=g.balance.id, **request.args
+    )
+
+    form = DeleteTransactionForm(request.form)
+    if not form.validate():
+        notify.error("Form data validation error.")
+        return redirect(redirect_url)
+
+    txn_id = form.txn_id.data
+
+    txn = Transaction.get_or_none(id=txn_id, balance=g.balance)
+    if txn is None:
+        notify.error("Transaction not found.")
+        return redirect(redirect_url)
+
+    remove_transaction(txn)
+    notify.info(f"Transaction {txn.id} was deleted.")
 
     return redirect(redirect_url)

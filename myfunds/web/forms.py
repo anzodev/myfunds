@@ -97,3 +97,7 @@ class UpdateTransactionCategoryForm(Form):
 class UpdateTransactionCommentForm(Form):
     txn_id = id_field()
     comment = StringField(validators=[vals.Optional()])
+
+
+class DeleteTransactionForm(Form):
+    txn_id = id_field()
