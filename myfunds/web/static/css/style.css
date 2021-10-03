@@ -2,10 +2,6 @@ html {
   font-size: 14px;
 }
 
-.container {
-  /* width: 1024px; */
-}
-
 .hover\:cursor-pointer:hover {
   cursor: pointer;
 }
@@ -18,10 +14,6 @@ html {
   background-color: #f8f9fa;
 }
 
-.hover-bg-light:hover {
-  background-color: #f8f9fa;
-}
-
 .noselect {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -29,10 +21,6 @@ html {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.table {
-  /* table-layout: fixe/d; */
 }
 
 .daterangepicker td.active, .daterangepicker td.active:hover {
