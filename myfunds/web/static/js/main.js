@@ -9,7 +9,7 @@
   }
 
 
-  const NOTIFY_CLOSING_DELAY = 5000;
+  const NOTIFY_CLOSING_DELAY = 8000;
 
   function closeNotifyAfter(ms) {
     setTimeout(function () {
