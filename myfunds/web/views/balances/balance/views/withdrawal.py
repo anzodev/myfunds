@@ -27,7 +27,7 @@ def withdrawal():
             Category.select()
             .where(
                 (Category.account == g.authorized_account)
-                & (Category.direction == FundsDirection.INCOME.value)
+                & (Category.direction == FundsDirection.EXPENSE.value)
             )
             .order_by(Category.name)
         )
