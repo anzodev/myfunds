@@ -12,6 +12,7 @@ class Config:
     PBKDF2_PWD_HASHER_HASH_FUNC: str
     PBKDF2_PWD_HASHER_ITERATIONS: int
     PBKDF2_PWD_HASHER_SALT_LENGTH: int
+    BALANCE_STATISTICS_YEARS: int
 
 
 def init_config(env_path: Optional[str] = None) -> Config:
@@ -26,4 +27,5 @@ def init_config(env_path: Optional[str] = None) -> Config:
             PBKDF2_PWD_HASHER_HASH_FUNC=env.str("PBKDF2_PWD_HASHER_HASH_FUNC"),
             PBKDF2_PWD_HASHER_ITERATIONS=env.int("PBKDF2_PWD_HASHER_ITERATIONS"),
             PBKDF2_PWD_HASHER_SALT_LENGTH=env.int("PBKDF2_PWD_HASHER_SALT_LENGTH"),
+            BALANCE_STATISTICS_YEARS=env.int("BALANCE_STATISTICS_YEARS", 5),
         )

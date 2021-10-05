@@ -1,12 +1,10 @@
 from flask import Flask
 
-
-def amount_repr(amount: int, currency_precision: int) -> str:
-    return f"{amount / (10 ** currency_precision):.{currency_precision}f}"
+from myfunds.web.utils import make_hrf_amount
 
 
 def main_processor():
-    return {"amount_repr": amount_repr}
+    return {"hrf_amount": make_hrf_amount}
 
 
 def init_app(app: Flask) -> None:

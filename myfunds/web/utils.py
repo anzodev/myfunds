@@ -32,10 +32,23 @@ def make_amount_placeholder(currency_precision: int) -> str:
     return ".".join([placeholder, "0" * currency_precision])
 
 
-def amount_to_subunits(amount_repr: str, currency_precision: int) -> int:
-    return round(float(amount_repr) * (10 ** currency_precision))
+def amount_to_subunits(hrf_amount: str, currency_precision: int) -> int:
+    return round(float(hrf_amount) * (10 ** currency_precision))
+
+
+def make_hrf_amount(amount: int, currency_precision: int) -> str:
+    """Returns human readable format of the amount."""
+    return f"{amount / (10 ** currency_precision):.{currency_precision}f}"
 
 
 def datetime_range_from_first_month_day_to_now() -> tuple[datetime, datetime]:
     now = datetime.now()
     return (now.replace(day=1, hour=0, minute=0, second=0, microsecond=0), now)
+
+
+def current_year() -> int:
+    return datetime.now().year
+
+
+def current_month() -> int:
+    return datetime.now().month

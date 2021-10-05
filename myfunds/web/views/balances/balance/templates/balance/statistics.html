@@ -11,123 +11,145 @@
   <section class="p-3 mb-1">
     <div class="d-flex align-items-center">
       <div class="me-3">
-        <select name="" id="" class="form-control">
-          <option value="">2021</option>
-          <option value="">2020</option>
-          <option value="">2019</option>
-          <option value="">2018</option>
-          <option value="">2017</option>
-          <option value="">2016</option>
-        </select>
+        <form action="{{ url_for('balances.i.statistics', balance_id=g.balance.id, **request.args) }}">
+          {% set year_filter_args = request.args.to_dict() %}
+          {% set _ = year_filter_args.pop("year", None) %}
+          {% for k,v in year_filter_args.items() %}
+          <input type="hidden" name="{{ k }}" value="{{ v }}">
+          {% endfor %}
+          <select name="year" class="form-control" onchange="this.form.submit();">
+            {% for year in filters.allowed_years %}
+            <option value="{{ year }}" {% if year==filters.year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+          </select>
+        </form>
       </div>
       <div class="btn-group flex-grow-1">
-        <a href="#" class="btn btn-info">Jan</a>
-        <a href="#" class="btn btn-info">Feb</a>
-        <a href="#" class="btn btn-info active">Mar</a>
-        <a href="#" class="btn btn-info disabled">Apr</a>
-        <a href="#" class="btn btn-info disabled">May</a>
-        <a href="#" class="btn btn-info disabled">Jun</a>
-        <a href="#" class="btn btn-info disabled">Jul</a>
-        <a href="#" class="btn btn-info disabled">Aug</a>
-        <a href="#" class="btn btn-info disabled">Sep</a>
-        <a href="#" class="btn btn-info disabled">Oct</a>
-        <a href="#" class="btn btn-info disabled">Nov</a>
-        <a href="#" class="btn btn-info disabled">Dec</a>
+        {% set month_link_args = request.args.to_dict() %}
+        {% set _ = month_link_args.pop("month", None) %}
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=1, **month_link_args) }}"
+          class="btn btn-info {% if 1 in filters.disabled_months %}disabled{% endif %} {% if 1 == filters.month %}active{% endif %}">Jan</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=2, **month_link_args) }}"
+          class="btn btn-info {% if 2 in filters.disabled_months %}disabled{% endif %} {% if 2 == filters.month %}active{% endif %}">Feb</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=3, **month_link_args) }}"
+          class="btn btn-info {% if 3 in filters.disabled_months %}disabled{% endif %} {% if 3 == filters.month %}active{% endif %}">Mar</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=4, **month_link_args) }}"
+          class="btn btn-info {% if 4 in filters.disabled_months %}disabled{% endif %} {% if 4 == filters.month %}active{% endif %}">Apr</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=5, **month_link_args) }}"
+          class="btn btn-info {% if 5 in filters.disabled_months %}disabled{% endif %} {% if 5 == filters.month %}active{% endif %}">May</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=6, **month_link_args) }}"
+          class="btn btn-info {% if 6 in filters.disabled_months %}disabled{% endif %} {% if 6 == filters.month %}active{% endif %}">Jun</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=7, **month_link_args) }}"
+          class="btn btn-info {% if 7 in filters.disabled_months %}disabled{% endif %} {% if 7 == filters.month %}active{% endif %}">Jul</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=8, **month_link_args) }}"
+          class="btn btn-info {% if 8 in filters.disabled_months %}disabled{% endif %} {% if 8 == filters.month %}active{% endif %}">Aug</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=9, **month_link_args) }}"
+          class="btn btn-info {% if 9 in filters.disabled_months %}disabled{% endif %} {% if 9 == filters.month %}active{% endif %}">Sep</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=10, **month_link_args) }}"
+          class="btn btn-info {% if 10 in filters.disabled_months %}disabled{% endif %} {% if 10 == filters.month %}active{% endif %}">Oct</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=11, **month_link_args) }}"
+          class="btn btn-info {% if 11 in filters.disabled_months %}disabled{% endif %} {% if 11 == filters.month %}active{% endif %}">Nov</a>
+        <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=12, **month_link_args) }}"
+          class="btn btn-info {% if 12 in filters.disabled_months %}disabled{% endif %} {% if 12 == filters.month %}active{% endif %}">Dec</a>
       </div>
     </div>
   </section>
 
-  <section class="p-3">
-    <p class=" mb-2">Current date: <span class="fw-bold">23.08.2021</span></p>
-    <div class="progress">
-      <div class="progress-bar bg-info" role="progressbar" style="width: 85.43%;" aria-valuenow="85.43"
-        aria-valuemin="0" aria-valuemax="100">85.43%</div>
+
+  <div class="row">
+    <div class="col-8">
+
+      <section class="p-3">
+        <table class="table table-sm table-borderless shadow-none fs-6">
+          <tbody>
+            <tr>
+              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Start balance:</td>
+              <td class="py-1">{% if general_stats.start_balance %}{{ hrf_amount(general_stats.start_balance,
+                g.currency.precision) }}{%
+                else %}-{% endif %}</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Expense:</td>
+              <td class="py-1">
+                {% if general_stats.expense %}{{ hrf_amount(general_stats.expense, g.currency.precision) }}{% else %}-{%
+                endif %}
+                {% if general_stats.expense_pct %}({{ general_stats.expense_pct }}%){% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Income:</td>
+              <td class="py-1">{% if general_stats.income %}{{ hrf_amount(general_stats.income, g.currency.precision)
+                }}{%
+                else %}-{%
+                endif %}</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap ps-0 py-1" style="width: 1px;">End balance:</td>
+              <td class="py-1">{% if general_stats.end_balance %}{{ hrf_amount(general_stats.end_balance,
+                g.currency.precision) }}{% else
+                %}-{% endif %}</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Savings:</td>
+              <td class="py-1">
+                {% if general_stats.savings %}{{ hrf_amount(general_stats.savings, g.currency.precision) }}{% else %}-{%
+                endif %}
+                {% if general_stats.savings_pct %}({{ general_stats.savings_pct }}%){% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
     </div>
-  </section>
+    <div class="col-4">
 
-  <section class="p-3">
-    <table class="table table-sm table-borderless shadow-none fs-6">
-      <tbody>
-        <tr>
-          <td class="text-nowrap ps-0" style="width: 1px;">Start balance:</td>
-          <td>71898.28</td>
-        </tr>
-        <tr>
-          <td class="text-nowrap ps-0" style="width: 1px;">Expense:</td>
-          <td>70704.65 (98.34% of start balance)</td>
-        </tr>
-        <tr>
-          <td class="text-nowrap ps-0" style="width: 1px;">Income:</td>
-          <td>8436.34</td>
-        </tr>
-        <tr>
-          <td class="text-nowrap ps-0" style="width: 1px;">End balance:</td>
-          <td>n/a</td>
-        </tr>
-        <tr>
-          <td class="text-nowrap ps-0" style="width: 1px;">Savings:</td>
-          <td>1193.64 (1.66% of start balance)</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+      {% if month_progress %}
+      <section class="p-3">
+        <p class="text-end">Current day: <span class="fw-bold">{{ month_progress.current_day }}</span> ({{ month_progress.progress }}%)</p>
+      </section>
+      {% endif %}
 
+    </div>
+  </div>
 
-    <table class="table table-sm table-bordered shadow-none m-0">
-      <thead>
-        <tr class="bg-light">
-          <th rowspan="2" class="align-middle text-center text-muted py-2 small border-start-0">Category</th>
-          <th colspan="2" class="text-center text-muted py-2 small">Expenses</th>
-          <th colspan="2" class="text-center text-muted py-2 small">Limit</th>
-          <th rowspan="2" class="align-middle text-center text-muted py-2 small border-end-0">Expenses ratio</th>
-        </tr>
-        <tr class="bg-light">
-          <th class="text-muted text-center py-2 small">Amount</th>
-          <th class="text-nowrap text-center text-muted py-2 small">%</th>
-          <th class="text-nowrap text-center text-muted py-2 small">Remainder</th>
-          <th class="text-nowrap text-center text-muted py-2 small">Used (%)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="hover:bg-light">
-          <td class="align-middle text-nowrap border-start-0">
-            <div class="d-flex">
-              <div
-                style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: green;">
-              </div>
-              <div class="ms-2"><a href="#" class="link-info">Products</a></div>
+  {% if expense_categories_stats %}
+  <table class="table table-sm table-bordered shadow-none mb-0">
+    <thead>
+      <tr class="bg-light">
+        <th colspan="6" class="text-center text-muted py-2 small border-start-0 border-end-0">Expense</th>
+      </tr>
+      <tr class="bg-light">
+        <th class="align-middle text-center text-muted py-2 small border-start-0">Category</th>
+        <th colspan="2" class="text-muted text-center py-2 small">Amount</th>
+        <th colspan="2" class="text-nowrap text-center text-muted py-2 small">Limit</th>
+        <th class="align-middle text-center text-muted py-2 small border-end-0">Expenses ratio</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in expense_categories_stats %}
+      <tr class="hover:bg-light">
+        <td class="align-middle text-nowrap border-start-0">
+          <div class="d-flex">
+            <div
+              style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }};">
             </div>
-          </td>
-          <td class="align-middle">4366.34</td>
-          <td class="align-middle">84.43%</td>
-          <td class="align-middle">420.85</td>
-          <td class="align-middle text-warning">95%</td>
-          <td class="align-middle p-0 border-end-0">
-            <div style="width: 84.32%; height: 38px; background-color: green;">
-            </div>
-          </td>
-        </tr>
-        <tr class="hover:bg-light">
-          <td class="align-middle border-bottom-0 text-nowrap border-start-0">
-            <div class="d-flex">
-              <div
-                style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: purple;">
-              </div>
-              <div class="ms-2">Auto</div>
-            </div>
-          </td>
-          <td class="align-middle border-bottom-0">4366.34</td>
-          <td class="align-middle border-bottom-0">84.43%</td>
-          <td class="align-middle border-bottom-0">420.85</td>
-          <td class="align-middle border-bottom-0 text-warning">95%</td>
-          <td class="align-middle border-bottom-0 p-0 border-end-0">
-            <div style="width: 32.54%; height: 38px; background-color: purple;">
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
+            <div class="ms-2"><a href="{{ i.href }}" class="link-info">{{ i.name }}</a></div>
+          </div>
+        </td>
+        <td class="align-middle">{{ hrf_amount(i.amount, g.currency.precision) }}</td>
+        <td class="align-middle">{{ i.amount_pct }}%</td>
+        <td class="align-middle">...</td>
+        <td class="align-middle">...</td>
+        <td class="align-middle p-0 border-end-0">
+          <div style="width: {{ i.amount_pct }}%; height: 38px; background-color: {{ i.color_sign }};">
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 
 </div>
 {% endblock %}

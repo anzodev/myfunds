@@ -84,12 +84,12 @@
         <td class="align-middle text-nowrap py-3 pe-4">{{ txn.created_at }}</td>
         <td
           class="align-middle text-nowrap py-3 pe-4 text-{% if txn.direction == g.funds_direction.INCOME.value %}success{% else %}danger{% endif %}">
-          {% if txn.direction == g.funds_direction.INCOME.value %}+{% else %}-{% endif %}{{ amount_repr(txn.amount,
+          {% if txn.direction == g.funds_direction.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount,
           g.currency.precision) }}
         </td>
         <td
           class="align-middle text-nowrap py-3 pe-4 text-{% if txn.balance_remainder > 0 %}success{% elif txn.balance_remainder < 0%}danger{% endif %}">
-          {% if txn.balance_remainder > 0 %}+{% endif %}{{ amount_repr(txn.balance_remainder, g.currency.precision) }}
+          {% if txn.balance_remainder > 0 %}+{% endif %}{{ hrf_amount(txn.balance_remainder, g.currency.precision) }}
         </td>
         <td class="align-middle text-nowrap p-0">
           <div class="dropdown">
@@ -103,7 +103,7 @@
               {% endif %}
               <div class="d-flex">
                 <div
-                  style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category_color_sign }};">
+                  style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category_color_sign }};">
                 </div>
                 <div class="ms-2">{{ category_name }}</div>
               </div>
@@ -121,7 +121,7 @@
                       <button type="submit" class="list-group-item list-group-item-action border-0 p-2">
                         <div class="d-flex">
                           <div
-                            style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: #eee">
+                            style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: #eee">
                           </div>
                           <div class="ms-2">No category</div>
                         </div>
@@ -147,7 +147,7 @@
                       <button type="submit" class="list-group-item list-group-item-action border-0 p-2">
                         <div class="d-flex">
                           <div
-                            style="position: relative; top: 4px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category.color_sign }};">
+                            style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category.color_sign }};">
                           </div>
                           <div class="ms-2">{{ category.name }}</div>
                         </div>

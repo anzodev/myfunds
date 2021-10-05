@@ -21,7 +21,7 @@
 
       <div
         class="lead card p-3 mb-3 fw-bold text-{% if g.balance.amount > 0 %}success{% elif g.balance.amount < 0 %}danger{% endif %}">
-        {% if g.balance.amount > 0 %}+{% endif %}{{ amount_repr(g.balance.amount, g.currency.precision) }} {{ g.currency.code_alpha }}
+        {% if g.balance.amount > 0 %}+{% endif %}{{ hrf_amount(g.balance.amount, g.currency.precision) }} {{ g.currency.code_alpha }}
       </div>
 
       <div class="list-group">

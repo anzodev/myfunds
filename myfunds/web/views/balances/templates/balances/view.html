@@ -21,7 +21,7 @@
         <div class="lead text-truncate text-end mb-3">{{ balance.name }}</div>
         <div
           class="text-end text-{% if balance.amount > 0 %}success{% elif balance.amount < 0 %}danger{% else %}muted{% endif %}">
-          {{ amount_repr(balance.amount, balance.currency.precision) }} {{ balance.currency.code_alpha }}
+          {{ hrf_amount(balance.amount, balance.currency.precision) }} {{ balance.currency.code_alpha }}
         </div>
       </a>
 
