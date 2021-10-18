@@ -27,6 +27,7 @@
       <div class="btn-group flex-grow-1">
         {% set month_link_args = request.args.to_dict() %}
         {% set _ = month_link_args.pop("month", None) %}
+        {% set _ = month_link_args.pop("excluded_categories", None) %}
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=1, **month_link_args) }}"
           class="btn btn-info {% if 1 in filters.disabled_months %}disabled{% endif %} {% if 1 == filters.month %}active{% endif %}">Jan</a>
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id, month=2, **month_link_args) }}"
@@ -118,8 +119,8 @@
         <th colspan="7" class="text-center text-muted py-2 small border-start-0 border-end-0">Expense</th>
       </tr>
       <tr class="bg-light">
-        <th class="align-middle text-center py-2 border-start-0" style="width: 1px;"><i data-feather="eye" width="16"
-            height="16"></i></th>
+        <th class="align-middle text-center py-2 border-start-0" style="width: 1px;"><i data-feather="eye-off"
+            width="16" height="16"></i></th>
         <th class="align-middle text-center text-muted py-2 small">Category</th>
         <th colspan="2" class="text-muted text-center py-2 small">Amount</th>
         <th colspan="2" class="text-nowrap text-center text-muted py-2 small border-end-0">Limit</th>
@@ -129,29 +130,41 @@
       {% for i in expense_categories_stats %}
       <tr class="hover:bg-light">
         <td class="align-middle text-center">
-          <input class="form-check-input shadow-none" type="checkbox" style="transform: scale(1.5);">
+          <input class="form-check-input shadow-none" type="checkbox" style="transform: scale(1.5);"
+            value="{{ i.exclusion_link }}" {% if i.is_excluded %}checked{% endif %}
+            onclick="document.location.href = this.value;">
         </td>
         <td class="align-middle text-nowrap border-start-0">
           <div class="d-flex align-items-center">
             <div
               style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }};">
             </div>
-            <div class="ms-2"><a href="{{ i.href }}" class="link-info">{{ i.name }}</a></div>
+            <div class="ms-2"><a href="{{ i.transactions_link }}" class="link-info">{{ i.name }}</a></div>
           </div>
         </td>
-        <td class="align-middle">{{ hrf_amount(i.amount) }}</td>
-        <td class="align-middle">
+        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>{{ hrf_amount(i.amount) }}</td>
+        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>
+          {% if i.is_excluded %}
+          <div class="text-center">0%</div>
+          <div class="progress" style="height: 4px;">
+            <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+              aria-valuemax="100"></div>
+          </div>
+          {% else %}
           <div class="text-center">{{ i.amount_pct }}%</div>
           <div class="progress" style="height: 4px;">
             <div class="progress-bar" role="progressbar"
               style="width: {{ i.amount_ratio }}%; background-color: {{ i.color_sign }};"
               aria-valuenow="{{ i.amount_ratio }}" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
+          {% endif %}
         </td>
-        <td class="align-middle">{% if i.month_limit.value %}{{ hrf_amount(i.month_limit.value) }}{% else %}-{% endif %}
+        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>{% if i.month_limit.value %}{{
+          hrf_amount(i.month_limit.value) }}{% else %}-{% endif %}
         </td>
         <td
-          class="align-middle border-end-0{% if i.month_limit.css_text_color %} {{ i.month_limit.css_text_color }}{% endif %}">
+          class="align-middle border-end-0{% if i.month_limit.css_text_color %} {{ i.month_limit.css_text_color }}{% endif %}"
+          {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>
           {% if i.month_limit.css_text_color %}{{ i.month_limit.percent }}%{% else %}-{% endif %}
         </td>
       </tr>

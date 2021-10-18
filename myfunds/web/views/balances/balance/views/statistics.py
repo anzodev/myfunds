@@ -15,26 +15,19 @@ from wtforms import Form
 from wtforms import IntegerField
 from wtforms import ValidationError
 from wtforms import validators as vals
+from wtforms.fields.core import StringField
 
 from myfunds.core.models import Category
 from myfunds.core.models import CategoryMonthLimit
 from myfunds.core.models import Transaction
 from myfunds.web import auth
 from myfunds.web import utils
-from myfunds.web.constants import DATETIME_FORMAT, NO_CATEGORY_TXN_COLOR
+from myfunds.web.constants import DATETIME_FORMAT
+from myfunds.web.constants import NO_CATEGORY_ID
+from myfunds.web.constants import NO_CATEGORY_TXN_COLOR
 from myfunds.web.constants import FundsDirection
 from myfunds.web.views.balances.balance.views import bp
 from myfunds.web.views.balances.balance.views import verify_balance
-
-
-class StatisticsFilterForm(Form):
-    year = IntegerField(validators=[vals.Optional()])
-    month = IntegerField(validators=[vals.Optional(), vals.AnyOf(list(range(1, 13)))])
-
-    def validate_year(form, field) -> None:
-        year = field.data
-        if year not in make_stats_years():
-            raise ValidationError(f"Can't show statistics for the {year} year.")
 
 
 def make_stats_years() -> list[int]:
@@ -91,7 +84,25 @@ def calculate_end_balance(stats_range: tuple[datetime, datetime]) -> int:
     return result
 
 
-def calculate_expense(stats_range: tuple[datetime, datetime]) -> int:
+def calculate_expense(
+    stats_range: tuple[datetime, datetime], excluded_categories: set[int]
+) -> int:
+    excluded_categories = excluded_categories.copy()
+    exclude_no_category = NO_CATEGORY_ID in excluded_categories
+    excluded_categories.discard(NO_CATEGORY_ID)
+
+    # fmt: off
+    excluded_categories_condition = (
+        (Transaction.category.not_in(excluded_categories))
+        | (Transaction.category.is_null(True))
+    )
+    if exclude_no_category:
+        excluded_categories_condition = (
+            (Transaction.category.not_in(excluded_categories))
+            & (Transaction.category.is_null(False))
+        )
+    # fmt: on
+
     # fmt: off
     return (
         Transaction
@@ -100,6 +111,7 @@ def calculate_expense(stats_range: tuple[datetime, datetime]) -> int:
             (Transaction.balance == g.balance)
             & (Transaction.direction == FundsDirection.EXPENSE.value)
             & (Transaction.created_at.between(*stats_range))
+            & excluded_categories_condition
         )
         .scalar()
     )
@@ -121,11 +133,13 @@ def calculate_income(stats_range: tuple[datetime, datetime]) -> int:
     # fmt: on
 
 
-def calculate_general_stats(stats_range: tuple[datetime, datetime]) -> dict:
+def calculate_general_stats(
+    stats_range: tuple[datetime, datetime], excluded_categories: set[int]
+) -> dict:
     year, month = stats_range[0].year, stats_range[0].month
 
     start_balance = calculate_start_balance(stats_range)
-    expense = calculate_expense(stats_range)
+    expense = calculate_expense(stats_range, excluded_categories)
     income = calculate_income(stats_range)
 
     end_balance = None
@@ -150,7 +164,7 @@ def calculate_general_stats(stats_range: tuple[datetime, datetime]) -> dict:
 
 
 def calculate_expense_categories_stats(
-    stats_range: tuple[datetime, datetime]
+    stats_range: tuple[datetime, datetime], excluded_categories: set[int]
 ) -> list[dict]:
     # fmt: off
     query = (
@@ -195,11 +209,16 @@ def calculate_expense_categories_stats(
     )
     # fmt: on
 
-    categories_month_limit = {i.category_id: i.limit for i in month_limits}
+    expense = calculate_expense(stats_range, excluded_categories)
 
-    top_expense = max([i.amount for i in query] + [no_category_txns_amount or 0])
+    exclude_no_category = NO_CATEGORY_ID in excluded_categories
 
-    expense = calculate_expense(stats_range)
+    categories_month_limits = {i.category_id: i.limit for i in month_limits}
+
+    top_expense = max(
+        [i.amount for i in query if i.id not in excluded_categories]
+        + [(no_category_txns_amount if not exclude_no_category else 0) or 0]
+    )
 
     result = []
     for i in query:
@@ -207,21 +226,19 @@ def calculate_expense_categories_stats(
             {
                 "name": i.name,
                 "color_sign": i.color_sign,
-                "href": url_for(
-                    "balances.i.transactions",
-                    balance_id=g.balance.id,
-                    direction=FundsDirection.EXPENSE.value,
-                    category_id=i.id,
-                    created_at_between=" - ".join(
-                        i.strftime(DATETIME_FORMAT.value) for i in stats_range
-                    ),
-                ),
+                "transactions_link": make_transactions_link(i.id, stats_range),
                 "amount": i.amount,
-                "amount_pct": round((i.amount / expense) * 100, 2),
-                "amount_ratio": round((i.amount / top_expense) * 100, 2),
-                "month_limit": init_month_limit(
-                    i.amount, categories_month_limit.get(i.id)
+                "amount_pct": (
+                    round((i.amount / expense) * 100, 2) if expense else None
                 ),
+                "amount_ratio": (
+                    round((i.amount / top_expense) * 100, 2) if top_expense else None
+                ),
+                "month_limit": init_month_limit(
+                    i.amount, categories_month_limits.get(i.id)
+                ),
+                "is_excluded": i.id in excluded_categories,
+                "exclusion_link": make_exclusion_link(excluded_categories, i.id),
             }
         )
 
@@ -230,24 +247,59 @@ def calculate_expense_categories_stats(
             {
                 "name": "No category",
                 "color_sign": NO_CATEGORY_TXN_COLOR,
-                "href": url_for(
-                    "balances.i.transactions",
-                    balance_id=g.balance.id,
-                    direction=FundsDirection.EXPENSE.value,
-                    category_id=-1,
-                    created_at_between=" - ".join(
-                        i.strftime(DATETIME_FORMAT.value) for i in stats_range
-                    ),
+                "transactions_link": make_transactions_link(
+                    NO_CATEGORY_ID, stats_range
                 ),
                 "amount": no_category_txns_amount,
-                "amount_pct": round((no_category_txns_amount / expense) * 100, 2),
-                "amount_ratio": round((no_category_txns_amount / top_expense) * 100, 2),
-                "month_limit": init_month_limit(i.amount, None),
+                "amount_pct": (
+                    round((no_category_txns_amount / expense) * 100, 2)
+                    if expense
+                    else None
+                ),
+                "amount_ratio": (
+                    round((no_category_txns_amount / top_expense) * 100, 2)
+                    if top_expense
+                    else None
+                ),
+                "month_limit": init_month_limit(no_category_txns_amount, None),
+                "is_excluded": exclude_no_category,
+                "exclusion_link": make_exclusion_link(
+                    excluded_categories, NO_CATEGORY_ID
+                ),
             }
         )
 
-    result = sorted(result, key=lambda i: i["amount"], reverse=True)
+    result = sorted(
+        result, key=lambda i: 0 if i["is_excluded"] else i["amount"], reverse=True
+    )
     return result
+
+
+def make_transactions_link(
+    category_id: int, stats_range: tuple[datetime, datetime]
+) -> str:
+    return url_for(
+        "balances.i.transactions",
+        balance_id=g.balance.id,
+        direction=FundsDirection.EXPENSE.value,
+        category_id=category_id,
+        created_at_between=" - ".join(
+            i.strftime(DATETIME_FORMAT.value) for i in stats_range
+        ),
+    )
+
+
+def make_exclusion_link(excluded_categories: set[int], category_id: int) -> str:
+    excluded_categories = excluded_categories.copy()
+    if category_id in excluded_categories:
+        excluded_categories.discard(category_id)
+    else:
+        excluded_categories.add(category_id)
+
+    args = request.args.copy()
+    args["excluded_categories"] = ",".join(str(i) for i in excluded_categories)
+
+    return url_for("balances.i.statistics", balance_id=g.balance.id, **args)
 
 
 MonthLimit = namedtuple("MonthLimit", ["value", "percent", "css_text_color"])
@@ -275,6 +327,19 @@ def init_month_limit(
     return MonthLimit(limit_value, percent, css_text_color)
 
 
+class StatisticsFilterForm(Form):
+    year = IntegerField(validators=[vals.Optional()])
+    month = IntegerField(validators=[vals.Optional(), vals.AnyOf(list(range(1, 13)))])
+    excluded_categories = StringField(
+        validators=[vals.Optional(), vals.Regexp(r"^-?\d+(,-?\d+?)*$")]
+    )
+
+    def validate_year(form, field) -> None:
+        year = field.data
+        if year not in make_stats_years():
+            raise ValidationError(f"Can't show statistics for the {year} year.")
+
+
 @bp.route("/statistics")
 @auth.login_required
 @verify_balance
@@ -287,6 +352,9 @@ def statistics():
 
     year = filter_form.year.data or current_year
     month = filter_form.month.data or current_month
+    excluded_categories = set(
+        int(i) for i in filter_form.excluded_categories.data.split(",") if i != ""
+    )
 
     # Set the December month if month parameter not set and year parameter isn't
     # equal to the current year.
@@ -315,8 +383,10 @@ def statistics():
         current_day = f"{today.day} ({today.strftime('%A')}, {month_completed_by}%)"
 
     stats_range = make_date_range_by_year_and_month(year, month)
-    general_stats = calculate_general_stats(stats_range)
-    expense_categories_stats = calculate_expense_categories_stats(stats_range)
+    general_stats = calculate_general_stats(stats_range, excluded_categories)
+    expense_categories_stats = calculate_expense_categories_stats(
+        stats_range, excluded_categories
+    )
 
     return render_template(
         "balance/statistics.html",

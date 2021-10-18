@@ -43,3 +43,4 @@ class FundsDirection(ConstantGroup):
 DATETIME_FORMAT = Constant("%Y-%m-%d %H:%M:%S")
 DATETIME_PATTERN = Constant(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}")
 NO_CATEGORY_TXN_COLOR = "#bcbcbc"
+NO_CATEGORY_ID = -1

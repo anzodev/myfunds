@@ -19,16 +19,13 @@ from myfunds.web import notify
 from myfunds.web import utils
 from myfunds.web.constants import DATETIME_FORMAT
 from myfunds.web.constants import DATETIME_PATTERN
+from myfunds.web.constants import NO_CATEGORY_ID
 from myfunds.web.constants import FundsDirection
 from myfunds.web.forms import DeleteTransactionForm
 from myfunds.web.forms import UpdateTransactionCategoryForm
 from myfunds.web.forms import UpdateTransactionCommentForm
 from myfunds.web.views.balances.balance.views import bp
 from myfunds.web.views.balances.balance.views import verify_balance
-
-
-FILTER_ALL_DIRECTIONS = ""
-FILTER_NO_CATEGORY = -1
 
 
 class TransactionFilterForm(Form):
@@ -61,7 +58,7 @@ def transactions():
     offset = filter_form.offset.data or 0
 
     categories = []
-    if direction != FILTER_ALL_DIRECTIONS:
+    if direction != "":
         categories = (
             Category.select()
             .where(
@@ -104,11 +101,11 @@ def transactions():
     )
     # fmt: on
 
-    if direction != FILTER_ALL_DIRECTIONS:
+    if direction != "":
         txns_query = txns_query.where(Transaction.direction == direction)
 
     if category_id is not None:
-        if category_id == FILTER_NO_CATEGORY:
+        if category_id == NO_CATEGORY_ID:
             txns_query = txns_query.where(Transaction.category.is_null())
         else:
             category = Category.get_or_none(
