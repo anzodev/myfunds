@@ -25,7 +25,7 @@
             <span class="input-group-text">Direction</span>
             <select name="direction" class="form-control px-3" onchange="this.form.submit();">
               <option value="">All</option>
-              {% for direction in g.funds_direction.constants() %}
+              {% for direction in g.CONST_FUNDS_DIRECTION.constants() %}
               <option value="{{ direction.value }}" {% if filters.direction==direction.value %}selected{% endif %}>{{
                 direction.meta.name }}</option>
               {% endfor %}
@@ -83,13 +83,12 @@
       <tr class="hover:bg-light">
         <td class="align-middle text-nowrap py-3 pe-4">{{ txn.created_at }}</td>
         <td
-          class="align-middle text-nowrap py-3 pe-4 text-{% if txn.direction == g.funds_direction.INCOME.value %}success{% else %}danger{% endif %}">
-          {% if txn.direction == g.funds_direction.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount,
-          g.currency.precision) }}
+          class="align-middle text-nowrap py-3 pe-4 text-{% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}success{% else %}danger{% endif %}">
+          {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount) }}
         </td>
         <td
           class="align-middle text-nowrap py-3 pe-4 text-{% if txn.balance_remainder > 0 %}success{% elif txn.balance_remainder < 0%}danger{% endif %}">
-          {% if txn.balance_remainder > 0 %}+{% endif %}{{ hrf_amount(txn.balance_remainder, g.currency.precision) }}
+          {% if txn.balance_remainder > 0 %}+{% endif %}{{ hrf_amount(txn.balance_remainder) }}
         </td>
         <td class="align-middle text-nowrap p-0">
           <div class="dropdown">
@@ -99,11 +98,11 @@
               {% set category_color_sign = txn.category.color_sign %}
               {% else %}
               {% set category_name = 'No category' %}
-              {% set category_color_sign = '#eeeeee' %}
+              {% set category_color_sign = g.CONST_NO_CATEGORY_TXN_COLOR %}
               {% endif %}
-              <div class="d-flex">
+              <div class="d-flex align-items-center">
                 <div
-                  style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category_color_sign }};">
+                  style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category_color_sign }};">
                 </div>
                 <div class="ms-2">{{ category_name }}</div>
               </div>
@@ -119,9 +118,9 @@
                       <input type="hidden" name="txn_id" value="{{ txn.id }}">
                       <input type="hidden" name="category_id" value="">
                       <button type="submit" class="list-group-item list-group-item-action border-0 p-2">
-                        <div class="d-flex">
+                        <div class="d-flex align-items-center">
                           <div
-                            style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: #eee">
+                            style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: #eee">
                           </div>
                           <div class="ms-2">No category</div>
                         </div>
@@ -130,7 +129,7 @@
                   </div>
                   {% endif %}
 
-                  {% if txn.direction == g.funds_direction.INCOME.value %}
+                  {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}
                   {% set categories_for_update = income_categories %}
                   {% else %}
                   {% set categories_for_update = expense_categories %}
@@ -145,9 +144,9 @@
                       <input type="hidden" name="txn_id" value="{{ txn.id }}">
                       <input type="hidden" name="category_id" value="{{ category.id }}">
                       <button type="submit" class="list-group-item list-group-item-action border-0 p-2">
-                        <div class="d-flex">
+                        <div class="d-flex align-items-center">
                           <div
-                            style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category.color_sign }};">
+                            style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ category.color_sign }};">
                           </div>
                           <div class="ms-2">{{ category.name }}</div>
                         </div>

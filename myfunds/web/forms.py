@@ -101,3 +101,12 @@ class UpdateTransactionCommentForm(Form):
 
 class DeleteTransactionForm(Form):
     txn_id = id_field()
+
+
+class AddExpenseLimitForm(Form):
+    category_id = id_field()
+    limit = StringField(validators=[vals.InputRequired()])
+
+
+class DeleteExpenseLimitForm(Form):
+    limit_id = id_field()

@@ -1,6 +1,8 @@
 from calendar import monthrange
+from collections import namedtuple
 from datetime import date
 from datetime import datetime
+from typing import Optional
 
 import peewee as pw
 from flask import current_app
@@ -15,10 +17,11 @@ from wtforms import ValidationError
 from wtforms import validators as vals
 
 from myfunds.core.models import Category
+from myfunds.core.models import CategoryMonthLimit
 from myfunds.core.models import Transaction
 from myfunds.web import auth
 from myfunds.web import utils
-from myfunds.web.constants import DATETIME_FORMAT
+from myfunds.web.constants import DATETIME_FORMAT, NO_CATEGORY_TXN_COLOR
 from myfunds.web.constants import FundsDirection
 from myfunds.web.views.balances.balance.views import bp
 from myfunds.web.views.balances.balance.views import verify_balance
@@ -40,12 +43,10 @@ def make_stats_years() -> list[int]:
     return [current_year] + [current_year - i for i in range(1, years + 1)]
 
 
-def make_datetime_range_by_year_and_month(
-    year: int, month: int
-) -> tuple[datetime, datetime]:
+def make_date_range_by_year_and_month(year: int, month: int) -> tuple[date, date]:
     until_year = year if month < 12 else year + 1
     until_month = month + 1 if month < 12 else 1
-    return (datetime(year, month, 1), datetime(until_year, until_month, 1))
+    return (date(year, month, 1), date(until_year, until_month, 1))
 
 
 def calculate_start_balance(stats_range: tuple[datetime, datetime]) -> int:
@@ -132,7 +133,7 @@ def calculate_general_stats(stats_range: tuple[datetime, datetime]) -> dict:
         end_balance = calculate_end_balance(stats_range)
 
     expense_pct, savings, savings_pct = None, None, None
-    if start_balance is not None:
+    if start_balance is not None and expense is not None:
         expense_pct = round((expense / start_balance) * 100, 2)
         savings = start_balance - expense
         savings_pct = round((savings / start_balance) * 100, 2)
@@ -151,8 +152,6 @@ def calculate_general_stats(stats_range: tuple[datetime, datetime]) -> dict:
 def calculate_expense_categories_stats(
     stats_range: tuple[datetime, datetime]
 ) -> list[dict]:
-    expense = calculate_expense(stats_range)
-
     # fmt: off
     query = (
         Category
@@ -169,9 +168,38 @@ def calculate_expense_categories_stats(
             & (Transaction.created_at.between(*stats_range))
         )
         .group_by(Category.id)
-        .order_by(pw.SQL("amount").desc())
     )
     # fmt: on
+
+    # fmt: off
+    no_category_txns_amount = (
+        Transaction
+        .select(pw.fn.SUM(Transaction.amount))
+        .where(
+            (Transaction.balance == g.balance)
+            & (Transaction.direction == FundsDirection.EXPENSE.value)
+            & (Transaction.category.is_null())
+            & (Transaction.created_at.between(*stats_range))
+        )
+        .scalar()
+    )
+    # fmt: on
+
+    # fmt: off
+    month_limits = (
+        CategoryMonthLimit
+        .select()
+        .where(
+            (CategoryMonthLimit.balance == g.balance)
+        )
+    )
+    # fmt: on
+
+    categories_month_limit = {i.category_id: i.limit for i in month_limits}
+
+    top_expense = max([i.amount for i in query] + [no_category_txns_amount or 0])
+
+    expense = calculate_expense(stats_range)
 
     result = []
     for i in query:
@@ -190,27 +218,18 @@ def calculate_expense_categories_stats(
                 ),
                 "amount": i.amount,
                 "amount_pct": round((i.amount / expense) * 100, 2),
+                "amount_ratio": round((i.amount / top_expense) * 100, 2),
+                "month_limit": init_month_limit(
+                    i.amount, categories_month_limit.get(i.id)
+                ),
             }
         )
 
-    # fmt: off
-    no_category_txns_amount = (
-        Transaction
-        .select(pw.fn.SUM(Transaction.amount))
-        .where(
-            (Transaction.balance == g.balance)
-            & (Transaction.category.is_null())
-            & (Transaction.created_at.between(*stats_range))
-        )
-        .scalar()
-    )
-    # fmt: on
-
-    if no_category_txns_amount > 0:
+    if no_category_txns_amount is not None and no_category_txns_amount > 0:
         result.append(
             {
                 "name": "No category",
-                "color_sign": "#eeeeee",
+                "color_sign": NO_CATEGORY_TXN_COLOR,
                 "href": url_for(
                     "balances.i.transactions",
                     balance_id=g.balance.id,
@@ -222,10 +241,38 @@ def calculate_expense_categories_stats(
                 ),
                 "amount": no_category_txns_amount,
                 "amount_pct": round((no_category_txns_amount / expense) * 100, 2),
+                "amount_ratio": round((no_category_txns_amount / top_expense) * 100, 2),
+                "month_limit": init_month_limit(i.amount, None),
             }
         )
 
+    result = sorted(result, key=lambda i: i["amount"], reverse=True)
     return result
+
+
+MonthLimit = namedtuple("MonthLimit", ["value", "percent", "css_text_color"])
+
+
+def init_month_limit(
+    category_amount: int, limit_value: Optional[int] = None
+) -> MonthLimit:
+    if limit_value is None:
+        return MonthLimit(None, None, None)
+
+    percent = round((category_amount / limit_value) * 100, 2)
+    if percent > 100:
+        percent = round((100 - percent), 2)
+
+    if 0 <= percent < 60:
+        css_text_color = "text-success"
+    elif 60 <= percent < 80:
+        css_text_color = "text-warning"
+    elif 80 <= percent or percent < 0:
+        css_text_color = "text-danger"
+    else:
+        css_text_color = None
+
+    return MonthLimit(limit_value, percent, css_text_color)
 
 
 @bp.route("/statistics")
@@ -240,6 +287,9 @@ def statistics():
 
     year = filter_form.year.data or current_year
     month = filter_form.month.data or current_month
+    excluded = filter_form.excluded.data
+    print(f"{excluded=}")
+    print(f"{request.args.get('excluded')=}")
 
     # Set the December month if month parameter not set and year parameter isn't
     # equal to the current year.
@@ -261,22 +311,20 @@ def statistics():
         "month": month,
     }
 
-    month_progress = None
+    current_day = None
     if year == current_year and month == current_month:
         today = date.today()
-        month_progress = {
-            "current_day": f"{today.day} {today.strftime('%A')}",
-            "progress": round((today.day / monthrange(year, month)[1]) * 100, 2),
-        }
+        month_completed_by = round((today.day / monthrange(year, month)[1]) * 100, 2)
+        current_day = f"{today.day} ({today.strftime('%A')}, {month_completed_by}%)"
 
-    stats_range = make_datetime_range_by_year_and_month(year, month)
+    stats_range = make_date_range_by_year_and_month(year, month)
     general_stats = calculate_general_stats(stats_range)
     expense_categories_stats = calculate_expense_categories_stats(stats_range)
 
     return render_template(
         "balance/statistics.html",
         filters=filters,
-        month_progress=month_progress,
+        current_day=current_day,
         general_stats=general_stats,
         expense_categories_stats=expense_categories_stats,
     )

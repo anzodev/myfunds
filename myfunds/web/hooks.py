@@ -14,7 +14,8 @@ from myfunds.web import constants
 
 
 def add_constants_to_globals():
-    g.funds_direction = constants.FundsDirection
+    g.CONST_FUNDS_DIRECTION = constants.FundsDirection
+    g.CONST_NO_CATEGORY_TXN_COLOR = constants.NO_CATEGORY_TXN_COLOR
 
 
 def errorhandler(exc: Exception) -> Response:

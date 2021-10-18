@@ -21,7 +21,7 @@
 
       <div
         class="lead card p-3 mb-3 fw-bold text-{% if g.balance.amount > 0 %}success{% elif g.balance.amount < 0 %}danger{% endif %}">
-        {% if g.balance.amount > 0 %}+{% endif %}{{ hrf_amount(g.balance.amount, g.currency.precision) }} {{ g.currency.code_alpha }}
+        {% if g.balance.amount > 0 %}+{% endif %}{{ hrf_amount(g.balance.amount) }} {{ g.currency.code_alpha }}
       </div>
 
       <div class="list-group">
@@ -31,7 +31,8 @@
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.replenishment' %}disabled bg-info text-white{% endif%}">Replenishment</a>
         <a href="{{ url_for('balances.i.withdrawal', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.withdrawal' %}disabled bg-info text-white{% endif%}">Withdrawal</a>
-        <a href="#" class="list-group-item list-group-item-action p-3">Expense Limits</a>
+        <a href="{{ url_for('balances.i.expense_limits', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.expense_limits' %}disabled bg-info text-white{% endif%}">Expense Month Limits</a>
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.statistics' %}disabled bg-info text-white{% endif%}">Statistics</a>
       </div>

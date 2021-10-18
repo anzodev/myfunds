@@ -60,7 +60,7 @@ class CategoryMonthLimit(BaseModel):
 
     balance = pw.ForeignKeyField(Balance)
     category = pw.ForeignKeyField(Category)
-    amount_limit = pw.IntegerField()
+    limit = pw.IntegerField()
 
 
 class Transaction(BaseModel):

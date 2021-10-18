@@ -2,6 +2,7 @@ from flask import Flask
 
 from myfunds.web.views.balances import views  # noqa: F401
 from myfunds.web.views.balances.balance.views import bp as balance_bp
+from myfunds.web.views.balances.balance.views import expense_limits  # noqa: F401
 from myfunds.web.views.balances.balance.views import index  # noqa: F401
 from myfunds.web.views.balances.balance.views import replenishment  # noqa: F401
 from myfunds.web.views.balances.balance.views import statistics  # noqa: F401

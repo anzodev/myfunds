@@ -64,35 +64,33 @@
           <tbody>
             <tr>
               <td class="text-nowrap ps-0 py-1" style="width: 1px;">Start balance:</td>
-              <td class="py-1">{% if general_stats.start_balance %}{{ hrf_amount(general_stats.start_balance,
-                g.currency.precision) }}{%
+              <td class="py-1">{% if general_stats.start_balance %}{{ hrf_amount(general_stats.start_balance) }}{%
                 else %}-{% endif %}</td>
             </tr>
             <tr>
               <td class="text-nowrap ps-0 py-1" style="width: 1px;">Expense:</td>
               <td class="py-1">
-                {% if general_stats.expense %}{{ hrf_amount(general_stats.expense, g.currency.precision) }}{% else %}-{%
+                {% if general_stats.expense %}{{ hrf_amount(general_stats.expense) }}{% else %}-{%
                 endif %}
                 {% if general_stats.expense_pct %}({{ general_stats.expense_pct }}%){% endif %}
               </td>
             </tr>
             <tr>
               <td class="text-nowrap ps-0 py-1" style="width: 1px;">Income:</td>
-              <td class="py-1">{% if general_stats.income %}{{ hrf_amount(general_stats.income, g.currency.precision)
+              <td class="py-1">{% if general_stats.income %}{{ hrf_amount(general_stats.income)
                 }}{%
                 else %}-{%
                 endif %}</td>
             </tr>
             <tr>
               <td class="text-nowrap ps-0 py-1" style="width: 1px;">End balance:</td>
-              <td class="py-1">{% if general_stats.end_balance %}{{ hrf_amount(general_stats.end_balance,
-                g.currency.precision) }}{% else
+              <td class="py-1">{% if general_stats.end_balance %}{{ hrf_amount(general_stats.end_balance) }}{% else
                 %}-{% endif %}</td>
             </tr>
             <tr>
               <td class="text-nowrap ps-0 py-1" style="width: 1px;">Savings:</td>
               <td class="py-1">
-                {% if general_stats.savings %}{{ hrf_amount(general_stats.savings, g.currency.precision) }}{% else %}-{%
+                {% if general_stats.savings %}{{ hrf_amount(general_stats.savings) }}{% else %}-{%
                 endif %}
                 {% if general_stats.savings_pct %}({{ general_stats.savings_pct }}%){% endif %}
               </td>
@@ -104,9 +102,9 @@
     </div>
     <div class="col-4">
 
-      {% if month_progress %}
+      {% if current_day %}
       <section class="p-3">
-        <p class="text-end">Current day: <span class="fw-bold">{{ month_progress.current_day }}</span> ({{ month_progress.progress }}%)</p>
+        <p class="text-end">Day: {{ current_day }}</p>
       </section>
       {% endif %}
 
@@ -117,33 +115,44 @@
   <table class="table table-sm table-bordered shadow-none mb-0">
     <thead>
       <tr class="bg-light">
-        <th colspan="6" class="text-center text-muted py-2 small border-start-0 border-end-0">Expense</th>
+        <th colspan="7" class="text-center text-muted py-2 small border-start-0 border-end-0">Expense</th>
       </tr>
       <tr class="bg-light">
-        <th class="align-middle text-center text-muted py-2 small border-start-0">Category</th>
+        <th class="align-middle text-center py-2 border-start-0" style="width: 1px;"><i data-feather="eye" width="16"
+            height="16"></i></th>
+        <th class="align-middle text-center text-muted py-2 small">Category</th>
         <th colspan="2" class="text-muted text-center py-2 small">Amount</th>
-        <th colspan="2" class="text-nowrap text-center text-muted py-2 small">Limit</th>
-        <th class="align-middle text-center text-muted py-2 small border-end-0">Expenses ratio</th>
+        <th colspan="2" class="text-nowrap text-center text-muted py-2 small border-end-0">Limit</th>
       </tr>
     </thead>
     <tbody>
       {% for i in expense_categories_stats %}
       <tr class="hover:bg-light">
+        <td class="align-middle text-center">
+          <input class="form-check-input shadow-none" type="checkbox" style="transform: scale(1.5);">
+        </td>
         <td class="align-middle text-nowrap border-start-0">
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <div
-              style="position: relative; top: 3px; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }};">
+              style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ i.color_sign }};">
             </div>
             <div class="ms-2"><a href="{{ i.href }}" class="link-info">{{ i.name }}</a></div>
           </div>
         </td>
-        <td class="align-middle">{{ hrf_amount(i.amount, g.currency.precision) }}</td>
-        <td class="align-middle">{{ i.amount_pct }}%</td>
-        <td class="align-middle">...</td>
-        <td class="align-middle">...</td>
-        <td class="align-middle p-0 border-end-0">
-          <div style="width: {{ i.amount_pct }}%; height: 38px; background-color: {{ i.color_sign }};">
+        <td class="align-middle">{{ hrf_amount(i.amount) }}</td>
+        <td class="align-middle">
+          <div class="text-center">{{ i.amount_pct }}%</div>
+          <div class="progress" style="height: 4px;">
+            <div class="progress-bar" role="progressbar"
+              style="width: {{ i.amount_ratio }}%; background-color: {{ i.color_sign }};"
+              aria-valuenow="{{ i.amount_ratio }}" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
+        </td>
+        <td class="align-middle">{% if i.month_limit.value %}{{ hrf_amount(i.month_limit.value) }}{% else %}-{% endif %}
+        </td>
+        <td
+          class="align-middle border-end-0{% if i.month_limit.css_text_color %} {{ i.month_limit.css_text_color }}{% endif %}">
+          {% if i.month_limit.css_text_color %}{{ i.month_limit.percent }}%{% else %}-{% endif %}
         </td>
       </tr>
       {% endfor %}

@@ -164,7 +164,7 @@ def transactions():
     )
 
 
-@bp.route("/transactions/update_category", methods=["POST"])
+@bp.route("/transactions/update-category", methods=["POST"])
 @auth.login_required
 @verify_balance
 def update_transaction_category():
@@ -202,7 +202,7 @@ def update_transaction_category():
     return redirect(redirect_url)
 
 
-@bp.route("/transactions/update_comment", methods=["POST"])
+@bp.route("/transactions/update-comment", methods=["POST"])
 @auth.login_required
 @verify_balance
 def update_transaction_comment():

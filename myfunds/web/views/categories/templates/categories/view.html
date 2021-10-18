@@ -28,7 +28,7 @@
           <tbody>
             {% for category in expense_categories %}
             <tr class="category-row hover:bg-light" data-category-id="{{ category.id }}"
-              data-category-direction-name="{{ g.funds_direction.get(category.direction).meta.name }}"
+              data-category-direction-name="{{ g.CONST_FUNDS_DIRECTION.get(category.direction).meta.name }}"
               data-category-name="{{ category.name }}" data-category-color-sign="{{ category.color_sign }}">
               <td class="align-middle">
                 <div class="d-flex align-items-center">
@@ -70,7 +70,7 @@
           <tbody>
             {% for category in income_categories %}
             <tr class="category-row hover:bg-light" data-category-id="{{ category.id }}"
-              data-category-direction-name="{{ g.funds_direction.get(category.direction).meta.name }}"
+              data-category-direction-name="{{ g.CONST_FUNDS_DIRECTION.get(category.direction).meta.name }}"
               data-category-name="{{ category.name }}" data-category-color-sign="{{ category.color_sign }}">
               <td class="align-middle">
                 <div class="d-flex align-items-center">
@@ -116,15 +116,17 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label for="f1-name" class="form-label small">Name</label>
-            <input type="text" name="name" id="f1-name" class="form-control px-3" required>
-          </div>
-          <div>
-            <label for="f1-color-sign" class="form-label small">Color sign</label>
-            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
-              <input type="color" name="color_sign" id="f1-color-sign"
-                style="width: 200%; height: 200%; border: 0; padding: 0; transform: translate(-25%, -25%);" required>
+          <div class="row">
+            <div class="col-2">
+              <label for="f1-color-sign" class="form-label small">Color sign</label>
+              <div style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden;">
+                <input type="color" name="color_sign" id="f1-color-sign"
+                  style="width: 200%; height: 200%; border: 0; padding: 0; transform: translate(-25%, -25%);" required>
+              </div>
+            </div>
+            <div class="col-10">
+              <label for="f1-name" class="form-label small">Name</label>
+              <input type="text" name="name" id="f1-name" class="form-control px-3" required>
             </div>
           </div>
         </div>
@@ -148,15 +150,17 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label for="f2-name" class="form-label small">Name</label>
-            <input type="text" name="name" id="f2-name" class="form-control px-3" required>
-          </div>
-          <div>
-            <label for="f2-color-sign" class="form-label small">Color sign</label>
-            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
-              <input type="color" name="color_sign" id="f2-color-sign"
-                style="width: 200%; height: 200%; border: 0; padding: 0; transform: translate(-25%, -25%);" required>
+          <div class="row">
+            <div class="col-2">
+              <label for="f2-color-sign" class="form-label small">Color sign</label>
+              <div style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden;">
+                <input type="color" name="color_sign" id="f2-color-sign"
+                  style="width: 200%; height: 200%; border: 0; padding: 0; transform: translate(-25%, -25%);" required>
+              </div>
+            </div>
+            <div class="col-10">
+              <label for="f2-name" class="form-label small">Name</label>
+              <input type="text" name="name" id="f2-name" class="form-control px-3" required>
             </div>
           </div>
         </div>
@@ -203,13 +207,13 @@
     let addIncomeCategory = $('#add-income-category');
 
     addExpenseCategory.on('click', function () {
-      addCategoryDirection.val('{{ g.funds_direction.EXPENSE.value }}');
-      addCategoryDirectionName.text('{{ g.funds_direction.EXPENSE.meta.name }}');
+      addCategoryDirection.val('{{ g.CONST_FUNDS_DIRECTION.EXPENSE.value }}');
+      addCategoryDirectionName.text('{{ g.CONST_FUNDS_DIRECTION.EXPENSE.meta.name }}');
     });
 
     addIncomeCategory.on('click', function () {
-      addCategoryDirection.val('{{ g.funds_direction.INCOME.value }}');
-      addCategoryDirectionName.text('{{ g.funds_direction.INCOME.meta.name }}');
+      addCategoryDirection.val('{{ g.CONST_FUNDS_DIRECTION.INCOME.value }}');
+      addCategoryDirectionName.text('{{ g.CONST_FUNDS_DIRECTION.INCOME.meta.name }}');
     });
 
 
