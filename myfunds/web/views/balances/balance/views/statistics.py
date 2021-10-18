@@ -287,9 +287,6 @@ def statistics():
 
     year = filter_form.year.data or current_year
     month = filter_form.month.data or current_month
-    excluded = filter_form.excluded.data
-    print(f"{excluded=}")
-    print(f"{request.args.get('excluded')=}")
 
     # Set the December month if month parameter not set and year parameter isn't
     # equal to the current year.
