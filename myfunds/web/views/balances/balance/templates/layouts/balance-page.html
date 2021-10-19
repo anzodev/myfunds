@@ -19,20 +19,25 @@
   <div class="row">
     <div class="col-3">
 
-      <div
-        class="lead card p-3 mb-3 fw-bold text-{% if g.balance.amount > 0 %}success{% elif g.balance.amount < 0 %}danger{% endif %}">
-        {% if g.balance.amount > 0 %}+{% endif %}{{ hrf_amount(g.balance.amount) }} {{ g.currency.code_alpha }}
+      <div class="card p-3 mb-3">
+        <div
+          class="mb-3 lead text-center fw-bold text-{% if g.balance.amount > 0 %}success{% elif g.balance.amount < 0 %}danger{% endif %}">
+          {% if g.balance.amount > 0 %}+{% endif %}{{ hrf_amount(g.balance.amount) }} {{ g.currency.code_alpha }}
+        </div>
+        <div class="d-flex align-items-center justify-content-between">
+          <button class="btn btn-light w-100 me-3" data-bs-toggle="modal"
+            data-bs-target="#replenishment-modal">Replenish</button>
+          <button class="btn btn-light w-100" data-bs-toggle="modal"
+            data-bs-target="#withdrawal-modal">Withdraw</button>
+        </div>
       </div>
 
       <div class="list-group">
         <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.transactions' %}disabled bg-info text-white{% endif%}">Transactions</a>
-        <a href="{{ url_for('balances.i.replenishment', balance_id=g.balance.id) }}"
-          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.replenishment' %}disabled bg-info text-white{% endif%}">Replenishment</a>
-        <a href="{{ url_for('balances.i.withdrawal', balance_id=g.balance.id) }}"
-          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.withdrawal' %}disabled bg-info text-white{% endif%}">Withdrawal</a>
         <a href="{{ url_for('balances.i.expense_limits', balance_id=g.balance.id) }}"
-          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.expense_limits' %}disabled bg-info text-white{% endif%}">Expense Month Limits</a>
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.expense_limits' %}disabled bg-info text-white{% endif%}">Expense
+          Month Limits</a>
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.statistics' %}disabled bg-info text-white{% endif%}">Statistics</a>
       </div>
@@ -46,4 +51,176 @@
   </div>
 
 </section>
+
+
+<div class="modal fade" id="replenishment-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('balances.i.replenishment', balance_id=g.balance.id) }}" method="POST"
+        autocomplete="off">
+        <input type="hidden" name="return_url" value="{{ request.url }}">
+        <div class="modal-header">
+          <h5 class="modal-title">Replenishment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-6">
+              <div class="mb-3">
+                <label class="form-label small">Amount</label>
+                <input type="text" name="amount" class="form-control px-3" placeholder="{{ g.amount_placeholder }}"
+                  pattern="{{ g.amount_pattern }}" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="mb-3">
+                <label class="form-label small">Category</label>
+                <select name="category_id" class="form-control px-3">
+                  <option value="">No category</option>
+                  {% for category in g.income_categories %}
+                  <option value="{{ category.id }}">{{ category.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">Time</label>
+            <div class="input-group txn-created-at-controller" data-operation="replenishment">
+              <input type="text" name="created_at" class="created-at form-control px-3" data-mask="0000-00-00 00:00:00"
+                required>
+              <button type="button" class="toggle-created-at-ticker btn btn-info disabled">
+                <i data-feather="play-circle" width="18" height="18"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="form-label small">Comment (optional)</label>
+            <input type="text" name="comment" class="form-control px-3" placeholder="...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Replenish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="withdrawal-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('balances.i.withdrawal', balance_id=g.balance.id) }}" method="POST" autocomplete="off">
+        <input type="hidden" name="return_url" value="{{ request.url }}">
+        <div class="modal-header">
+          <h5 class="modal-title">Withdrawal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-6">
+              <div class="mb-3">
+                <label class="form-label small">Amount</label>
+                <input type="text" name="amount" class="form-control px-3" placeholder="{{ g.amount_placeholder }}"
+                  pattern="{{ g.amount_pattern }}" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="mb-3">
+                <label class="form-label small">Category</label>
+                <select name="category_id" class="form-control px-3">
+                  <option value="">No category</option>
+                  {% for category in g.expense_categories %}
+                  <option value="{{ category.id }}">{{ category.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">Time</label>
+            <div class="input-group txn-created-at-controller" data-operation="withdrawal">
+              <input type="text" name="created_at" class="created-at form-control px-3" data-mask="0000-00-00 00:00:00"
+                required>
+              <button type="button" class="toggle-created-at-ticker btn btn-info disabled">
+                <i data-feather="play-circle" width="18" height="18"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="form-label small">Comment (optional)</label>
+            <input type="text" name="comment" class="form-control px-3" placeholder="...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Withdraw</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+  (function () {
+
+    const REPLENISHMENT = 'replenishment';
+    const WITHDRAWAL = 'withdrawal';
+
+
+    $('.created-at').daterangepicker({
+      singleDatePicker: true,
+      startDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+      locale: {
+        format: 'YYYY-MM-DD HH:mm:ss'
+      }
+    });
+
+
+    function tickCreatedAt(operation) {
+      let txnCreatedAtController = $('.txn-created-at-controller[data-operation="' + operation + '"]');
+      let createdAtField = txnCreatedAtController.find('input');
+
+      return function () {
+        let time = moment().format('YYYY-MM-DD HH:mm:ss');
+        createdAtField.data('daterangepicker').setStartDate(time);
+        createdAtField.data('daterangepicker').setEndDate(time);
+      }
+    }
+
+    let tickIntervals = {
+      [REPLENISHMENT]: setInterval(tickCreatedAt(REPLENISHMENT), 1000),
+      [WITHDRAWAL]: setInterval(tickCreatedAt(WITHDRAWAL), 1000),
+    }
+
+
+    let createdAtFields = $('.created-at');
+    let toggleCreatedAtTickers = $('.toggle-created-at-ticker');
+
+    createdAtFields.on('show.daterangepicker', function () {
+      let txnCreatedAtController = $(this).parents('.txn-created-at-controller');
+      let operation = txnCreatedAtController.attr('data-operation');
+      let toggleCreatedAtTicker = txnCreatedAtController.find('button');
+
+      clearInterval(tickIntervals[operation]);
+      toggleCreatedAtTicker.removeClass('disabled');
+    });
+
+    toggleCreatedAtTickers.on('click', function () {
+      if (!$(this).hasClass('disabled')) {
+        let txnCreatedAtController = $(this).parents('.txn-created-at-controller');
+        let operation = txnCreatedAtController.attr('data-operation');
+
+        tickIntervals[operation] = setInterval(tickCreatedAt(operation), 1000);
+        $(this).addClass('disabled');
+      }
+    });
+
+  })();
+</script>
 {% endblock %}

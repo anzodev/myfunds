@@ -1,6 +1,5 @@
 from flask import g
 from flask import redirect
-from flask import render_template
 from flask import request
 from flask import url_for
 from wtforms import validators as vals
@@ -16,36 +15,20 @@ from myfunds.web.views.balances.balance.views import bp
 from myfunds.web.views.balances.balance.views import verify_balance
 
 
-@bp.route("/withdrawal", methods=["GET", "POST"])
+@bp.route("/withdraw", methods=["POST"])
 @auth.login_required
 @verify_balance
 def withdrawal():
-    if request.method == "GET":
-        amount_pattern = utils.make_amount_pattern(g.currency.precision)
-        amount_placeholder = utils.make_amount_placeholder(g.currency.precision)
-        categories = (
-            Category.select()
-            .where(
-                (Category.account == g.authorized_account)
-                & (Category.direction == FundsDirection.EXPENSE.value)
-            )
-            .order_by(Category.name)
-        )
-        return render_template(
-            "balance/withdrawal.html",
-            amount_pattern=amount_pattern,
-            amount_placeholder=amount_placeholder,
-            categories=categories,
-        )
+    redirect_url = request.form.get(
+        "return_url", url_for("balances.i.transactions", balance_id=g.balance.id)
+    )
 
     form = AddTransactionForm(request.form)
-    form.amount.validators.append(
-        vals.Regexp(utils.make_amount_pattern(g.currency.precision))
-    )
+    form.amount.validators.append(vals.Regexp(g.amount_pattern))
 
     if not form.validate():
         notify.error("Form data validation error.")
-        return redirect(url_for("balances.i.withdrawal", balance_id=g.balance.id))
+        return redirect(redirect_url)
 
     amount = utils.amount_to_subunits(form.amount.data, g.currency.precision)
     category_id = form.category_id.data
@@ -61,7 +44,7 @@ def withdrawal():
         )
         if category is None:
             notify.error("Category not found.")
-            return redirect(url_for("balances.i.withdrawal", balance_id=g.balance.id))
+            return redirect(redirect_url)
 
     make_withdrawal(
         balance=g.balance,
@@ -72,4 +55,4 @@ def withdrawal():
     )
     notify.info("New withdrawal was created.")
 
-    return redirect(url_for("balances.i.withdrawal", balance_id=g.balance.id))
+    return redirect(redirect_url)

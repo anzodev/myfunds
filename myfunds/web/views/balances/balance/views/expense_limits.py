@@ -21,8 +21,6 @@ from myfunds.web.views.balances.balance.views import verify_balance
 @auth.login_required
 @verify_balance
 def expense_limits():
-    amount_pattern = utils.make_amount_pattern(g.currency.precision)
-
     if request.method == "GET":
         # fmt: off
         expense_month_limits = (
@@ -50,20 +48,16 @@ def expense_limits():
         )
         # fmt: on
 
-        amount_placeholder = utils.make_amount_placeholder(g.currency.precision)
-
         return render_template(
             "balance/expense-limits.html",
             expense_month_limits=expense_month_limits,
             expense_categories=expense_categories,
-            amount_placeholder=amount_placeholder,
-            amount_pattern=amount_pattern,
         )
 
     redirect_url = url_for("balances.i.expense_limits", balance_id=g.balance.id)
 
     form = AddExpenseLimitForm(request.form)
-    form.limit.validators.append(vals.Regexp(amount_pattern))
+    form.limit.validators.append(vals.Regexp(g.amount_pattern))
     if not form.validate():
         notify.error("Form data validation error.")
         return redirect(redirect_url)
