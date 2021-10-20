@@ -11,6 +11,7 @@ from myfunds.core.models import Balance
 from myfunds.core.models import Currency
 from myfunds.web import auth
 from myfunds.web import notify
+from myfunds.web import utils
 from myfunds.web.forms import AddBalanceForm
 
 
@@ -39,10 +40,10 @@ def index():
 @bp.route("/balances/new", methods=["POST"])
 @auth.login_required
 def new():
+    redirect_url = url_for("balances.index")
+
     form = AddBalanceForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(url_for("currencies.index"))
+    utils.validate_form(form, redirect_url)
 
     name = form.name.data
     code_alpha = form.currency.data
@@ -50,16 +51,22 @@ def new():
     currency = Currency.get_or_none(code_alpha=code_alpha)
     if currency is None:
         notify.error("Currency not found.")
-        return redirect(url_for("balances.index"))
+        return redirect(redirect_url)
 
+    # fmt: off
     balance_exists = (
-        Balance.select(Balance.id)
-        .where((Balance.account == g.authorized_account) & (Balance.name == name))
+        Balance
+        .select(Balance.id)
+        .where(
+            (Balance.account == g.authorized_account)
+            & (Balance.name == name)
+        )
         .exists()
     )
+    # fmt: on
     if balance_exists:
-        notify.error("Balance exists.")
-        return redirect(url_for("balances.index"))
+        notify.error("Balance exists already.")
+        return redirect(redirect_url)
 
     balance = Balance.create(
         account=g.authorized_account,
@@ -70,4 +77,4 @@ def new():
     )
     notify.info(f"New balance {balance.name} was created.")
 
-    return redirect(url_for("balances.index"))
+    return redirect(redirect_url)

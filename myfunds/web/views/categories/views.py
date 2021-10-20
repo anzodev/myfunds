@@ -8,6 +8,7 @@ from flask import url_for
 from myfunds.core.models import Category
 from myfunds.web import auth
 from myfunds.web import notify
+from myfunds.web import utils
 from myfunds.web.constants import FundsDirection
 from myfunds.web.forms import AddCategoryForm
 from myfunds.web.forms import DeleteCategoryForm
@@ -20,8 +21,10 @@ bp = Blueprint("categories", __name__, template_folder="templates")
 @bp.route("/categories")
 @auth.login_required
 def index():
+    # fmt: off
     expense_categories = (
-        Category.select()
+        Category
+        .select()
         .where(
             (Category.account == g.authorized_account)
             & (Category.direction == FundsDirection.EXPENSE.value)
@@ -29,13 +32,16 @@ def index():
         .order_by(Category.name)
     )
     income_categories = (
-        Category.select()
+        Category
+        .select()
         .where(
             (Category.account == g.authorized_account)
             & (Category.direction == FundsDirection.INCOME.value)
         )
         .order_by(Category.name)
     )
+    # fmt: on
+
     return render_template(
         "categories/view.html",
         expense_categories=expense_categories,
@@ -46,10 +52,10 @@ def index():
 @bp.route("/categories/new", methods=["POST"])
 @auth.login_required
 def new():
+    redirect_url = url_for("categories.index")
+
     form = AddCategoryForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(url_for("categories.index"))
+    utils.validate_form(form, redirect_url)
 
     direction = form.direction.data
     name = form.name.data
@@ -63,16 +69,16 @@ def new():
     )
     notify.info(f"New category {category.name} was created.")
 
-    return redirect(url_for("categories.index"))
+    return redirect(redirect_url)
 
 
 @bp.route("/categories/edit", methods=["POST"])
 @auth.login_required
 def edit():
+    redirect_url = url_for("categories.index")
+
     form = EditCategoryForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(url_for("categories.index"))
+    utils.validate_form(form, redirect_url)
 
     category_id = form.category_id.data
     name = form.name.data
@@ -81,7 +87,7 @@ def edit():
     category = Category.get_or_none(id=category_id, account=g.authorized_account)
     if category is None:
         notify.error("Category not found.")
-        return redirect(url_for("categories.index"))
+        return redirect(redirect_url)
 
     if name is not None and name != category.name:
         category.name = name
@@ -92,26 +98,25 @@ def edit():
     category.save()
     notify.info(f"Category {category.name} was updated.")
 
-    return redirect(url_for("categories.index"))
+    return redirect(redirect_url)
 
 
 @bp.route("/categories/delete", methods=["POST"])
 @auth.login_required
 def delete():
+    redirect_url = url_for("categories.index")
+
     form = DeleteCategoryForm(request.form)
-    if not form.validate():
-        print(form.errors)
-        notify.error("Form data validation error.")
-        return redirect(url_for("categories.index"))
+    utils.validate_form(form, redirect_url)
 
     category_id = form.category_id.data
 
     category = Category.get_or_none(id=category_id, account=g.authorized_account)
     if category is None:
         notify.error("Category not found.")
-        return redirect(url_for("categories.index"))
+        return redirect(redirect_url)
 
     category.delete_instance()
     notify.info(f"Category {category.name} was deleted.")
 
-    return redirect(url_for("categories.index"))
+    return redirect(redirect_url)

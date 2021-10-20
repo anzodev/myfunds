@@ -178,10 +178,10 @@ def transactions():
     )
 
 
-@bp.route("/transactions/export/csv")
+@bp.route("/transactions/export")
 @auth.login_required
 @verify_balance
-def transactions_export_csv():
+def export_transactions():
     filter_form = TransactionFilterForm(request.args)
     utils.validate_form(
         filter_form, url_for("balances.i.transactions", balance_id=g.balance.id)
@@ -217,12 +217,10 @@ def transactions_export_csv():
 @bp.route("/transactions/import", methods=["POST"])
 @auth.login_required
 @verify_balance
-def transactions_import():
+def import_transactions():
     redirect_url = url_for(
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
-
-    g.logger.info(request.form.to_dict())
 
     form = ImportTransactionsForm(request.form)
     utils.validate_form(form, redirect_url)

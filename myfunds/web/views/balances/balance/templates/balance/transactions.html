@@ -13,11 +13,12 @@
           <i data-feather="more-vertical" width="16" height="16"></i>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-              data-bs-target="#import-transactions-modal">Import transactions</a></li>
-          <li><a class="dropdown-item"
-              href="{{ url_for('balances.i.transactions_export_csv', balance_id=g.balance.id, **request.args) }}">Export
-              to CSV</a></li>
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#import-transactions-modal">Import</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('balances.i.export_transactions', balance_id=g.balance.id, **request.args) }}">Export</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -236,7 +237,7 @@
 <div class="modal fade" id="import-transactions-modal">
   <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
-      <form action="{{ url_for('balances.i.transactions_import', balance_id=g.balance.id) }}" method="POST"
+      <form action="{{ url_for('balances.i.import_transactions', balance_id=g.balance.id) }}" method="POST"
         enctype="multipart/form-data">
         <div class="modal-header">
           <h5 class="modal-title">Import Transactions</h5>
