@@ -58,9 +58,7 @@ def expense_limits():
 
     form = AddExpenseLimitForm(request.form)
     form.limit.validators.append(vals.Regexp(g.amount_pattern))
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(redirect_url)
+    utils.validate_form(form, redirect_url)
 
     category_id = form.category_id.data
     limit_value = utils.amount_to_subunits(form.limit.data, g.currency.precision)
@@ -98,9 +96,7 @@ def delete_expense_limits():
     redirect_url = url_for("balances.i.expense_limits", balance_id=g.balance.id)
 
     form = DeleteExpenseLimitForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(redirect_url)
+    utils.validate_form(form, redirect_url)
 
     limit_id = form.limit_id.data
 

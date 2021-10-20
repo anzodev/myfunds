@@ -4,7 +4,6 @@ from wtforms import IntegerField
 from wtforms import PasswordField
 from wtforms import StringField
 from wtforms import validators as vals
-from wtforms.fields.simple import FileField
 
 from myfunds.web import constants
 

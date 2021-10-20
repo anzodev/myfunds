@@ -7,7 +7,6 @@ from typing import Optional
 import peewee as pw
 from flask import current_app
 from flask import g
-from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
@@ -345,8 +344,11 @@ class StatisticsFilterForm(Form):
 @verify_balance
 def statistics():
     filter_form = StatisticsFilterForm(request.args)
-    if not filter_form.validate():
-        return redirect(url_for("balances.i.statistics", balance_id=g.balance.id))
+    utils.validate_form(
+        filter_form,
+        url_for("balances.i.statistics", balance_id=g.balance.id),
+        error_notify=None,
+    )
 
     current_year, current_month = utils.current_year(), utils.current_month()
 

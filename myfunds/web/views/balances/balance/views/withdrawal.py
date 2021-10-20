@@ -25,10 +25,7 @@ def withdrawal():
 
     form = AddTransactionForm(request.form)
     form.amount.validators.append(vals.Regexp(g.amount_pattern))
-
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(redirect_url)
+    utils.validate_form(form, redirect_url)
 
     amount = utils.amount_to_subunits(form.amount.data, g.currency.precision)
     category_id = form.category_id.data

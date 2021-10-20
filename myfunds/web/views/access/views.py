@@ -7,6 +7,7 @@ from flask import url_for
 from myfunds.core.models import Account
 from myfunds.web import auth
 from myfunds.web import notify
+from myfunds.web import utils
 from myfunds.web.app_runtime_utils import init_password_hasher
 from myfunds.web.forms import LoginForm
 
@@ -22,10 +23,10 @@ def login():
     if request.method == "GET":
         return render_template("access/login.html")
 
+    redirect_url = url_for("access.login")
+
     form = LoginForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(url_for("access.login"))
+    utils.validate_form(form, redirect_url)
 
     username = form.username.data
     password = form.password.data
@@ -33,12 +34,12 @@ def login():
     account = Account.get_or_none(username=username)
     if account is None:
         notify.error("Account not found.")
-        return redirect(url_for("access.login"))
+        return redirect(redirect_url)
 
     password_hasher = init_password_hasher()
     if not password_hasher.is_hash_correct(account.password_hash, password):
         notify.error("Wrong password.")
-        return redirect(url_for("access.login"))
+        return redirect(redirect_url)
 
     auth.authorize_account(account)
 

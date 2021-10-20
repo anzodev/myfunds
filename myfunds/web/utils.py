@@ -2,6 +2,12 @@ import logging
 from argparse import ArgumentParser
 from argparse import Namespace
 from datetime import datetime
+from typing import Optional
+
+from wtforms import Form
+
+from myfunds.web import notify
+from myfunds.web.exceptions import FormValidationError
 
 
 def env_parser() -> ArgumentParser:
@@ -58,3 +64,14 @@ def current_month() -> int:
 def disable_werkzeug_logs() -> None:
     logger = logging.getLogger("werkzeug")
     logger.setLevel(logging.CRITICAL)
+
+
+def validate_form(
+    form: Form,
+    redirect_url: str,
+    error_notify: Optional[str] = "Form data validation error.",
+) -> None:
+    if not form.validate():
+        if error_notify is not None:
+            notify.error(error_notify)
+        raise FormValidationError(form, redirect_url)

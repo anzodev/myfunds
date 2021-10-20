@@ -26,7 +26,6 @@ from myfunds.modules import reparser
 from myfunds.web import auth
 from myfunds.web import notify
 from myfunds.web import utils
-from myfunds.web.app_runtime_utils import init_and_validate_form
 from myfunds.web.constants import DATETIME_FORMAT
 from myfunds.web.constants import DATETIME_PATTERN
 from myfunds.web.constants import NO_CATEGORY_ID
@@ -157,8 +156,11 @@ def paginated_transactions(
 @verify_balance
 def transactions():
     filter_form = TransactionFilterForm(request.args)
-    if not filter_form.validate():
-        return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))
+    utils.validate_form(
+        filter_form,
+        url_for("balances.i.transactions", balance_id=g.balance.id),
+        error_notify=None,
+    )
 
     report_parsers = reparser.get_parsers_by_currency(g.currency.code_alpha)
 
@@ -181,8 +183,9 @@ def transactions():
 @verify_balance
 def transactions_export_csv():
     filter_form = TransactionFilterForm(request.args)
-    if not filter_form.validate():
-        return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))
+    utils.validate_form(
+        filter_form, url_for("balances.i.transactions", balance_id=g.balance.id)
+    )
 
     filters = init_filters(filter_form)
     filtered_txns = filtered_transactions(filters)
@@ -221,7 +224,8 @@ def transactions_import():
 
     g.logger.info(request.form.to_dict())
 
-    form = init_and_validate_form(ImportTransactionsForm, request.form, redirect_url)
+    form = ImportTransactionsForm(request.form)
+    utils.validate_form(form, redirect_url)
 
     parser_id = form.parser_id.data
 
@@ -272,9 +276,8 @@ def update_transaction_category():
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
 
-    form = init_and_validate_form(
-        UpdateTransactionCategoryForm, request.form, redirect_url
-    )
+    form = UpdateTransactionCategoryForm(request.form)
+    utils.validate_form(form, redirect_url)
 
     txn_id = form.txn_id.data
     category_id = form.category_id.data
@@ -309,9 +312,8 @@ def update_transaction_comment():
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
 
-    form = init_and_validate_form(
-        UpdateTransactionCommentForm, request.form, redirect_url
-    )
+    form = UpdateTransactionCommentForm(request.form)
+    utils.validate_form(form, redirect_url)
 
     txn_id = form.txn_id.data
     comment = form.comment.data
@@ -335,7 +337,8 @@ def delete_transaction():
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
 
-    form = init_and_validate_form(DeleteTransactionForm, request.form, redirect_url)
+    form = DeleteTransactionForm(request.form)
+    utils.validate_form(form, redirect_url)
 
     txn_id = form.txn_id.data
 
