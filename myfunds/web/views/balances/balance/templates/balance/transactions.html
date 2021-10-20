@@ -13,7 +13,8 @@
           <i data-feather="more-vertical" width="16" height="16"></i>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#import-transactions-modal">Import transactions</a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+              data-bs-target="#import-transactions-modal">Import transactions</a></li>
           <li><a class="dropdown-item"
               href="{{ url_for('balances.i.transactions_export_csv', balance_id=g.balance.id, **request.args) }}">Export
               to CSV</a></li>
@@ -168,11 +169,12 @@
             </div>
           </div>
         </td>
-        <td class="align-middle p-0">
+        <td class="align-middle p-0" style="max-width: 1px;">
           <div class="dropdown">
-            <p class="txn-comment-label hover:cursor-pointer list-group-item-action m-0 p-3"
-              style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;" data-bs-toggle="dropdown">
-              {{ txn.comment or "..." }}</p>
+            <p class="txn-comment-label hover:cursor-pointer list-group-item-action text-truncate m-0 p-3"
+              data-bs-toggle="dropdown">
+              {{ txn.comment or "..." }}
+            </p>
             <div class="dropdown-menu p-0 border-0" style="width: 400px;">
               <div class="card p-2">
                 <form
@@ -234,23 +236,31 @@
 <div class="modal fade" id="import-transactions-modal">
   <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
-      <form action="{{ url_for('balances.i.transactions_import', balance_id=g.balance.id) }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ url_for('balances.i.transactions_import', balance_id=g.balance.id) }}" method="POST"
+        enctype="multipart/form-data">
         <div class="modal-header">
           <h5 class="modal-title">Import Transactions</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label small">Provider</label>
-            <select name="provider_id" class="form-control px-3" required>
-              {% for provider in txns_providers %}
-              <option value="{{ provider.id }}">{{ provider.name }}</option>
+            <label class="form-label small">Parser</label>
+            {% if report_parsers %}
+            <select name="parser_id" class="form-control px-3" required>
+              {% for parser in report_parsers %}
+              <option value="{{ parser.identifier() }}">{{ parser.name(include_currency=False) }}</option>
               {% endfor %}
             </select>
+            {% else %}
+            <select class="form-control px-3" required>
+              <option value="" selected>-</option>
+            </select>
+            <div class="form-text">There aren't any available parsers for {{ g.currency.code_alpha }} currency.</div>
+            {% endif %}
           </div>
           <div>
             <label class="form-label small">Report</label>
-            <input type="file" class="form-control" name="report_filename" accept=".csv,.xlsx,.xls" required>
+            <input type="file" class="form-control" name="report_file" accept=".csv,.xlsx,.xls" required>
           </div>
         </div>
         <div class="modal-footer">

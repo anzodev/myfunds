@@ -114,4 +114,4 @@ class DeleteExpenseLimitForm(Form):
 
 
 class ImportTransactionsForm(Form):
-    provider_id = StringField(validators=[vals.Required()])
+    parser_id = StringField(validators=[vals.InputRequired()])

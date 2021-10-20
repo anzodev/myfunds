@@ -1,5 +1,8 @@
 import csv
 import io
+import os
+import tempfile
+import uuid
 from collections import namedtuple
 from datetime import datetime
 
@@ -157,7 +160,7 @@ def transactions():
     if not filter_form.validate():
         return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))
 
-    txns_providers = reparser.get_providers()
+    report_parsers = reparser.get_parsers_by_currency(g.currency.code_alpha)
 
     filters = init_filters(filter_form)
     filtered_txns = filtered_transactions(filters)
@@ -165,7 +168,7 @@ def transactions():
 
     return render_template(
         "balance/transactions.html",
-        txns_providers=txns_providers,
+        report_parsers=report_parsers,
         txns=txns,
         filters=filters,
         has_prev=has_prev,
@@ -220,52 +223,44 @@ def transactions_import():
 
     form = init_and_validate_form(ImportTransactionsForm, request.form, redirect_url)
 
-    # provider_id = form.provider_id.data
+    parser_id = form.parser_id.data
 
-    # if "report_file" not in request.files:
-    #     alerts.error("Выберете файл отчета.")
-    #     return redirect(redirect_url)
+    report_parser = reparser.get_parser(parser_id)
+    if report_parser is None:
+        notify.error("Parser not found.")
+        return redirect(redirect_url)
 
-    # report_file = request.files["report_file"]
-    # if report_file.filename == "":
-    #     alerts.error("Файл отчета не выбран.")
-    #     return redirect(redirect_url)
+    if "report_file" not in request.files:
+        notify.error("No report file.")
+        return redirect(redirect_url)
 
-    # with tempfile.TemporaryDirectory() as tmpdir:
-    #     filename = uuid.uuid4().hex
-    #     filepath = os.path.join(tmpdir, filename)
-    #     report_file.save(filepath)
+    report_file = request.files["report_file"]
+    if report_file.filename == "":
+        notify.error("No selected file.")
+        return redirect(redirect_url)
 
-    # provider = reparser.get_provider(provider_id)
-    # if provider is None:
-    #     notify.error("Provider not found.")
-    #     return redirect(redirect_url)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filename = uuid.uuid4().hex
+        filepath = os.path.join(tmpdir, filename)
+        report_file.save(filepath)
 
-    # parser_args_map = {
-    #     reparser.MonobankProvider.id: (
-    #         report_filename,
-    #         g.currency.code_alpha,
-    #         g.currency.precision,
-    #     ),
-    #     reparser.Privat24Provider.id: (report_filename, g.currency.precision),
-    # }
+        for txn in report_parser(filepath).parse():
+            if reparser.is_replenishment(txn):
+                func = "make_replenishment"
+            elif reparser.is_withdrawal(txn):
+                func = "make_withdrawal"
+            else:
+                continue
 
-    # txns = provider.parse_report(*parser_args_map[provider.id])
-    # for txn in txns:
-    #     if reparser.is_replenishment(txn):
-    #         func = "make_replenishment"
-    #     else:
-    #         func = "make_withdrawal"
+            getattr(txn_usecase, func)(
+                balance=g.balance,
+                amount=txn.amount,
+                category=None,
+                comment=txn.comment,
+                created_at=txn.created_at,
+            )
 
-    #     getattr(txn_usecase, func)(
-    #         balance=g.balance,
-    #         amount=txn.amount,
-    #         category=None,
-    #         comment=txn.comment,
-    #         created_at=txn.created_at,
-    #     )
-
-    # notify.info("Transaction imported successfully")
+    notify.info("Transaction imported successfully")
     return redirect(redirect_url)
 
 
@@ -315,7 +310,7 @@ def update_transaction_comment():
     )
 
     form = init_and_validate_form(
-        UpdateTransactionCommentForm, request.endpoint, redirect_url
+        UpdateTransactionCommentForm, request.form, redirect_url
     )
 
     txn_id = form.txn_id.data
