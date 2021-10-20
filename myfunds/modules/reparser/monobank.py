@@ -1,33 +1,22 @@
 import csv
 from datetime import datetime
 from typing import Iterable
-from typing import Union
 
-from .base import ProviderReport
+from .base import ReportParser
 from .base import Replenishment
+from .base import Transaction
 from .base import Withdrawal
 
 
-class MonobankBase(ProviderReport):
-    currency_code: str = None
-    currency_precision: int = None
+class MonobankBaseParser(ReportParser):
+    provider_name = "Monobank"
+    header: list[str] = []
 
-    def parse(self) -> Iterable[Union[Replenishment, Withdrawal]]:
+    def parse(self) -> Iterable[Transaction]:
         with open(self.filename) as csvfile:
             reader = csv.reader(csvfile, delimiter=",")
             header = next(reader)
-            if header != [
-                "Дата i час операції",
-                "Деталі операції",
-                "MCC",
-                f"Сума в валюті картки ({self.currency_code})",
-                "Сума в валюті операції",
-                "Валюта",
-                "Курс",
-                f"Сума комісій ({self.currency_code})",
-                f"Сума кешбеку ({self.currency_code})",
-                "Залишок після операції",
-            ]:
+            if header != self.header:
                 raise ValueError(f"Unexpected header ({header}).")
 
             for row in reader:
@@ -40,3 +29,20 @@ class MonobankBase(ProviderReport):
 
                 elif amount < 0:
                     yield Withdrawal(abs(amount), created_at, comment)
+
+
+class Monobank_UK_UAH(MonobankBaseParser):
+    language = "UK"
+    currency_code = "UAH"
+    header = [
+        "Дата i час операції",
+        "Деталі операції",
+        "MCC",
+        "Сума в валюті картки (UAH)",
+        "Сума в валюті операції",
+        "Валюта",
+        "Курс",
+        "Сума комісій (UAH)",
+        "Сума кешбеку (UAH)",
+        "Залишок після операції",
+    ]

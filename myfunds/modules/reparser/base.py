@@ -1,10 +1,10 @@
-import abc
 import datetime
+import hashlib
 from typing import Iterable
 from typing import Optional
 
 
-class _Transaction:
+class Transaction:
     def __init__(
         self,
         amount: int,
@@ -22,18 +22,37 @@ class _Transaction:
         )
 
 
-class Replenishment(_Transaction):
+class Replenishment(Transaction):
     ...
 
 
-class Withdrawal(_Transaction):
+class Withdrawal(Transaction):
     ...
 
 
-class ProviderReport(abc.ABC):
+class ReportParser:
+    provider_name: str = None
+    language: str = None
+    currency_code: str = None
+    currency_precision: int = 2
+
     def __init__(self, filename: str):
         self.filename = filename
 
-    @abc.abstractmethod
-    def parse(self) -> Iterable[_Transaction]:
-        ...
+    def parse(self) -> Iterable[Transaction]:
+        raise NotImplementedError
+
+    @classmethod
+    def name(cls, include_language: bool = True, include_currency: bool = True) -> str:
+        parts = [cls.provider_name]
+        if include_language:
+            parts.append(cls.language.upper())
+        if include_currency:
+            parts.append(cls.currency_code.upper())
+        return " - ".join(parts)
+
+    @classmethod
+    def identifier(cls) -> str:
+        return hashlib.sha1(
+            f"{cls.provider_name}{cls.language}{cls.currency_code}".encode()
+        ).hexdigest()

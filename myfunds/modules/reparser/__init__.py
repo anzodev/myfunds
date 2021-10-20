@@ -1,26 +1,35 @@
-from .base import Provider
+from typing import Type
+
+from . import monobank
+from . import privat24
 from .base import Replenishment
+from .base import ReportParser
+from .base import Transaction
 from .base import Withdrawal
-from .base import _Transaction
-from .monobank import MonobankProvider
-from .privat24 import Privat24Provider
 
 
-_providers = [MonobankProvider, Privat24Provider]
-_providers_map = {i.id: i for i in _providers}
+_report_parsers = [
+    monobank.Monobank_UK_UAH,
+    privat24.Privat24_UK_UAH,
+]
+_report_parsers_map = {i.identifier(): i for i in _report_parsers}
 
 
-def get_provider(id_: str) -> Provider:
-    return _providers_map.get(id_)
+def get_parser(id_: str) -> Type[ReportParser]:
+    return _report_parsers_map.get(id_)
 
 
-def get_providers() -> list[Provider]:
-    return sorted(_providers.copy(), key=lambda i: i.name)
+def get_parsers() -> list[Type[ReportParser]]:
+    return list(sorted(_report_parsers.copy(), key=lambda i: i.name()))
 
 
-def is_replenishment(txn: _Transaction) -> bool:
+def get_parsers_by_currency(currency_code: str) -> list[Type[ReportParser]]:
+    return list(filter(lambda i: i.currency_code == currency_code, get_parsers()))
+
+
+def is_replenishment(txn: Transaction) -> bool:
     return isinstance(txn, Replenishment)
 
 
-def is_withdrawal(txn: _Transaction) -> bool:
+def is_withdrawal(txn: Transaction) -> bool:
     return isinstance(txn, Withdrawal)
