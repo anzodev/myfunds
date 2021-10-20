@@ -1,3 +1,4 @@
+import logging
 from argparse import ArgumentParser
 from argparse import Namespace
 from datetime import datetime
@@ -52,3 +53,8 @@ def current_year() -> int:
 
 def current_month() -> int:
     return datetime.now().month
+
+
+def disable_werkzeug_logs() -> None:
+    logger = logging.getLogger("werkzeug")
+    logger.setLevel(logging.CRITICAL)

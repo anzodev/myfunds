@@ -1,3 +1,6 @@
+import csv
+import io
+from collections import namedtuple
 from datetime import datetime
 
 import peewee as pw
@@ -6,6 +9,7 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
+from flask.helpers import make_response
 from wtforms import Form
 from wtforms import IntegerField
 from wtforms import StringField
@@ -13,15 +17,19 @@ from wtforms import validators as vals
 
 from myfunds.core.models import Category
 from myfunds.core.models import Transaction
+from myfunds.core.usecase import transactions as txn_usecase
 from myfunds.core.usecase.transactions import remove_transaction
+from myfunds.modules import reparser
 from myfunds.web import auth
 from myfunds.web import notify
 from myfunds.web import utils
+from myfunds.web.app_runtime_utils import init_and_validate_form
 from myfunds.web.constants import DATETIME_FORMAT
 from myfunds.web.constants import DATETIME_PATTERN
 from myfunds.web.constants import NO_CATEGORY_ID
 from myfunds.web.constants import FundsDirection
 from myfunds.web.forms import DeleteTransactionForm
+from myfunds.web.forms import ImportTransactionsForm
 from myfunds.web.forms import UpdateTransactionCategoryForm
 from myfunds.web.forms import UpdateTransactionCommentForm
 from myfunds.web.views.balances.balance.views import bp
@@ -33,7 +41,7 @@ class TransactionFilterForm(Form):
         validators=[vals.Optional(), vals.AnyOf(FundsDirection.values())]
     )
     category_id = IntegerField(validators=[vals.Optional()])
-    created_at_between = StringField(
+    created_at_range_hrf = StringField(
         validators=[
             vals.Optional(),
             vals.Regexp(f"{DATETIME_PATTERN.value} - {DATETIME_PATTERN.value}"),
@@ -43,17 +51,24 @@ class TransactionFilterForm(Form):
     offset = IntegerField(validators=[vals.Optional()])
 
 
-@bp.route("/transactions")
-@auth.login_required
-@verify_balance
-def transactions():
-    filter_form = TransactionFilterForm(request.args)
-    if not filter_form.validate():
-        return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))
+TransactionFilters = namedtuple(
+    "TransactionFilters",
+    [
+        "direction",
+        "category_id",
+        "categories",
+        "created_at_range",
+        "created_at_range_hrf",
+        "limit",
+        "offset",
+    ],
+)
 
+
+def init_filters(filter_form: Form) -> TransactionFilters:
     direction = filter_form.direction.data
     category_id = filter_form.category_id.data
-    created_at_between = filter_form.created_at_between.data
+    created_at_range_hrf = filter_form.created_at_range_hrf.data
     limit = filter_form.limit.data or 8
     offset = filter_form.offset.data or 0
 
@@ -69,96 +84,189 @@ def transactions():
         )
 
     created_at_range = utils.datetime_range_from_first_month_day_to_now()
-    if created_at_between != "":
-        created_at_range = (
+    if created_at_range_hrf != "":
+        created_at_range = tuple(
             datetime.strptime(i, DATETIME_FORMAT.value)
-            for i in created_at_between.split(" - ")
+            for i in created_at_range_hrf.split(" - ")
         )
     else:
-        created_at_between = " - ".join(
+        created_at_range_hrf = " - ".join(
             i.strftime(DATETIME_FORMAT.value) for i in created_at_range
         )
 
-    filters = {
-        "direction": direction,
-        "category_id": category_id,
-        "categories": categories,
-        "created_at_between": created_at_between,
-        "limit": limit,
-        "offset": offset,
-    }
+    return TransactionFilters(
+        direction=direction,
+        category_id=category_id,
+        categories=categories,
+        created_at_range=created_at_range,
+        created_at_range_hrf=created_at_range_hrf,
+        limit=limit,
+        offset=offset,
+    )
 
+
+def filtered_transactions(filters: TransactionFilters) -> pw.SelectQuery:
     # fmt: off
-    txns_query = (
+    query = (
         Transaction
         .select(Transaction, Category)
         .join(Category, pw.JOIN.LEFT_OUTER)
         .where(
             (Transaction.balance == g.balance)
-            & (Transaction.created_at.between(*created_at_range))
+            & (Transaction.created_at.between(*filters.created_at_range))
         )
         .order_by(Transaction.created_at.desc())
     )
     # fmt: on
 
-    if direction != "":
-        txns_query = txns_query.where(Transaction.direction == direction)
+    if filters.direction != "":
+        query = query.where(Transaction.direction == filters.direction)
 
-    if category_id is not None:
-        if category_id == NO_CATEGORY_ID:
-            txns_query = txns_query.where(Transaction.category.is_null())
+    if filters.category_id is not None:
+        if filters.category_id == NO_CATEGORY_ID:
+            query = query.where(Transaction.category.is_null())
         else:
             category = Category.get_or_none(
-                id=category_id, account=g.authorized_account
+                id=filters.category_id, account=g.authorized_account
             )
-            if category is not None and category.direction == direction:
-                txns_query = txns_query.where(Transaction.category == category)
-            else:
-                args = request.args.to_dict()
-                args.pop("category_id")
-                return redirect(
-                    url_for(
-                        "balances.i.transactions",
-                        balance_id=g.balance.id,
-                        category_id=None,
-                        **args,
-                    )
-                )
+            if category is not None and category.direction == filters.direction:
+                query = query.where(Transaction.category == category)
 
-    limit_plus_one = limit + 1
-    txns_query = txns_query.offset(offset).limit(limit_plus_one)
+    return query
 
-    has_prev = offset > 0
-    has_next = len(txns_query) == limit_plus_one
 
-    txns = list(txns_query)[:limit]
+def paginated_transactions(
+    filters: TransactionFilters, filtered_txns: pw.SelectQuery
+) -> tuple[list[Transaction], bool, bool]:
+    limit_plus_one = filters.limit + 1
+    query = filtered_txns.offset(filters.offset).limit(limit_plus_one)
 
-    expense_categories = (
-        Category.select()
-        .where(
-            (Category.account == g.authorized_account)
-            & (Category.direction == FundsDirection.EXPENSE.value)
-        )
-        .order_by(Category.name)
-    )
-    income_categories = (
-        Category.select()
-        .where(
-            (Category.account == g.authorized_account)
-            & (Category.direction == FundsDirection.INCOME.value)
-        )
-        .order_by(Category.name)
-    )
+    has_prev = filters.offset > 0
+    has_next = len(query) == limit_plus_one
+
+    result = list(query)[: filters.limit]
+
+    return result, has_prev, has_next
+
+
+@bp.route("/transactions")
+@auth.login_required
+@verify_balance
+def transactions():
+    filter_form = TransactionFilterForm(request.args)
+    if not filter_form.validate():
+        return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))
+
+    txns_providers = reparser.get_providers()
+
+    filters = init_filters(filter_form)
+    filtered_txns = filtered_transactions(filters)
+    txns, has_prev, has_next = paginated_transactions(filters, filtered_txns)
 
     return render_template(
         "balance/transactions.html",
+        txns_providers=txns_providers,
         txns=txns,
-        expense_categories=expense_categories,
-        income_categories=income_categories,
         filters=filters,
         has_prev=has_prev,
         has_next=has_next,
     )
+
+
+@bp.route("/transactions/export/csv")
+@auth.login_required
+@verify_balance
+def transactions_export_csv():
+    filter_form = TransactionFilterForm(request.args)
+    if not filter_form.validate():
+        return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))
+
+    filters = init_filters(filter_form)
+    filtered_txns = filtered_transactions(filters)
+
+    buffer = io.StringIO()
+    csvwriter = csv.writer(buffer, delimiter=";", quoting=csv.QUOTE_ALL)
+    csvwriter.writerow(
+        ["Time", "Direction", "Category", "Amount", "Currency", "Comment"]
+    )
+
+    for i in filtered_txns.iterator():
+        csvwriter.writerow(
+            [
+                i.created_at.strftime(DATETIME_FORMAT.value),
+                FundsDirection.get(i.direction).meta["name"],
+                i.category.name if i.category else "",
+                utils.make_hrf_amount(i.amount, g.currency.precision),
+                g.currency.code_alpha,
+                i.comment,
+            ]
+        )
+
+    res = make_response(buffer.getvalue())
+    res.headers["Content-Disposition"] = "attachment; filename=transactions.csv"
+    res.headers["Content-type"] = "text/csv"
+    return res
+
+
+@bp.route("/transactions/import", methods=["POST"])
+@auth.login_required
+@verify_balance
+def transactions_import():
+    redirect_url = url_for(
+        "balances.i.transactions", balance_id=g.balance.id, **request.args
+    )
+
+    g.logger.info(request.form.to_dict())
+
+    form = init_and_validate_form(ImportTransactionsForm, request.form, redirect_url)
+
+    # provider_id = form.provider_id.data
+
+    # if "report_file" not in request.files:
+    #     alerts.error("Выберете файл отчета.")
+    #     return redirect(redirect_url)
+
+    # report_file = request.files["report_file"]
+    # if report_file.filename == "":
+    #     alerts.error("Файл отчета не выбран.")
+    #     return redirect(redirect_url)
+
+    # with tempfile.TemporaryDirectory() as tmpdir:
+    #     filename = uuid.uuid4().hex
+    #     filepath = os.path.join(tmpdir, filename)
+    #     report_file.save(filepath)
+
+    # provider = reparser.get_provider(provider_id)
+    # if provider is None:
+    #     notify.error("Provider not found.")
+    #     return redirect(redirect_url)
+
+    # parser_args_map = {
+    #     reparser.MonobankProvider.id: (
+    #         report_filename,
+    #         g.currency.code_alpha,
+    #         g.currency.precision,
+    #     ),
+    #     reparser.Privat24Provider.id: (report_filename, g.currency.precision),
+    # }
+
+    # txns = provider.parse_report(*parser_args_map[provider.id])
+    # for txn in txns:
+    #     if reparser.is_replenishment(txn):
+    #         func = "make_replenishment"
+    #     else:
+    #         func = "make_withdrawal"
+
+    #     getattr(txn_usecase, func)(
+    #         balance=g.balance,
+    #         amount=txn.amount,
+    #         category=None,
+    #         comment=txn.comment,
+    #         created_at=txn.created_at,
+    #     )
+
+    # notify.info("Transaction imported successfully")
+    return redirect(redirect_url)
 
 
 @bp.route("/transactions/update-category", methods=["POST"])
@@ -169,10 +277,9 @@ def update_transaction_category():
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
 
-    form = UpdateTransactionCategoryForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect()
+    form = init_and_validate_form(
+        UpdateTransactionCategoryForm, request.form, redirect_url
+    )
 
     txn_id = form.txn_id.data
     category_id = form.category_id.data
@@ -207,10 +314,9 @@ def update_transaction_comment():
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
 
-    form = UpdateTransactionCommentForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(redirect_url)
+    form = init_and_validate_form(
+        UpdateTransactionCommentForm, request.endpoint, redirect_url
+    )
 
     txn_id = form.txn_id.data
     comment = form.comment.data
@@ -234,10 +340,7 @@ def delete_transaction():
         "balances.i.transactions", balance_id=g.balance.id, **request.args
     )
 
-    form = DeleteTransactionForm(request.form)
-    if not form.validate():
-        notify.error("Form data validation error.")
-        return redirect(redirect_url)
+    form = init_and_validate_form(DeleteTransactionForm, request.form, redirect_url)
 
     txn_id = form.txn_id.data
 

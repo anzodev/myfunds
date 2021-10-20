@@ -6,7 +6,7 @@ import pytest
 from myfunds.core import models
 from myfunds.core.constants import FundsDirection
 from myfunds.core.usecase import transactions as txn_usecase
-from myfunds.tools import check
+from myfunds.modules import check
 
 
 @pytest.mark.usefixtures("with_memory_database")

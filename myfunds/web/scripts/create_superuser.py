@@ -2,7 +2,7 @@ import secrets
 
 from myfunds.core.models import Account
 from myfunds.core.models import db_proxy
-from myfunds.tools.security import PBKDF2_PasswordHasher
+from myfunds.modules.security import PBKDF2_PasswordHasher
 from myfunds.web.config import init_config
 from myfunds.web.database import init_database
 from myfunds.web.utils import parse_env_parser

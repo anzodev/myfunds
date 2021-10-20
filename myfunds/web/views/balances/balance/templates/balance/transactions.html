@@ -13,8 +13,10 @@
           <i data-feather="more-vertical" width="16" height="16"></i>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#">Import transactions</a></li>
-          <li><a class="dropdown-item" href="#">Export to CSV</a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#import-transactions-modal">Import transactions</a></li>
+          <li><a class="dropdown-item"
+              href="{{ url_for('balances.i.transactions_export_csv', balance_id=g.balance.id, **request.args) }}">Export
+              to CSV</a></li>
         </ul>
       </div>
     </div>
@@ -58,8 +60,8 @@
           <div class="d-flex">
             <div class="input-group me-4">
               <span class="input-group-text">Time</span>
-              <input type="text" id="created-at-between" name="created_at_between" class="form-control px-3"
-                data-mask="0000-00-00 00:00:00 - 0000-00-00 00:00:00" value="{{ filters.created_at_between }}">
+              <input type="text" id="created-at-range-hrf" name="created_at_range_hrf" class="form-control px-3"
+                data-mask="0000-00-00 00:00:00 - 0000-00-00 00:00:00" value="{{ filters.created_at_range_hrf }}">
             </div>
 
             <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id) }}"
@@ -89,7 +91,8 @@
         <td class="align-middle text-nowrap py-3 pe-4">{{ txn.created_at }}</td>
         <td
           class="align-middle text-nowrap py-3 pe-4 text-{% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}success{% else %}danger{% endif %}">
-          {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount) }}
+          {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount)
+          }}
         </td>
         <td
           class="align-middle text-nowrap py-3 pe-4 text-{% if txn.balance_remainder > 0 %}success{% elif txn.balance_remainder < 0%}danger{% endif %}">
@@ -135,9 +138,9 @@
                   {% endif %}
 
                   {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}
-                  {% set categories_for_update = income_categories %}
+                  {% set categories_for_update = g.income_categories %}
                   {% else %}
-                  {% set categories_for_update = expense_categories %}
+                  {% set categories_for_update = g.expense_categories %}
                   {% endif %}
 
                   {% for category in categories_for_update %}
@@ -190,7 +193,8 @@
           </div>
         </td>
         <td class="align-middle p-0 px-3" style="width: 1px;">
-          <form action="{{ url_for('balances.i.delete_transaction', balance_id=g.balance.id, **request.args) }}" method="POST">
+          <form action="{{ url_for('balances.i.delete_transaction', balance_id=g.balance.id, **request.args) }}"
+            method="POST">
             <input type="hidden" name="txn_id" value="{{ txn.id }}">
             <button type="submit" class="btn shadow-none p-0 text-muted">
               <i data-feather="trash" width="16" height="16"></i>
@@ -227,7 +231,36 @@
 </div>
 
 
-
+<div class="modal fade" id="import-transactions-modal">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{{ url_for('balances.i.transactions_import', balance_id=g.balance.id) }}" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">Import Transactions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small">Provider</label>
+            <select name="provider_id" class="form-control px-3" required>
+              {% for provider in txns_providers %}
+              <option value="{{ provider.id }}">{{ provider.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="form-label small">Report</label>
+            <input type="file" class="form-control" name="report_filename" accept=".csv,.xlsx,.xls" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 
@@ -250,7 +283,7 @@
       }, 0);
     });
 
-    $('#created-at-between').daterangepicker({
+    $('#created-at-range-hrf').daterangepicker({
       autoApply: true,
       showCustomRangeLabel: false,
       locale: {
@@ -258,7 +291,7 @@
       }
     });
 
-    $('#created-at-between').on('change', function () {
+    $('#created-at-range-hrf').on('change', function () {
       this.form.submit();
     });
 

@@ -28,3 +28,8 @@ html {
   border: 1px solid transparent;
   border-radius: .2rem;
 }
+
+.dropdown-item:focus, .dropdown-item:hover {
+  color: #fff;
+  background-color: #287bb5;
+}

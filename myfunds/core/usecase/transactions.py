@@ -8,7 +8,7 @@ from myfunds.core.models import Balance
 from myfunds.core.models import Category
 from myfunds.core.models import Transaction
 from myfunds.core.models import db_proxy
-from myfunds.tools import check
+from myfunds.modules import check
 
 
 def _calculate_common_balance_remainder_for_new_transaction(
