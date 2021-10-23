@@ -4,7 +4,7 @@ from myfunds.web.views.balances.balance.views import statistics
 
 
 @pytest.mark.parametrize(
-    "args,value,percent,css_text_color",
+    "args,amount,percent,css_text_color",
     [
         ((100, None), None, None, None),
         ((0, 2000), 2000, 0.0, "text-success"),
@@ -16,8 +16,8 @@ from myfunds.web.views.balances.balance.views import statistics
         ((2002, 2000), 2000, -0.1, "text-danger"),
     ],
 )
-def test_init_month_limit(args, value, percent, css_text_color):
-    month_limit = statistics.init_month_limit(*args)
-    assert month_limit.value == value
-    assert month_limit.percent == percent
-    assert month_limit.css_text_color == css_text_color
+def test_init_expense_limit_params(args, amount, percent, css_text_color):
+    expense_limit = statistics.init_expense_limit_params(*args)
+    assert expense_limit.amount == amount
+    assert expense_limit.percent == percent
+    assert expense_limit.css_text_color == css_text_color
