@@ -1,18 +1,13 @@
-import os
-
 import peewee as pw
 from flask import Flask
 from flask import current_app
 from flask import g
 
 from myfunds.core.models import db_proxy
-from myfunds.core.models import get_models
 
 
 def init_database(database_path: str) -> pw.SqliteDatabase:
-    db_exists = os.path.exists(database_path)
-
-    db = pw.SqliteDatabase(
+    return pw.SqliteDatabase(
         database_path,
         pragmas=[
             ("cache_size", -1024 * 64),
@@ -20,13 +15,6 @@ def init_database(database_path: str) -> pw.SqliteDatabase:
             ("foreign_keys", 1),
         ],
     )
-
-    if not db_exists:
-        models_list = get_models()
-        with db.bind_ctx(models_list):
-            db.create_tables(models_list)
-
-    return db
 
 
 def initialize_app_database():
