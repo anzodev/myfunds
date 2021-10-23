@@ -5,7 +5,12 @@
 <div class="card">
 
   <section class="p-3">
-    <div class="lead">Statistics</div>
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="lead">Statistics</div>
+      {% if current_day %}
+      <p class="m-0 text-muted small">Day: {{ current_day }}</p>
+      {% endif %}
+    </div>
   </section>
 
   <section class="p-3 mb-1 border-bottom">
@@ -56,61 +61,45 @@
     </div>
   </section>
 
-
-  <div class="row">
-    <div class="col-8">
-
-      <section class="p-3">
-        <table class="table table-sm table-borderless shadow-none fs-6 m-0">
-          <tbody>
-            <tr>
-              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Start balance:</td>
-              <td class="py-1">{% if general_stats.start_balance %}{{ hrf_amount(general_stats.start_balance) }}{%
-                else %}-{% endif %}</td>
-            </tr>
-            <tr>
-              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Expense:</td>
-              <td class="py-1">
-                {% if general_stats.expense %}{{ hrf_amount(general_stats.expense) }}{% else %}-{%
-                endif %}
-                {% if general_stats.expense_pct %}({{ general_stats.expense_pct }}%){% endif %}
-              </td>
-            </tr>
-            <tr>
-              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Income:</td>
-              <td class="py-1">{% if general_stats.income %}{{ hrf_amount(general_stats.income)
-                }}{%
-                else %}-{%
-                endif %}</td>
-            </tr>
-            <tr>
-              <td class="text-nowrap ps-0 py-1" style="width: 1px;">End balance:</td>
-              <td class="py-1">{% if general_stats.end_balance %}{{ hrf_amount(general_stats.end_balance) }}{% else
-                %}-{% endif %}</td>
-            </tr>
-            <tr>
-              <td class="text-nowrap ps-0 py-1" style="width: 1px;">Savings:</td>
-              <td class="py-1">
-                {% if general_stats.savings %}{{ hrf_amount(general_stats.savings) }}{% else %}-{%
-                endif %}
-                {% if general_stats.savings_pct %}({{ general_stats.savings_pct }}%){% endif %}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-    </div>
-    <div class="col-4">
-
-      {% if current_day %}
-      <section class="p-3">
-        <p class="text-end">Day: {{ current_day }}</p>
-      </section>
-      {% endif %}
-
-    </div>
-  </div>
+  <section class="p-3">
+    <table class="table table-sm table-borderless shadow-none fs-6 m-0">
+      <tbody>
+        <tr>
+          <td class="text-nowrap ps-0 py-1" style="width: 1px;">Start balance:</td>
+          <td class="py-1">{% if general_stats.start_balance %}{{ hrf_amount(general_stats.start_balance) }}{%
+            else %}-{% endif %}</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0 py-1" style="width: 1px;">Expense:</td>
+          <td class="py-1">
+            {% if general_stats.expense %}{{ hrf_amount(general_stats.expense) }}{% else %}-{%
+            endif %}
+            {% if general_stats.expense_pct %}({{ general_stats.expense_pct }}%){% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0 py-1" style="width: 1px;">Income:</td>
+          <td class="py-1">{% if general_stats.income %}{{ hrf_amount(general_stats.income)
+            }}{%
+            else %}-{%
+            endif %}</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0 py-1" style="width: 1px;">End balance:</td>
+          <td class="py-1">{% if general_stats.end_balance %}{{ hrf_amount(general_stats.end_balance) }}{% else
+            %}-{% endif %}</td>
+        </tr>
+        <tr>
+          <td class="text-nowrap ps-0 py-1" style="width: 1px;">Savings:</td>
+          <td class="py-1">
+            {% if general_stats.savings %}{{ hrf_amount(general_stats.savings) }}{% else %}-{%
+            endif %}
+            {% if general_stats.savings_pct %}({{ general_stats.savings_pct }}%){% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
   {% if expense_categories_stats %}
   <table class="table table-sm table-bordered shadow-none mb-0">
