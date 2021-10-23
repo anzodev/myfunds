@@ -6,17 +6,26 @@
 
   <header class="border-bottom py-3 mb-5">
     <div class="d-flex justify-content-between align-items-center">
-      <div>
+      <div class="d-flex align-items-center">
         <a href="{{ url_for('balances.index') }}" class="link-info me-5">Balances</a>
+        <a href="#" class="link-info me-5">Crypto</a>
+        <a href="{{ url_for('dashboard.index') }}" class="link-info position-relative me-5">Dashboard</a>
         <a href="{{ url_for('categories.index') }}" class="link-info me-5">Categories</a>
         {% if g.is_superuser %}
         <i class="border-start py-2"></i>
-        <a href="{{ url_for('accounts.index') }}" class="d-inline-block link-info ms-5">Accounts</a>
-        <a href="{{ url_for('currencies.index') }}" class="d-inline-block link-info ms-5">Currencies</a>
+        <div class="dropdown">
+          <a href="#" class="d-inline-block link-info ms-5" data-bs-toggle="dropdown">Settings <span style="font-size: 1.125rem;">&#129170;</span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{{ url_for('joint_limits.index') }}" class="dropdown-item link-info">Joint Limits</a></li>
+            <li><a href="{{ url_for('accounts.index') }}" class="dropdown-item link-info">Accounts</a></li>
+            <li><a href="{{ url_for('currencies.index') }}" class="dropdown-item link-info">Currencies</a></li>
+          </ul>
+        </div>
         {% endif %}
       </div>
       <div class="d-flex justify-content-end align-items-center">
-        <p class="small m-0 me-3">You are logined in as <span class="fw-bold">{{ g.authorized_account.username }}</span></p>
+        <p class="small m-0 me-3">You are logined in as <span class="fw-bold">{{ g.authorized_account.username }}</span>
+        </p>
         <form action="{{ url_for('access.logout') }}" method="POST">
           <button type="submit" class="btn btn-sm btn-light"><small>Logout</small></button>
         </form>
@@ -29,7 +38,7 @@
   </section>
 
   <main class="mb-5">
-  {% block main %}{% endblock %}
+    {% block main %}{% endblock %}
   </main>
 </div>
 {% endblock %}

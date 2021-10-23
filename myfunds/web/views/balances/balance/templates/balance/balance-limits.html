@@ -6,41 +6,41 @@
 
   <section class="p-3 border-bottom">
     <div class="d-flex align-items-center justify-content-between">
-      <div class="lead">Expense Month Limits</div>
+      <div class="lead">Limits</div>
       <div class="dropdown">
         <button type="submit" class="btn shadow-none p-0 text-muted" data-bs-toggle="dropdown">
           <i data-feather="more-vertical" width="16" height="16"></i>
         </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#add-expense-limit-modal">Add Expense Limit</a></li>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#add-balance-limit-modal">Add Limit</a></li>
         </ul>
       </div>
     </div>
   </section>
 
-  {% if expense_month_limits %}
+  {% if balance_limits %}
   <table class="table table-borderless shadow-none m-0">
     <thead>
       <tr class="bg-light border-bottom">
         <th class="align-middle text-muted py-2 small" style="width: 1px;">Category</th>
-        <th class="align-middle text-muted py-2 small" colspan="2">Limit</th>
+        <th class="align-middle text-muted py-2 small" colspan="2">Limit Amount</th>
       </tr>
     </thead>
     <tbody>
-      {% for expense_limit in expense_month_limits %}
+      {% for limit in balance_limits %}
       <tr class="hover:bg-light">
         <td class="align-middle py-3 pe-5" style="width: 1px;">
           <div class="d-flex align-items-center">
             <div
-              style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ expense_limit.category.color_sign }};">
+              style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ limit.category.color_sign }};">
             </div>
-            <div class="ms-2">{{ expense_limit.category.name }}</div>
+            <div class="ms-2">{{ limit.category.name }}</div>
           </div>
         </td>
-        <td class="align-middle py-3">{{ hrf_amount(expense_limit.limit) }}</td>
+        <td class="align-middle py-3">{{ hrf_amount(limit.amount) }}</td>
         <td class="align-middle text-end py-0">
-          <form action="{{ url_for('balances.i.delete_expense_limits', balance_id=g.balance.id) }}" method="POST">
-            <input type="hidden" name="limit_id" value="{{ expense_limit.id }}">
+          <form action="{{ url_for('balances.i.delete_limit', balance_id=g.balance.id) }}" method="POST">
+            <input type="hidden" name="limit_id" value="{{ limit.id }}">
             <button type="submit" class="btn shadow-none p-0 text-muted">
               <i data-feather="trash" width="16" height="16"></i>
             </button>
@@ -51,25 +51,25 @@
     </tbody>
   </table>
   {% else %}
-  <p class="p-3 m-0">Month limits not found.</p>
+  <p class="p-3 m-0">Limits not found.</p>
   {% endif %}
 
 </div>
 
-<div class="modal fade" id="add-expense-limit-modal">
+<div class="modal fade" id="add-balance-limit-modal">
   <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
-      <form action="{{ url_for('balances.i.expense_limits', balance_id=g.balance.id) }}" method="POST"
+      <form action="{{ url_for('balances.i.balance_limits', balance_id=g.balance.id) }}" method="POST"
         autocomplete="off">
         <div class="modal-header">
-          <h5 class="modal-title">New Expense Limit</h5>
+          <h5 class="modal-title">New Balance Limit</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label for="f1-category" class="form-label small">Category</label>
+            <label class="form-label small">Category</label>
             {% if expense_categories %}
-            <select name="category_id" id="f1-category" class="form-control px-3" required>
+            <select name="category_id" class="form-control px-3" required>
               {% for category in expense_categories %}
               <option value="{{ category.id }}">{{ category.name }}</option>
               {% endfor %}
@@ -82,8 +82,8 @@
             {% endif %}
           </div>
           <div>
-            <label for="f1-limit" class="form-label small">Limit</label>
-            <input type="text" name="limit" id="f1-limit" class="form-control px-3"
+            <label class="form-label small">Limit</label>
+            <input type="text" name="amount" class="form-control px-3"
               placeholder="{{ g.amount_placeholder }}" pattern="{{ g.amount_pattern }}" required>
           </div>
         </div>

@@ -35,9 +35,8 @@
       <div class="list-group">
         <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.transactions' %}disabled bg-info text-white{% endif%}">Transactions</a>
-        <a href="{{ url_for('balances.i.expense_limits', balance_id=g.balance.id) }}"
-          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.expense_limits' %}disabled bg-info text-white{% endif%}">Expense
-          Month Limits</a>
+        <a href="{{ url_for('balances.i.balance_limits', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.balance_limits' %}disabled bg-info text-white{% endif%}">Limits</a>
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.statistics' %}disabled bg-info text-white{% endif%}">Statistics</a>
       </div>

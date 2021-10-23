@@ -4,11 +4,11 @@
 {% block content %}
 <div class="card">
 
-  <section class="p-3 border-bottom">
+  <section class="p-3">
     <div class="lead">Statistics</div>
   </section>
 
-  <section class="p-3 mb-1">
+  <section class="p-3 mb-1 border-bottom">
     <div class="d-flex align-items-center">
       <div class="me-3">
         <form action="{{ url_for('balances.i.statistics', balance_id=g.balance.id, **request.args) }}">
@@ -61,7 +61,7 @@
     <div class="col-8">
 
       <section class="p-3">
-        <table class="table table-sm table-borderless shadow-none fs-6">
+        <table class="table table-sm table-borderless shadow-none fs-6 m-0">
           <tbody>
             <tr>
               <td class="text-nowrap ps-0 py-1" style="width: 1px;">Start balance:</td>
@@ -129,7 +129,7 @@
     <tbody>
       {% for i in expense_categories_stats %}
       <tr class="hover:bg-light">
-        <td class="align-middle text-center">
+        <td class="align-middle text-center border-start-0">
           <input class="form-check-input shadow-none" type="checkbox" style="transform: scale(1.5);"
             value="{{ i.exclusion_link }}" {% if i.is_excluded %}checked{% endif %}
             onclick="document.location.href = this.value;">
@@ -142,7 +142,8 @@
             <div class="ms-2"><a href="{{ i.transactions_link }}" class="link-info">{{ i.name }}</a></div>
           </div>
         </td>
-        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>{{ hrf_amount(i.amount) }}</td>
+        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>{{ hrf_amount(i.amount) }}
+        </td>
         <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>
           {% if i.is_excluded %}
           <div class="text-center">0%</div>
@@ -159,14 +160,17 @@
           </div>
           {% endif %}
         </td>
-        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>{% if i.month_limit.value %}{{
-          hrf_amount(i.month_limit.value) }}{% else %}-{% endif %}
+        <td class="align-middle" {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>{% if
+          i.expense_limit.amount %}{{
+          hrf_amount(i.expense_limit.amount) }}{% else %}-{% endif %}
         </td>
+        {% if loop.last %}
         <td
-          class="align-middle border-end-0{% if i.month_limit.css_text_color %} {{ i.month_limit.css_text_color }}{% endif %}"
+          class="align-middle border-end-0{% if i.expense_limit.css_text_color %} {{ i.expense_limit.css_text_color }}{% endif %}"
           {% if i.is_excluded %}style="opacity: 0.4;" {% endif %}>
-          {% if i.month_limit.css_text_color %}{{ i.month_limit.percent }}%{% else %}-{% endif %}
+          {% if i.expense_limit.css_text_color %}{{ i.expense_limit.percent }}%{% else %}-{% endif %}
         </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>

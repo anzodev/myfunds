@@ -1,0 +1,32 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 m-0">Dashboard</h1>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<section>
+
+  <div class="row">
+    <div class="col-3">
+
+      <div class="list-group">
+        <a href="{{ url_for('dashboard.joint_limits') }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'dashboard.joint_limits' %}disabled bg-info text-white{% endif%}">Joint Limits</a>
+        <a href="#" class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'dashboard.total_budget' %}disabled bg-info text-white{% endif%}">Total Budget</a>
+      </div>
+
+    </div>
+    <div class="col-9">
+
+      {% block content %}{% endblock %}
+
+    </div>
+  </div>
+
+</section>
+{% endblock %}

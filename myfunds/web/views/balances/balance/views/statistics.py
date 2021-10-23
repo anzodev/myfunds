@@ -16,8 +16,8 @@ from wtforms import ValidationError
 from wtforms import validators as vals
 from wtforms.fields.core import StringField
 
+from myfunds.core.models import BalanceLimit
 from myfunds.core.models import Category
-from myfunds.core.models import CategoryMonthLimit
 from myfunds.core.models import Transaction
 from myfunds.web import auth
 from myfunds.web import utils
@@ -178,6 +178,7 @@ def calculate_expense_categories_stats(
         .where(
             (Category.account == g.authorized_account)
             & (Category.direction == FundsDirection.EXPENSE.value)
+            & (Transaction.balance_id == g.balance.id)
             & (Transaction.created_at.between(*stats_range))
         )
         .group_by(Category.id)
@@ -199,11 +200,11 @@ def calculate_expense_categories_stats(
     # fmt: on
 
     # fmt: off
-    month_limits = (
-        CategoryMonthLimit
+    balance_limits = (
+        BalanceLimit
         .select()
         .where(
-            (CategoryMonthLimit.balance == g.balance)
+            (BalanceLimit.balance == g.balance)
         )
     )
     # fmt: on
@@ -212,7 +213,7 @@ def calculate_expense_categories_stats(
 
     exclude_no_category = NO_CATEGORY_ID in excluded_categories
 
-    categories_month_limits = {i.category_id: i.limit for i in month_limits}
+    categories_limit_amounts = {i.category_id: i.amount for i in balance_limits}
 
     top_expense = max(
         [i.amount for i in query if i.id not in excluded_categories]
@@ -233,8 +234,8 @@ def calculate_expense_categories_stats(
                 "amount_ratio": (
                     round((i.amount / top_expense) * 100, 2) if top_expense else None
                 ),
-                "month_limit": init_month_limit(
-                    i.amount, categories_month_limits.get(i.id)
+                "expense_limit": init_expense_limit_params(
+                    i.amount, categories_limit_amounts.get(i.id)
                 ),
                 "is_excluded": i.id in excluded_categories,
                 "exclusion_link": make_exclusion_link(excluded_categories, i.id),
@@ -260,7 +261,9 @@ def calculate_expense_categories_stats(
                     if top_expense
                     else None
                 ),
-                "month_limit": init_month_limit(no_category_txns_amount, None),
+                "expense_limit": init_expense_limit_params(
+                    no_category_txns_amount, None
+                ),
                 "is_excluded": exclude_no_category,
                 "exclusion_link": make_exclusion_link(
                     excluded_categories, NO_CATEGORY_ID
@@ -301,16 +304,18 @@ def make_exclusion_link(excluded_categories: set[int], category_id: int) -> str:
     return url_for("balances.i.statistics", balance_id=g.balance.id, **args)
 
 
-MonthLimit = namedtuple("MonthLimit", ["value", "percent", "css_text_color"])
+ExpenseLimitParams = namedtuple(
+    "ExpenseLimitParams", ["amount", "percent", "css_text_color"]
+)
 
 
-def init_month_limit(
-    category_amount: int, limit_value: Optional[int] = None
-) -> MonthLimit:
-    if limit_value is None:
-        return MonthLimit(None, None, None)
+def init_expense_limit_params(
+    category_amount: int, limit_amount: Optional[int] = None
+) -> ExpenseLimitParams:
+    if limit_amount is None:
+        return ExpenseLimitParams(None, None, None)
 
-    percent = round((category_amount / limit_value) * 100, 2)
+    percent = round((category_amount / limit_amount) * 100, 2)
     if percent > 100:
         percent = round((100 - percent), 2)
 
@@ -323,7 +328,7 @@ def init_month_limit(
     else:
         css_text_color = None
 
-    return MonthLimit(limit_value, percent, css_text_color)
+    return ExpenseLimitParams(limit_amount, percent, css_text_color)
 
 
 class StatisticsFilterForm(Form):

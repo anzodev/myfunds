@@ -103,14 +103,41 @@ class DeleteTransactionForm(Form):
     txn_id = id_field()
 
 
-class AddExpenseLimitForm(Form):
+class AddBalanceLimitForm(Form):
     category_id = id_field()
-    limit = StringField(validators=[vals.InputRequired()])
+    amount = StringField(validators=[vals.InputRequired()])
 
 
-class DeleteExpenseLimitForm(Form):
+class DeleteBalanceLimitForm(Form):
     limit_id = id_field()
 
 
 class ImportTransactionsForm(Form):
     parser_id = StringField(validators=[vals.InputRequired()])
+
+
+class AddJointLimitForm(Form):
+    currency_id = id_field()
+    name = StringField(validators=[vals.InputRequired()])
+    amount = IntegerField(validators=[vals.InputRequired(), vals.NumberRange(min=1)])
+
+
+class DeleteJointLimitForm(Form):
+    limit_id = id_field()
+
+
+class JointLimitParticipantGetStepForm(Form):
+    step = IntegerField(validators=[vals.InputRequired(), vals.AnyOf([1, 2])])
+
+
+class AddJointLimitParticipantStep1Form(Form):
+    account_id = id_field()
+
+
+class AddJointLimitParticipantStep2Form(Form):
+    account_id = id_field()
+    category_id = id_field()
+
+
+class DeleteJointLimitParticipantForm(Form):
+    participant_id = id_field()

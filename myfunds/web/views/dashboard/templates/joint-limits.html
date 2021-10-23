@@ -1,0 +1,125 @@
+{% extends 'layouts/dashboard-page.html' %}
+
+
+{% block content %}
+
+<div class="card">
+
+  <section class="p-3">
+    <div class="lead">Joint Limits</div>
+  </section>
+
+  <section class="p-3">
+    <div class="d-flex align-items-center">
+      <div class="me-3">
+        <form action="{{ url_for('dashboard.joint_limits', **request.args) }}">
+          {% set year_filter_args = request.args.to_dict() %}
+          {% set _ = year_filter_args.pop("year", None) %}
+          {% for k,v in year_filter_args.items() %}
+          <input type="hidden" name="{{ k }}" value="{{ v }}">
+          {% endfor %}
+          <select name="year" class="form-control" onchange="this.form.submit();">
+            {% for year in filters.allowed_years %}
+            <option value="{{ year }}" {% if year==filters.year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+      <div class="btn-group flex-grow-1">
+        {% set month_link_args = request.args.to_dict() %}
+        {% set _ = month_link_args.pop("month", None) %}
+        <a href="{{ url_for('dashboard.joint_limits', month=1, **month_link_args) }}"
+          class="btn btn-info {% if 1 in filters.disabled_months %}disabled{% endif %} {% if 1 == filters.month %}active{% endif %}">Jan</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=2, **month_link_args) }}"
+          class="btn btn-info {% if 2 in filters.disabled_months %}disabled{% endif %} {% if 2 == filters.month %}active{% endif %}">Feb</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=3, **month_link_args) }}"
+          class="btn btn-info {% if 3 in filters.disabled_months %}disabled{% endif %} {% if 3 == filters.month %}active{% endif %}">Mar</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=4, **month_link_args) }}"
+          class="btn btn-info {% if 4 in filters.disabled_months %}disabled{% endif %} {% if 4 == filters.month %}active{% endif %}">Apr</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=5, **month_link_args) }}"
+          class="btn btn-info {% if 5 in filters.disabled_months %}disabled{% endif %} {% if 5 == filters.month %}active{% endif %}">May</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=6, **month_link_args) }}"
+          class="btn btn-info {% if 6 in filters.disabled_months %}disabled{% endif %} {% if 6 == filters.month %}active{% endif %}">Jun</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=7, **month_link_args) }}"
+          class="btn btn-info {% if 7 in filters.disabled_months %}disabled{% endif %} {% if 7 == filters.month %}active{% endif %}">Jul</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=8, **month_link_args) }}"
+          class="btn btn-info {% if 8 in filters.disabled_months %}disabled{% endif %} {% if 8 == filters.month %}active{% endif %}">Aug</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=9, **month_link_args) }}"
+          class="btn btn-info {% if 9 in filters.disabled_months %}disabled{% endif %} {% if 9 == filters.month %}active{% endif %}">Sep</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=10, **month_link_args) }}"
+          class="btn btn-info {% if 10 in filters.disabled_months %}disabled{% endif %} {% if 10 == filters.month %}active{% endif %}">Oct</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=11, **month_link_args) }}"
+          class="btn btn-info {% if 11 in filters.disabled_months %}disabled{% endif %} {% if 11 == filters.month %}active{% endif %}">Nov</a>
+        <a href="{{ url_for('dashboard.joint_limits', month=12, **month_link_args) }}"
+          class="btn btn-info {% if 12 in filters.disabled_months %}disabled{% endif %} {% if 12 == filters.month %}active{% endif %}">Dec</a>
+      </div>
+    </div>
+  </section>
+
+  {% if joint_limits_info %}
+  <table class="table table-sm table-bordered shadow-none mb-0">
+    <thead>
+      <tr class="bg-light">
+        <th class="align-middle text-muted py-2 small border-start-0">Limit</th>
+        <th class="align-middle text-muted py-2 small">Currency</th>
+        <th class="align-middle text-muted py-2 small">Account</th>
+        <th class="align-middle text-muted py-2 small">Category</th>
+        <th class="align-middle text-muted py-2 small">Balance</th>
+        <th class="align-middle text-muted text-center py-2 small" colspan="3">Expense</th>
+        <th class="align-middle text-muted py-2 small">Limit amount</th>
+        <th class="align-middle text-muted py-2 small border-end-0">Used By</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in joint_limits_info %}
+      {% set i_loop = loop %}
+      {% for p in i.participants %}
+      {% set p_loop = loop %}
+      {% for b in p.balances %}
+      {% set b_loop = loop %}
+      <tr style="background-color: {% if i_loop.index % 2 != 0 %}#fafdff{% else %}#fdfffc{% endif %};">
+        {% if p_loop.index0 == 0 and b_loop.index0 == 0 %}
+        <td class="align-middle border-start-0" rowspan="{{ i.participants | sum(attribute='balances_count') }}">{{
+          i.limit.name }}</td>
+        <td class="align-middle" rowspan="{{ i.participants | sum(attribute='balances_count') }}">{{ i.currency.code_alpha }}</td>
+        {% endif %}
+
+        {% if p_loop.index0 < i.participants | length and b_loop.index0==0 %} <td class="align-middle"
+          rowspan="{{ p.balances | length }}">{{ p.account.username }}</td>
+          <td class="align-middle" rowspan="{{ p.balances | length }}">
+            <div class="d-flex align-items-center">
+              <div
+                style="position: relative; width: 12px; height: 12px; border-radius: 50%; background-color: {{ p.category.color_sign }};">
+              </div>
+              <div class="ms-2">{{ p.category.name }}</div>
+            </div>
+          </td>
+          {% endif %}
+
+          <td class="align-middle">{{ b.name }}</td>
+          <td class="align-middle">{{ hrf_amount(b.expense_amount, i.currency.precision) }}</td>
+
+          {% if p_loop.index0 < i.participants | length and b_loop.index0==0 %} <td class="align-middle"
+            rowspan="{{ p.balances | length }}">{{ hrf_amount(p.total_expense, i.currency.precision) }}</td>
+            {% endif %}
+
+            {% if p_loop.index0 == 0 and b_loop.index0 == 0 %}
+            <td class="align-middle" rowspan="{{ i.participants | sum(attribute='balances_count') }}">{{
+              hrf_amount(i.total_expense, i.currency.precision) }}</td>
+            <td class="align-middle" rowspan="{{ i.participants | sum(attribute='balances_count') }}">{{
+              hrf_amount(i.limit.amount, i.currency.precision) }}</td>
+            <td class="align-middle border-end-0 {{ i.total_expense_pct_color }}"
+              rowspan="{{ i.participants | sum(attribute='balances_count') }}">{{ i.total_expense_pct }}%</td>
+            {% endif %}
+      </tr>
+      {% endfor %}
+      {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="p-3 m-0 border-top">There aren't any info about joint limits.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

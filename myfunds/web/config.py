@@ -14,6 +14,7 @@ class Config:
     PBKDF2_PWD_HASHER_SALT_LENGTH: int
     LOGGING_CONFIG: dict
     BALANCE_STATISTICS_YEARS: int
+    DASHBOARD_JOINT_LIMITS_YEARS: int
 
 
 def init_config(env_path: Optional[str] = None) -> Config:
@@ -30,4 +31,5 @@ def init_config(env_path: Optional[str] = None) -> Config:
             PBKDF2_PWD_HASHER_SALT_LENGTH=env.int("PBKDF2_PWD_HASHER_SALT_LENGTH"),
             LOGGING_CONFIG=env.json("LOGGING_CONFIG", "{}"),
             BALANCE_STATISTICS_YEARS=env.int("BALANCE_STATISTICS_YEARS", 5),
+            DASHBOARD_JOINT_LIMITS_YEARS=env.int("DASHBOARD_JOINT_LIMITS_YEARS", 5),
         )

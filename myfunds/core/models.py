@@ -53,16 +53,6 @@ class Category(BaseModel):
     color_sign = pw.CharField()
 
 
-class CategoryMonthLimit(BaseModel):
-    class Meta:
-        table_name = "category_month_limits"
-        indexes = ((("balance_id", "category_id"), True),)
-
-    balance = pw.ForeignKeyField(Balance)
-    category = pw.ForeignKeyField(Category)
-    limit = pw.IntegerField()
-
-
 class Transaction(BaseModel):
     class Meta:
         table_name = "transactions"
@@ -76,6 +66,34 @@ class Transaction(BaseModel):
     amount = pw.IntegerField()
     comment = pw.TextField(null=True)
     created_at = pw.DateTimeField(index=True)
+
+
+class BalanceLimit(BaseModel):
+    class Meta:
+        table_name = "balance_limits"
+        indexes = ((("balance_id", "category_id"), True),)
+
+    balance = pw.ForeignKeyField(Balance, on_delete="CASCADE")
+    category = pw.ForeignKeyField(Category)
+    amount = pw.IntegerField()
+
+
+class JointLimit(BaseModel):
+    class Meta:
+        table_name = "joint_limits"
+
+    currency = pw.ForeignKeyField(Currency)
+    name = pw.CharField(unique=True)
+    amount = pw.IntegerField()
+
+
+class JointLimitParticipant(BaseModel):
+    class Meta:
+        table_name = "joint_limit_participants"
+        indexes = ((("limit_id", "category_id"), True),)
+
+    limit = pw.ForeignKeyField(JointLimit, on_delete="CASCADE")
+    category = pw.ForeignKeyField(Category)
 
 
 def get_models() -> list[BaseModel]:
