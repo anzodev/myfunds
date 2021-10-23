@@ -21,6 +21,16 @@ class Currency(BaseModel):
     precision = pw.IntegerField()
 
 
+class CryptoCurrency(BaseModel):
+    class Meta:
+        table_name = "crypto_currencies"
+
+    symbol = pw.CharField(unique=True)
+    name = pw.CharField()
+    cmc_id = pw.IntegerField()
+    icon = pw.TextField()
+
+
 class Account(BaseModel):
     class Meta:
         table_name = "accounts"

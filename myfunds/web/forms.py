@@ -141,3 +141,11 @@ class AddJointLimitParticipantStep2Form(Form):
 
 class DeleteJointLimitParticipantForm(Form):
     participant_id = id_field()
+
+
+class AddCryptoCurrencyForm(Form):
+    url = StringField(validators=[vals.InputRequired(), vals.URL()])
+
+
+class DeleteCryptoCurrencyForm(Form):
+    currency_id = id_field()

@@ -16,9 +16,10 @@
         <div class="dropdown">
           <a href="#" class="d-inline-block link-info ms-5" data-bs-toggle="dropdown">Settings <span style="font-size: 1.125rem;">&#129170;</span></a>
           <ul class="dropdown-menu">
-            <li><a href="{{ url_for('joint_limits.index') }}" class="dropdown-item link-info">Joint Limits</a></li>
-            <li><a href="{{ url_for('accounts.index') }}" class="dropdown-item link-info">Accounts</a></li>
-            <li><a href="{{ url_for('currencies.index') }}" class="dropdown-item link-info">Currencies</a></li>
+            <li><a href="{{ url_for('joint_limits.index') }}" class="dropdown-item">Joint Limits</a></li>
+            <li><a href="{{ url_for('accounts.index') }}" class="dropdown-item">Accounts</a></li>
+            <li><a href="{{ url_for('currencies.index') }}" class="dropdown-item">Currencies</a></li>
+            <li><a href="{{ url_for('crypto_currencies.index') }}" class="dropdown-item">Crypto Currencies</a></li>
           </ul>
         </div>
         {% endif %}
