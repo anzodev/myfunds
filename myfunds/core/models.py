@@ -1,7 +1,9 @@
 import inspect
+from operator import inv
 
 import peewee as pw
 
+from myfunds.core.constants import CryptoDirection
 from myfunds.core.constants import FundsDirection
 
 
@@ -19,16 +21,6 @@ class Currency(BaseModel):
 
     code_alpha = pw.FixedCharField(max_length=3, unique=True)
     precision = pw.IntegerField()
-
-
-class CryptoCurrency(BaseModel):
-    class Meta:
-        table_name = "crypto_currencies"
-
-    symbol = pw.CharField(unique=True)
-    name = pw.CharField()
-    cmc_id = pw.IntegerField()
-    icon = pw.TextField()
 
 
 class Account(BaseModel):
@@ -104,6 +96,48 @@ class JointLimitParticipant(BaseModel):
 
     limit = pw.ForeignKeyField(JointLimit, on_delete="CASCADE")
     category = pw.ForeignKeyField(Category)
+
+
+class CryptoCurrency(BaseModel):
+    class Meta:
+        table_name = "crypto_currencies"
+
+    symbol = pw.CharField(unique=True)
+    name = pw.CharField()
+    cmc_id = pw.IntegerField()
+    icon = pw.TextField()
+
+
+class CryptoBalance(BaseModel):
+    class Meta:
+        table_name = "crypto_balances"
+
+    account = pw.ForeignKeyField(Account)
+    currency = pw.ForeignKeyField(CryptoCurrency)
+    name = pw.CharField()
+    quantity = pw.IntegerField()
+
+
+class CryptoActionLog(BaseModel):
+    class Meta:
+        table_name = "crypto_action_logs"
+
+    message = pw.TextField()
+    created_at = pw.DateTimeField(index=True)
+
+
+class CryptoTransaction(BaseModel):
+    class Meta:
+        table_name = "crypto_transactions"
+
+    direction = pw.CharField(
+        index=True, choices=[CryptoDirection.INVESTMENT, CryptoDirection.FIXED_PROFIT]
+    )
+    symbol = pw.CharField()
+    quantity = pw.IntegerField()
+    price = pw.IntegerField()
+    amount = pw.IntegerField()
+    created_at = pw.DateTimeField(index=True)
 
 
 def get_models() -> list[BaseModel]:

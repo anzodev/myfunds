@@ -13,8 +13,15 @@ def hrf_amount(amount: int, currency_precision: Optional[int] = None) -> str:
     return make_hrf_amount(amount, currency_precision)
 
 
+def hrf_crypto_amount(amount: int, currency_precision: int = 8) -> str:
+    return str(float(make_hrf_amount(amount, currency_precision)))
+
+
 def main_processor():
-    return {"hrf_amount": hrf_amount}
+    return {
+        "hrf_amount": hrf_amount,
+        "hrf_crypto_amount": hrf_crypto_amount,
+    }
 
 
 def init_app(app: Flask) -> None:

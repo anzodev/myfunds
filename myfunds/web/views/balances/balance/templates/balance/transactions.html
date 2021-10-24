@@ -117,7 +117,7 @@
                 <div class="ms-2">{{ category_name }}</div>
               </div>
             </div>
-            <div class="dropdown-menu border-0 p-0">
+            <div class="dropdown-menu dropdown-offset border-0 p-0">
               <div class="card" style="min-width: 280px; max-height: 280px; overflow-y: auto;">
                 <div class="list-group">
                   {% if txn.category %}
@@ -176,7 +176,7 @@
               data-bs-toggle="dropdown">
               {{ txn.comment or "..." }}
             </p>
-            <div class="dropdown-menu p-0 border-0" style="width: 400px;">
+            <div class="dropdown-menu dropdown-offset p-0 border-0" style="width: 400px;">
               <div class="card p-2">
                 <form
                   action="{{ url_for('balances.i.update_transaction_comment', balance_id=g.balance.id, **request.args) }}"

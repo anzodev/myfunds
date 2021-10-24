@@ -53,3 +53,17 @@ def fetch_currency(url: str) -> CryptoCurrency:
     img_body = base64.b64encode(res.content).decode()
 
     return CryptoCurrency(id_, symbol, name, img_body)
+
+
+def fetch_prices(currencies_ids: list[int], convert: str = "USD") -> dict[int, float]:
+    url = "https://portal-api.coinmarketcap.com/v1/watchlist/ids"
+    json_data = {"ids": currencies_ids, "convert": convert, "include_untracked": False}
+
+    res = requests.post(url, json=json_data)
+    data = res.json()
+
+    result = {}
+    for i in data["watchlist"]:
+        result[i["id"]] = float(f"{i['quote'][convert]['price']:.2f}")
+
+    return result

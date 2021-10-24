@@ -17,7 +17,8 @@
     {% for balance in balances %}
     <div class="col-3">
 
-      <a href="{{ url_for('balances.i.index', balance_id=balance.id) }}" class="card rounded list-group-item list-group-item-action p-3 mb-4">
+      <a href="{{ url_for('balances.i.index', balance_id=balance.id) }}"
+        class="card rounded list-group-item list-group-item-action p-3 mb-4">
         <div class="lead text-truncate text-end mb-3">{{ balance.name }}</div>
         <div
           class="text-end fw-bold text-{% if balance.amount > 0 %}success{% elif balance.amount < 0 %}danger{% else %}muted{% endif %}">
@@ -44,17 +45,23 @@
         </div>
         <div class="modal-body">
           {% if currencies %}
-          <div class="mb-3">
-            <label for="name" class="form-label small">Name</label>
-            <input type="text" name="name" id="name" class="form-control px-3" required>
-          </div>
-          <div>
-            <label for="currency" class="form-label small">Currency</label>
-            <select name="currency" id="currency" class="form-control px-3" required>
-              {% for currency in currencies %}
-              <option value="{{ currency.code_alpha }}">{{ currency.code_alpha }}</option>
-              {% endfor %}
-            </select>
+          <div class="row">
+            <div class="col-6">
+              <div>
+                <label for="name" class="form-label small">Name</label>
+                <input type="text" name="name" id="name" class="form-control px-3" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div>
+                <label for="currency" class="form-label small">Currency</label>
+                <select name="currency" id="currency" class="form-control px-3" required>
+                  {% for currency in currencies %}
+                  <option value="{{ currency.code_alpha }}">{{ currency.code_alpha }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
           </div>
           {% else %}
           <div class="form-text">Please, add some {% if g.is_superuser %}<a href="{{ url_for('currencies.index') }}"

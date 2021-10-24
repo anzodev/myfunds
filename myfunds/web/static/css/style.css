@@ -33,3 +33,7 @@ html {
   color: #fff;
   background-color: #287bb5;
 }
+
+.dropdown-offset {
+  transform: translate(0px, 38px) !important;
+}
