@@ -58,10 +58,10 @@ def migrate(migrator, database, fake=False, **kwargs):
 
 
 def rollback(migrator, database, fake=False, **kwargs):
-    migrator.remove_model("crypto_currencies")
-
-    migrator.remove_model("crypto_balances")
+    migrator.remove_model("crypto_transactions")
 
     migrator.remove_model("crypto_action_logs")
 
-    migrator.remove_model("crypto_transactions")
+    migrator.remove_model("crypto_balances")
+
+    migrator.remove_model("crypto_currencies")
