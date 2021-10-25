@@ -1,5 +1,7 @@
 from datetime import date
 from datetime import datetime
+from typing import List
+from typing import Tuple
 
 import peewee as pw
 from flask import current_app
@@ -23,19 +25,19 @@ from myfunds.web.constants import FundsDirection
 from myfunds.web.views.dashboard.views import bp
 
 
-def make_stats_years() -> list[int]:
+def make_stats_years() -> List[int]:
     years = current_app.config["DASHBOARD_JOINT_LIMITS_YEARS"]
     current_year = utils.current_year()
     return [current_year] + [current_year - i for i in range(1, years + 1)]
 
 
-def make_date_range_by_year_and_month(year: int, month: int) -> tuple[date, date]:
+def make_date_range_by_year_and_month(year: int, month: int) -> Tuple[date, date]:
     until_year = year if month < 12 else year + 1
     until_month = month + 1 if month < 12 else 1
     return (date(year, month, 1), date(until_year, until_month, 1))
 
 
-def build_joint_limits_info(stats_range: tuple[datetime, datetime]) -> list[dict]:
+def build_joint_limits_info(stats_range: Tuple[datetime, datetime]) -> List[dict]:
     categories_ids_query = Category.select(Category.id).where(
         (Category.account == g.authorized_account)
         & (Category.direction == FundsDirection.EXPENSE.value)

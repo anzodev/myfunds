@@ -1,5 +1,7 @@
 import base64
 from collections import namedtuple
+from typing import Dict
+from typing import List
 from urllib.parse import urlparse
 
 import requests
@@ -55,7 +57,7 @@ def fetch_currency(url: str) -> CryptoCurrency:
     return CryptoCurrency(id_, symbol, name, img_body)
 
 
-def fetch_prices(currencies_ids: list[int], convert: str = "USD") -> dict[int, float]:
+def fetch_prices(currencies_ids: List[int], convert: str = "USD") -> Dict[int, float]:
     url = "https://portal-api.coinmarketcap.com/v1/watchlist/ids"
     json_data = {"ids": currencies_ids, "convert": convert, "include_untracked": False}
 

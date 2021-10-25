@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from argparse import Namespace
 from datetime import datetime
 from typing import Optional
+from typing import Tuple
 
 from wtforms import Form
 
@@ -48,7 +49,7 @@ def make_hrf_amount(amount: int, currency_precision: int) -> str:
     return f"{amount / (10 ** currency_precision):.{currency_precision}f}"
 
 
-def datetime_range_from_first_month_day_to_now() -> tuple[datetime, datetime]:
+def datetime_range_from_first_month_day_to_now() -> Tuple[datetime, datetime]:
     now = datetime.now()
     return (now.replace(day=1, hour=0, minute=0, second=0, microsecond=0), now)
 

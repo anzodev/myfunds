@@ -1,17 +1,18 @@
 from datetime import datetime
 from typing import Iterable
+from typing import List
 
 import xlrd
 
-from .base import ReportParser
 from .base import Replenishment
+from .base import ReportParser
 from .base import Transaction
 from .base import Withdrawal
 
 
 class Privat24BaseParser(ReportParser):
     provider_name = "Privat24"
-    header: list[str] = []
+    header: List[str] = []
     sheet: str = None
 
     def parse(self) -> Iterable[Transaction]:

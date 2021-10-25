@@ -1,5 +1,5 @@
 import inspect
-from operator import inv
+from typing import List
 
 import peewee as pw
 
@@ -140,7 +140,7 @@ class CryptoTransaction(BaseModel):
     created_at = pw.DateTimeField(index=True)
 
 
-def get_models() -> list[BaseModel]:
+def get_models() -> List[BaseModel]:
     # fmt: off
     return [
         i for i in globals().values()

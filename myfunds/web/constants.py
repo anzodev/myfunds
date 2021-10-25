@@ -1,4 +1,6 @@
 from typing import Any
+from typing import Dict
+from typing import List
 from typing import Union
 
 from myfunds.core import constants
@@ -19,15 +21,15 @@ class Constant:
 
 class ConstantGroup:
     @classmethod
-    def constants(cls) -> list[Constant]:
+    def constants(cls) -> List[Constant]:
         return list(i for i in vars(cls).values() if isinstance(i, Constant))
 
     @classmethod
-    def values(cls) -> list[Union[int, str]]:
+    def values(cls) -> List[Union[int, str]]:
         return list(sorted(i.value for i in cls.constants()))
 
     @classmethod
-    def to_dict(cls) -> dict[Union[str, int], Constant]:
+    def to_dict(cls) -> Dict[Union[str, int], Constant]:
         return {i.value: i for i in cls.constants()}
 
     @classmethod

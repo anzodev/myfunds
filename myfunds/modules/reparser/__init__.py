@@ -1,3 +1,4 @@
+from typing import List
 from typing import Type
 
 from . import monobank
@@ -19,11 +20,11 @@ def get_parser(id_: str) -> Type[ReportParser]:
     return _report_parsers_map.get(id_)
 
 
-def get_parsers() -> list[Type[ReportParser]]:
+def get_parsers() -> List[Type[ReportParser]]:
     return list(sorted(_report_parsers.copy(), key=lambda i: i.name()))
 
 
-def get_parsers_by_currency(currency_code: str) -> list[Type[ReportParser]]:
+def get_parsers_by_currency(currency_code: str) -> List[Type[ReportParser]]:
     return list(filter(lambda i: i.currency_code == currency_code, get_parsers()))
 
 

@@ -1,16 +1,17 @@
 import csv
 from datetime import datetime
 from typing import Iterable
+from typing import List
 
-from .base import ReportParser
 from .base import Replenishment
+from .base import ReportParser
 from .base import Transaction
 from .base import Withdrawal
 
 
 class MonobankBaseParser(ReportParser):
     provider_name = "Monobank"
-    header: list[str] = []
+    header: List[str] = []
 
     def parse(self) -> Iterable[Transaction]:
         with open(self.filename) as csvfile:

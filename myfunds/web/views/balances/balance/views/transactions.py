@@ -5,6 +5,8 @@ import tempfile
 import uuid
 from collections import namedtuple
 from datetime import datetime
+from typing import List
+from typing import Tuple
 
 import peewee as pw
 from flask import g
@@ -139,7 +141,7 @@ def filtered_transactions(filters: TransactionFilters) -> pw.SelectQuery:
 
 def paginated_transactions(
     filters: TransactionFilters, filtered_txns: pw.SelectQuery
-) -> tuple[list[Transaction], bool, bool]:
+) -> Tuple[List[Transaction], bool, bool]:
     limit_plus_one = filters.limit + 1
     query = filtered_txns.offset(filters.offset).limit(limit_plus_one)
 
