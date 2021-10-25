@@ -1,0 +1,41 @@
+{% extends 'layouts/dashboard-page.html' %}
+
+
+{% block content %}
+
+<div class="card">
+
+  <section class="p-3">
+    <div class="lead">Joint Limits</div>
+  </section>
+
+  {% if data.common_balances %}
+  <table class="table table-sm table-bordered shadow-none m-0">
+    <thead>
+      <tr class="bg-light border-bottom border-top">
+        <th class="align-middle text-nowrap text-muted py-2 small border-start-0">Balance</th>
+        <th class="align-middle text-nowrap text-muted py-2 small">Amount</th>
+        <th class="align-middle text-nowrap text-muted py-2 small">Converted Amount</th>
+        <th class="align-middle text-nowrap text-muted py-2 small border-end-0">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in data.common_balances %}
+      <tr>
+        <td class="align-middle text-nowrap border-start-0">{{ i.balance_name }}</td>
+        <td class="align-middle text-nowrap">{{ i.amount }} {{ i.currency_code }}</td>
+        <td class="align-middle text-nowrap {% if not loop.first %}border-end-0{% endif %}">{% if i.converted_amount is not none %}{{ i.converted_amount }} USD{% else %}n/a {% endif %}</td>
+        {% if loop.first %}
+        <td class="align-middle border-end-0" rowspan="{{ data.common_balances | length }}" style="white-space: pre-wrap;">{{ data.total_amount }}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="p-3 m-0 border-top">You dont't have any balances.</p>
+  {% endif %}
+
+</div>
+
+{% endblock %}

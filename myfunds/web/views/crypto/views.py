@@ -201,7 +201,7 @@ def stream_balances_values():
                 try:
                     prices = cmc.fetch_prices(currencies_ids, USD_CODE)
                 except Exception as e:
-                    logger.error(
+                    logger.warning(
                         f"Unexpected error while fetching cmc prices ({repr(e)})."
                     )
                     prices = {}

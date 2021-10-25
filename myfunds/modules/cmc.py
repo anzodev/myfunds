@@ -59,7 +59,7 @@ def fetch_prices(currencies_ids: list[int], convert: str = "USD") -> dict[int, f
     url = "https://portal-api.coinmarketcap.com/v1/watchlist/ids"
     json_data = {"ids": currencies_ids, "convert": convert, "include_untracked": False}
 
-    res = requests.post(url, json=json_data)
+    res = requests.post(url, json=json_data, timeout=4)
     data = res.json()
 
     result = {}
