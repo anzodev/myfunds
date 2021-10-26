@@ -48,9 +48,13 @@ def index():
 
     investments = (
         CryptoTransaction.select(
-            pw.fn.COUNT(CryptoTransaction.id), pw.fn.SUM(CryptoTransaction.amount)
+            pw.fn.COUNT(CryptoTransaction.id),
+            pw.fn.SUM(CryptoTransaction.amount),
         )
-        .where(CryptoTransaction.direction == CryptoDirection.INVESTMENT)
+        .where(
+            (CryptoTransaction.account == g.authorized_account)
+            & (CryptoTransaction.direction == CryptoDirection.INVESTMENT)
+        )
         .scalar(as_tuple=True)
     )
     if investments[1] is None:
@@ -58,9 +62,13 @@ def index():
 
     fixed_profit = (
         CryptoTransaction.select(
-            pw.fn.COUNT(CryptoTransaction.id), pw.fn.SUM(CryptoTransaction.amount)
+            pw.fn.COUNT(CryptoTransaction.id),
+            pw.fn.SUM(CryptoTransaction.amount),
         )
-        .where(CryptoTransaction.direction == CryptoDirection.FIXED_PROFIT)
+        .where(
+            (CryptoTransaction.account == g.authorized_account)
+            & (CryptoTransaction.direction == CryptoDirection.FIXED_PROFIT)
+        )
         .scalar(as_tuple=True)
     )
     if fixed_profit[1] is None:
@@ -206,6 +214,7 @@ def invest():
         creation_time = datetime.now()
 
         CryptoTransaction.create(
+            account=g.authorized_account,
             direction=CryptoDirection.INVESTMENT,
             symbol=currency.symbol,
             quantity=utils.amount_to_subunits(quantity, CRYPTO_PRECISION),
@@ -254,6 +263,7 @@ def fix_profit():
         creation_time = datetime.now()
 
         CryptoTransaction.create(
+            account=g.authorized_account,
             direction=CryptoDirection.FIXED_PROFIT,
             symbol=currency.symbol,
             quantity=utils.amount_to_subunits(quantity, CRYPTO_PRECISION),

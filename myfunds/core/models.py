@@ -118,18 +118,11 @@ class CryptoBalance(BaseModel):
     quantity = pw.IntegerField()
 
 
-class CryptoActionLog(BaseModel):
-    class Meta:
-        table_name = "crypto_action_logs"
-
-    message = pw.TextField()
-    created_at = pw.DateTimeField(index=True)
-
-
 class CryptoTransaction(BaseModel):
     class Meta:
         table_name = "crypto_transactions"
 
+    account = pw.ForeignKeyField(Account)
     direction = pw.CharField(
         index=True, choices=[CryptoDirection.INVESTMENT, CryptoDirection.FIXED_PROFIT]
     )
@@ -137,6 +130,14 @@ class CryptoTransaction(BaseModel):
     quantity = pw.IntegerField()
     price = pw.IntegerField()
     amount = pw.IntegerField()
+    created_at = pw.DateTimeField(index=True)
+
+
+class CryptoActionLog(BaseModel):
+    class Meta:
+        table_name = "crypto_action_logs"
+
+    message = pw.TextField()
     created_at = pw.DateTimeField(index=True)
 
 
