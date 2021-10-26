@@ -2,13 +2,10 @@ import logging.config
 
 from myfunds.web import create_app
 from myfunds.web.config import init_config
-from myfunds.web.utils import disable_werkzeug_logs
-from myfunds.web.utils import parse_env_parser
+from myfunds.web.utils import command_line_args
 
 
-disable_werkzeug_logs()
-
-args = parse_env_parser()
+args = command_line_args()
 
 config = init_config(args.env)
 if config.LOGGING_CONFIG != {}:

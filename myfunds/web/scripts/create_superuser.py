@@ -5,10 +5,10 @@ from myfunds.core.models import db_proxy
 from myfunds.modules.security import PBKDF2_PasswordHasher
 from myfunds.web.config import init_config
 from myfunds.web.database import init_database
-from myfunds.web.utils import parse_env_parser
+from myfunds.web.utils import command_line_args
 
 
-args = parse_env_parser()
+args = command_line_args()
 config = init_config(args.env)
 
 db = init_database(config.DATABASE_PATH)

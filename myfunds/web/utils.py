@@ -11,16 +11,11 @@ from myfunds.web import notify
 from myfunds.web.exceptions import FormValidationError
 
 
-def env_parser() -> ArgumentParser:
-    parser = ArgumentParser()
+def command_line_args() -> Namespace:
+    parser = parser = ArgumentParser()
     parser.add_argument(
         "--env", type=str, default=None, help="environment configuration file path"
     )
-    return parser
-
-
-def parse_env_parser() -> Namespace:
-    parser = env_parser()
     return parser.parse_args()
 
 
@@ -64,7 +59,7 @@ def current_month() -> int:
 
 def disable_werkzeug_logs() -> None:
     logger = logging.getLogger("werkzeug")
-    logger.setLevel(logging.CRITICAL)
+    logger.disabled = True
 
 
 def validate_form(
