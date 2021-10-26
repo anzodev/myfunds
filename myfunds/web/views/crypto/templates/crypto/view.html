@@ -166,7 +166,7 @@
                     <input type="hidden" name="action" value="set">
                     <div class="input-group">
                       <input type="text" class="form-control px-3" name="quantity"
-                        value="{{ hrf_crypto_amount(balance.quantity) }}" pattern="^[1-9]{1}\d*(\.\d{1,8})?$" required>
+                        value="{{ hrf_crypto_amount(balance.quantity) }}" pattern="{{ amount_pattern }}" required>
                       <button type="submit" class="btn btn-sm btn-light">
                         <i data-feather="check"></i>
                       </button>
@@ -176,7 +176,7 @@
                     <input type="hidden" name="balance_id" value="{{ balance.id }}">
                     <input type="hidden" name="action" value="add">
                     <div class="input-group">
-                      <input type="text" class="form-control px-3" name="quantity" pattern="^[1-9]{1}\d*(\.\d{1,8})?$"
+                      <input type="text" class="form-control px-3" name="quantity" pattern="{{ amount_pattern }}"
                         required>
                       <button type="submit" class="btn btn-sm btn-light">
                         <i data-feather="plus"></i>
@@ -187,7 +187,7 @@
                     <input type="hidden" name="balance_id" value="{{ balance.id }}">
                     <input type="hidden" name="action" value="subtract">
                     <div class="input-group">
-                      <input type="text" class="form-control px-3" name="quantity" pattern="^[1-9]{1}\d*(\.\d{1,8})?$"
+                      <input type="text" class="form-control px-3" name="quantity" pattern="{{ amount_pattern }}"
                         required>
                       <button type="submit" class="btn btn-sm btn-light">
                         <i data-feather="minus"></i>

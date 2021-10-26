@@ -20,7 +20,7 @@ def command_line_args() -> Namespace:
 
 
 def make_amount_pattern(currency_precision: int) -> str:
-    pattern = r"^[1-9]{1}\d*"
+    pattern = r"^\d+"
     if currency_precision == 0:
         return f"{pattern}$"
 

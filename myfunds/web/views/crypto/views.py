@@ -66,12 +66,15 @@ def index():
     if fixed_profit[1] is None:
         fixed_profit = None
 
+    amount_pattern = utils.make_amount_pattern(8)
+
     return render_template(
         "crypto/view.html",
         currencies=currencies,
         investments=investments,
         fixed_profit=fixed_profit,
         balances=balances,
+        amount_pattern=amount_pattern,
     )
 
 

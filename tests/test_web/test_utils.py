@@ -6,10 +6,10 @@ from myfunds.web import utils
 @pytest.mark.parametrize(
     "currency_precision,result",
     [
-        [0, r"^[1-9]{1}\d*$"],
-        [1, r"^[1-9]{1}\d*(\.\d{1})?$"],
-        [2, r"^[1-9]{1}\d*(\.\d{1,2})?$"],
-        [3, r"^[1-9]{1}\d*(\.\d{1,3})?$"],
+        [0, r"^\d+$"],
+        [1, r"^\d+(\.\d{1})?$"],
+        [2, r"^\d+(\.\d{1,2})?$"],
+        [3, r"^\d+(\.\d{1,3})?$"],
     ],
 )
 def test_make_amount_pattern(currency_precision, result):
