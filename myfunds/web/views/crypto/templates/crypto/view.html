@@ -406,43 +406,54 @@
     let currentProfitValue = $('#current-profit-value');
     let fixedProfitValue = $('#fixed-profit-value');
 
-    let streamBalancesValues = new EventSource("{{ url_for('crypto.stream_balances_values') }}");
+    setInterval(
+      function updateBalancesValues() {
+        fetch("{{ url_for('crypto.ajax_balances_values') }}")
+          .then((res) => { return res.json() })
+          .then((data) => {
+            if (!data.success) {
+              console.log('Fetching balances values error: "' + data.error + '"');
+              return;
+            }
 
-    streamBalancesValues.onmessage = function (e) {
-      let data = JSON.parse(e.data);
+            let payload = data.payload;
+            let totalAmount = 0;
 
-      let totalAmount = 0;
-      for (id in data) {
-        totalAmount += data[id].amount;
-      }
+            for (id in payload) {
+              totalAmount += payload[id].amount;
+            }
 
-      investmentsValue.text(parseFloat(investments).toFixed(2) + '$');
-      currentValue.text(totalAmount.toFixed(2) + '$');
+            investmentsValue.text(parseFloat(investments).toFixed(2) + '$');
+            currentValue.text(totalAmount.toFixed(2) + '$');
 
-      if (investments === 0) {
-        currentProfitValue.text('0$');
-      } else {
-        let value = totalAmount - investments;
-        if (investments > 0) {
-          let percent = ((value / investments) * 100);
-          let colorClass = '';
-          percent > 0 ? colorClass = 'text-success' : colorClass = 'text-danger';
+            if (investments === 0) {
+              currentProfitValue.text('0$');
+            } else {
+              let value = totalAmount - investments;
+              if (investments > 0) {
+                let percent = ((value / investments) * 100);
+                let colorClass = '';
+                percent > 0 ? colorClass = 'text-success' : colorClass = 'text-danger';
 
-          currentProfitValue.removeClass('text-danger', 'text-success');
-          currentProfitValue.html(value.toFixed(2) + '$ (<span class="' + colorClass + '">' + percent.toFixed(2) + '%</span>)');
-        } else {
-          currentProfitValue.html('0.00$');
-        }
-      }
+                currentProfitValue.removeClass('text-danger', 'text-success');
+                currentProfitValue.html(value.toFixed(2) + '$ (<span class="' + colorClass + '">' + percent.toFixed(2) + '%</span>)');
+              } else {
+                currentProfitValue.html('0.00$');
+              }
+            }
 
-      fixedProfitValue.text(parseFloat(fixedProfit).toFixed(2) + '$');
+            fixedProfitValue.text(parseFloat(fixedProfit).toFixed(2) + '$');
 
-      for (id in data) {
-        let balance = $('#balance-' + id);
-        balance.find('.price').text(data[id].price + '$');
-        balance.find('.amount').text(data[id].amount + '$');
-      }
-    }
+            for (id in payload) {
+              let balance = $('#balance-' + id);
+              balance.find('.price').text(payload[id].price + '$');
+              balance.find('.amount').text(payload[id].amount + '$');
+            }
+          });
+
+        return updateBalancesValues;
+      }(), 15000
+    );
 
   })();
 </script>

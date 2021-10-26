@@ -1,10 +1,7 @@
-import json
-import time
 from datetime import datetime
 
 import peewee as pw
 from flask import Blueprint
-from flask import Response
 from flask import g
 from flask import redirect
 from flask import render_template
@@ -18,8 +15,8 @@ from myfunds.core.models import CryptoBalance
 from myfunds.core.models import CryptoCurrency
 from myfunds.core.models import CryptoTransaction
 from myfunds.core.models import db_proxy
-from myfunds.core.models import get_models
 from myfunds.modules import cmc
+from myfunds.web import ajax
 from myfunds.web import auth
 from myfunds.web import notify
 from myfunds.web import utils
@@ -178,52 +175,6 @@ def update_quantity():
     return redirect(redirect_url)
 
 
-@bp.route("/stream/balances-values")
-@auth.login_required
-def stream_balances_values():
-    db = db_proxy.obj
-    account_id = g.authorized_account.id
-
-    logger = g.logger
-
-    def _stream():
-        yield "retry: 1000\n"
-
-        with db.bind_ctx(get_models()):
-            while True:
-                balances = (
-                    CryptoBalance.select()
-                    .join(CryptoCurrency)
-                    .where(CryptoBalance.account_id == account_id)
-                )
-                currencies_ids = [i.currency.cmc_id for i in balances]
-
-                try:
-                    prices = cmc.fetch_prices(currencies_ids, USD_CODE)
-                except Exception as e:
-                    logger.warning(
-                        f"Unexpected error while fetching cmc prices ({repr(e)})."
-                    )
-                    prices = {}
-
-                data = {}
-                for b in balances:
-                    price, amount = prices.get(b.currency.cmc_id), None
-                    if price is not None:
-                        amount = round(
-                            float(utils.make_hrf_amount(b.quantity, CRYPTO_PRECISION))
-                            * price,
-                            USD_PRECISION,
-                        )
-
-                    data[int(b.id)] = {"price": price, "amount": amount}
-
-                yield f"data: {json.dumps(data)}\n\n"
-                time.sleep(15.0)
-
-    return Response(_stream(), mimetype="text/event-stream")
-
-
 @bp.route("/crypto/invest", methods=["POST"])
 @auth.login_required
 def invest():
@@ -318,3 +269,34 @@ def fix_profit():
     notify.info("New profit fix was added.")
 
     return redirect(redirect_url)
+
+
+@bp.route("/ajax/balances-values")
+@ajax.ajax_endpoint
+@auth.login_required
+def ajax_balances_values():
+    balances = (
+        CryptoBalance.select()
+        .join(CryptoCurrency)
+        .where(CryptoBalance.account == g.authorized_account)
+    )
+    currencies_ids = [i.currency.cmc_id for i in balances]
+
+    try:
+        prices = cmc.fetch_prices(currencies_ids, USD_CODE)
+    except Exception as e:
+        g.logger.warning(f"Unexpected error while fetching cmc prices ({repr(e)}).")
+        prices = {}
+
+    data = {}
+    for b in balances:
+        price, amount = prices.get(b.currency.cmc_id), None
+        if price is not None:
+            amount = round(
+                float(utils.make_hrf_amount(b.quantity, CRYPTO_PRECISION)) * price,
+                USD_PRECISION,
+            )
+
+        data[int(b.id)] = {"price": price, "amount": amount}
+
+    return data

@@ -7,4 +7,4 @@ if __name__ == "__main__":
 
     app.templates_auto_reload = True
     app.jinja_options["auto_reload"] = True
-    app.run()
+    app.run(use_reloader=True)
