@@ -27,7 +27,7 @@ def index():
         .select()
         .join(Currency, on=(Balance.currency_id == Currency.id))
         .where(Balance.account == g.authorized_account)
-        .order_by(Balance.created_at.desc())
+        .order_by(Balance.name)
     )
     # fmt: on
     currencies = Currency.select().order_by(Currency.code_alpha)
