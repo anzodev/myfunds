@@ -1,0 +1,50 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<ol class="breadcrumb shadow-none border-0 p-0 m-0 mb-3">
+  <li class="breadcrumb-item p-0 pe-3"><a href="{{ url_for('crypto.index') }}" class="link-info">Crypto</a></li>
+  <li class="breadcrumb-item p-0 active" aria-current="page">Actions</li>
+</ol>
+
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3 m-0">Actions</h1>
+  <a href="{{ url_for('crypto.export_actions') }}" class="btn btn-info">Export</a>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<table class="table table-sm table-bordered">
+  <thead>
+    <tr class="bg-light">
+      <th class="text-muted small">Time</th>
+      <th class="text-muted small">Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in actions %}
+    <tr>
+      <td>{{ i.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      <td>{{ i.message }}</td>
+    </tr>
+    {% endfor %}
+    <tr></tr>
+  </tbody>
+</table>
+
+{% if has_prev or has_next %}
+<section>
+  <div class="d-flex">
+    {% if has_prev %}
+    <a href="{{ url_for('crypto.actions', limit=filters.limit, offset=filters.offset - filters.limit) }}"
+      class="btn btn-light me-3">Previous</a>
+    {% endif %}
+    {% if has_next %}
+    <a href="{{ url_for('crypto.actions', limit=filters.limit, offset=filters.offset + filters.limit) }}"
+      class="btn btn-light me-3">Next</a>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

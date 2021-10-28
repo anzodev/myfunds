@@ -137,6 +137,7 @@ class CryptoActionLog(BaseModel):
     class Meta:
         table_name = "crypto_action_logs"
 
+    account = pw.ForeignKeyField(Account, null=True)
     message = pw.TextField()
     created_at = pw.DateTimeField(index=True)
 

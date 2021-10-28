@@ -1,12 +1,17 @@
+import csv
+import io
 from datetime import datetime
 
 import peewee as pw
 from flask import Blueprint
 from flask import g
+from flask import make_response
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
+from wtforms import Form
+from wtforms import IntegerField
 from wtforms import validators as vals
 
 from myfunds.core.constants import CryptoDirection
@@ -20,6 +25,7 @@ from myfunds.web import ajax
 from myfunds.web import auth
 from myfunds.web import notify
 from myfunds.web import utils
+from myfunds.web.constants import DATETIME_FORMAT
 from myfunds.web.forms import AddCryptoBalanceForm
 from myfunds.web.forms import AddCyptoTransactionForm
 from myfunds.web.forms import DeleteCryptoBalanceForm
@@ -171,6 +177,7 @@ def update_quantity():
 
     with db_proxy.atomic():
         CryptoActionLog.create(
+            account=g.authorized_account,
             message=(
                 f"{action.capitalize()} {form.quantity.data} {balance.currency.symbol} "
                 f"for {balance.name} ({balance.id}), "
@@ -224,6 +231,7 @@ def invest():
         )
 
         CryptoActionLog.create(
+            account=g.authorized_account,
             message=(
                 f"Invest ${amount}, bought {quantity} {currency.symbol} by ${price}."
             ),
@@ -273,6 +281,7 @@ def fix_profit():
         )
 
         CryptoActionLog.create(
+            account=g.authorized_account,
             message=(
                 f"Fix profit ${amount}, sell {quantity} {currency.symbol} by ${price}."
             ),
@@ -313,3 +322,64 @@ def ajax_balances_values():
         data[int(b.id)] = {"price": price, "amount": amount}
 
     return data
+
+
+class ActionsFilterForm(Form):
+    offset = IntegerField(validators=[vals.Optional()])
+    limit = IntegerField(validators=[vals.Optional()])
+
+
+@bp.route("/crypto/actions")
+@auth.login_required
+def actions():
+    filter_form = ActionsFilterForm(request.args)
+    utils.validate_form(filter_form, url_for("crypto.actions"), error_notify=None)
+
+    offset = filter_form.offset.data or 0
+    limit = filter_form.limit.data or 10
+
+    filters = {"offset": offset, "limit": limit}
+
+    limit_plus_one = limit + 1
+    query = (
+        CryptoActionLog.select()
+        .where(CryptoActionLog.account == g.authorized_account)
+        .order_by(CryptoActionLog.created_at.desc())
+        .offset(offset)
+        .limit(limit_plus_one)
+    )
+
+    actions = list(query)[:limit]
+
+    has_prev = offset > 0
+    has_next = len(query) == limit_plus_one
+
+    return render_template(
+        "crypto/actions.html",
+        filters=filters,
+        actions=actions,
+        has_prev=has_prev,
+        has_next=has_next,
+    )
+
+
+@bp.route("/crypto/actions/export")
+@auth.login_required
+def export_actions():
+    actions = (
+        CryptoActionLog.select()
+        .where(CryptoActionLog.account == g.authorized_account)
+        .order_by(CryptoActionLog.created_at.desc())
+    )
+
+    buffer = io.StringIO()
+    csvwriter = csv.writer(buffer, delimiter=";", quoting=csv.QUOTE_ALL)
+    csvwriter.writerow(["Time", "Message"])
+
+    for i in actions.iterator():
+        csvwriter.writerow([i.created_at.strftime(DATETIME_FORMAT.value), i.message])
+
+    res = make_response(buffer.getvalue())
+    res.headers["Content-Disposition"] = "attachment; filename=actions.csv"
+    res.headers["Content-type"] = "text/csv"
+    return res
