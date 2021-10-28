@@ -13,7 +13,11 @@
   <div class="col-3">
 
     <div class="card mb-4">
-      <div class="p-3">
+      <section class="p-3">
+        <div class="lead">General</div>
+      </section>
+
+      <div class="p-3 border-top">
         <table class="table table-borderless shadow-none m-0">
           <tbody>
             <tr>
@@ -53,27 +57,31 @@
         </div>
       </section>
 
-      <table class="table table-borderless shadow-none m-0">
-        <thead>
-          <tr class="bg-light border-bottom border-top">
-            <th class="align-middle text-nowrap text-muted py-2 small">Transactions</th>
-            <th class="align-middle text-nowrap text-muted py-2 small">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if investments %}
-          <tr>
-            <td class="align-middle text-nowrap">{{ investments[0] }}</td>
-            <td class="align-middle text-nowrap">{{ hrf_amount(investments[1], 2) }}$</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td class="align-middle text-nowrap">0</td>
-            <td class="align-middle text-nowrap">0.0$</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
+      <div class="px-3 py-2 border-top">
+        <table class="table table-borderless shadow-none m-0">
+          <tbody>
+            {% if investments %}
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Transactions:</td>
+              <td class="text-nowrap py-1">{{ investments[0] }}</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Amount:</td>
+              <td class="text-nowrap py-1">{{ hrf_amount(investments[1], 2) }}$</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Transactions:</td>
+              <td class="text-nowrap py-1">0</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Amount:</td>
+              <td class="text-nowrap py-1">0.0$</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="card">
@@ -92,27 +100,31 @@
         </div>
       </section>
 
-      <table class="table table-borderless shadow-none m-0">
-        <thead>
-          <tr class="bg-light border-bottom border-top">
-            <th class="align-middle text-nowrap text-muted py-2 small">Transactions</th>
-            <th class="align-middle text-nowrap text-muted py-2 small">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if fixed_profit %}
-          <tr>
-            <td class="align-middle text-nowrap">{{ fixed_profit[0] }}</td>
-            <td class="align-middle text-nowrap">{{ hrf_amount(fixed_profit[1], 2) }}$</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td class="align-middle text-nowrap">0</td>
-            <td class="align-middle text-nowrap">0.0$</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
+      <div class="px-3 py-2 border-top">
+        <table class="table table-borderless shadow-none m-0">
+          <tbody>
+            {% if fixed_profit %}
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Transactions:</td>
+              <td class="text-nowrap py-1">{{ fixed_profit[0] }}</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Amount:</td>
+              <td class="text-nowrap py-1">{{ hrf_amount(fixed_profit[1], 2) }}$</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Transactions:</td>
+              <td class="text-nowrap py-1">0</td>
+            </tr>
+            <tr>
+              <td class="text-nowrap py-1 ps-0" style="width: 1px;">Amount:</td>
+              <td class="text-nowrap py-1">0.0$</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div>
