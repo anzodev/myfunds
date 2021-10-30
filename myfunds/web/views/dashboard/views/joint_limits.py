@@ -1,3 +1,4 @@
+from calendar import monthrange
 from datetime import date
 from datetime import datetime
 from typing import List
@@ -173,11 +174,18 @@ def joint_limits():
         "month": month,
     }
 
+    current_day = None
+    if year == current_year and month == current_month:
+        today = date.today()
+        month_completed_by = round((today.day / monthrange(year, month)[1]) * 100, 2)
+        current_day = f"{today.day} ({today.strftime('%A')}, {month_completed_by}%)"
+
     stats_range = make_date_range_by_year_and_month(year, month)
     joint_limits_info = build_joint_limits_info(stats_range)
 
     return render_template(
         "joint-limits.html",
         filters=filters,
+        current_day=current_day,
         joint_limits_info=joint_limits_info,
     )
