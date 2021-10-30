@@ -377,7 +377,7 @@ def export_actions():
     csvwriter.writerow(["Time", "Message"])
 
     for i in actions.iterator():
-        csvwriter.writerow([i.created_at.strftime(DATETIME_FORMAT.value), i.message])
+        csvwriter.writerow([i.created_at.strftime(DATETIME_FORMAT), i.message])
 
     res = make_response(buffer.getvalue())
     res.headers["Content-Disposition"] = "attachment; filename=actions.csv"

@@ -48,7 +48,7 @@ class TransactionFilterForm(Form):
     created_at_range_hrf = StringField(
         validators=[
             vals.Optional(),
-            vals.Regexp(f"{DATETIME_PATTERN.value} - {DATETIME_PATTERN.value}"),
+            vals.Regexp(f"{DATETIME_PATTERN} - {DATETIME_PATTERN}"),
         ]
     )
     limit = IntegerField(validators=[vals.Optional()])
@@ -90,12 +90,12 @@ def init_filters(filter_form: Form) -> TransactionFilters:
     created_at_range = utils.datetime_range_from_first_month_day_to_now()
     if created_at_range_hrf != "":
         created_at_range = tuple(
-            datetime.strptime(i, DATETIME_FORMAT.value)
+            datetime.strptime(i, DATETIME_FORMAT)
             for i in created_at_range_hrf.split(" - ")
         )
     else:
         created_at_range_hrf = " - ".join(
-            i.strftime(DATETIME_FORMAT.value) for i in created_at_range
+            i.strftime(DATETIME_FORMAT) for i in created_at_range
         )
 
     return TransactionFilters(
@@ -201,7 +201,7 @@ def export_transactions():
     for i in filtered_txns.iterator():
         csvwriter.writerow(
             [
-                i.created_at.strftime(DATETIME_FORMAT.value),
+                i.created_at.strftime(DATETIME_FORMAT),
                 FundsDirection.get(i.direction).meta["name"],
                 i.category.name if i.category else "",
                 utils.make_hrf_amount(i.amount, g.currency.precision),
