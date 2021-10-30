@@ -82,20 +82,6 @@ def new():
         notify.error("Currency not found.")
         return redirect(redirect_url)
 
-    # fmt: off
-    limit_exists = (
-        JointLimit
-        .select(JointLimit.id)
-        .where(
-            (JointLimit.name == name)
-        )
-        .exists()
-    )
-    # fmt: on
-    if limit_exists:
-        notify.error("Limit exists already.")
-        return redirect(redirect_url)
-
     JointLimit.create(currency=currency, name=name, amount=amount)
     notify.info("New limit was created.")
 

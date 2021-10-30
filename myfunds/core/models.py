@@ -85,7 +85,7 @@ class JointLimit(BaseModel):
         table_name = "joint_limits"
 
     currency = pw.ForeignKeyField(Currency)
-    name = pw.CharField(unique=True)
+    name = pw.CharField()
     amount = pw.IntegerField()
 
 
