@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import g
 from flask import render_template
 
@@ -9,6 +11,7 @@ from myfunds.modules import cmc
 from myfunds.modules import convertmymoney
 from myfunds.web import auth
 from myfunds.web import utils
+from myfunds.web.constants import DATETIME_FORMAT
 from myfunds.web.views.dashboard.views import bp
 
 
@@ -100,6 +103,7 @@ def total_budget():
 
     total_amount = "\n+ ".join(total_amount)
 
+    current_time = datetime.now().strftime(DATETIME_FORMAT)
     data = {"common_balances": common_balances, "total_amount": total_amount}
 
-    return render_template("total-budget.html", data=data)
+    return render_template("total-budget.html", current_time=current_time, data=data)
