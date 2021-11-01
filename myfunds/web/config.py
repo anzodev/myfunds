@@ -15,6 +15,8 @@ class Config:
     LOGGING_CONFIG: dict
     BALANCE_STATISTICS_YEARS: int
     DASHBOARD_JOINT_LIMITS_YEARS: int
+    RUN_ON_HOST: str
+    RUN_ON_PORT: int
 
 
 def init_config(env_path: Optional[str] = None) -> Config:
@@ -32,4 +34,6 @@ def init_config(env_path: Optional[str] = None) -> Config:
             LOGGING_CONFIG=env.json("LOGGING_CONFIG", "{}"),
             BALANCE_STATISTICS_YEARS=env.int("BALANCE_STATISTICS_YEARS", 5),
             DASHBOARD_JOINT_LIMITS_YEARS=env.int("DASHBOARD_JOINT_LIMITS_YEARS", 5),
+            RUN_ON_HOST=env.str("RUN_ON_HOST", "localhost"),
+            RUN_ON_PORT=env.int("RUN_ON_PORT", 8080),
         )
