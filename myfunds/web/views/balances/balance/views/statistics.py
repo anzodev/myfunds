@@ -288,7 +288,7 @@ def make_transactions_link(
         balance_id=g.balance.id,
         direction=FundsDirection.EXPENSE.value,
         category_id=category_id,
-        created_at_between=" - ".join(i.strftime(DATETIME_FORMAT) for i in stats_range),
+        created_at_range_hrf=" - ".join(i.strftime(DATETIME_FORMAT) for i in stats_range),
     )
 
 
