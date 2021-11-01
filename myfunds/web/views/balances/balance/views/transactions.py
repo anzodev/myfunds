@@ -73,7 +73,7 @@ def init_filters(filter_form: Form) -> TransactionFilters:
     direction = filter_form.direction.data
     category_id = filter_form.category_id.data
     created_at_range_hrf = filter_form.created_at_range_hrf.data
-    limit = filter_form.limit.data or 8
+    limit = filter_form.limit.data or 10
     offset = filter_form.offset.data or 0
 
     categories = []
