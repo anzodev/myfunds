@@ -1,12 +1,13 @@
 import logging.config
 
+from myfunds.config import init_config
+from myfunds.config import init_env_parser
 from myfunds.core.models import db_proxy
 from myfunds.web import create_app
-from myfunds.web.config import init_config
-from myfunds.web.utils import command_line_args
 
 
-args = command_line_args()
+parser = init_env_parser()
+args = parser.parse_args()
 
 config = init_config(args.env)
 if config.LOGGING_CONFIG != {}:

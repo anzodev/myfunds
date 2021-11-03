@@ -23,7 +23,7 @@ def fail_response(error: str) -> dict:
 def ajax_endpoint(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        logger = logging.getLogger("web.views")
+        logger = logging.getLogger("myfunds.web.views")
 
         try:
             payload = f(*args, **kwargs)

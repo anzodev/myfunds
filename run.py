@@ -13,7 +13,7 @@ if __name__ == "__main__":
     app.templates_auto_reload = True
     app.jinja_options["auto_reload"] = True
 
-    host, port = app.config["RUN_ON_HOST"], app.config["RUN_ON_PORT"]
+    host, port = app.config["WEB_RUN_ON_HOST"], app.config["WEB_RUN_ON_PORT"]
     print(f"Running on http://{host}:{port}/")
 
     app.run(host=host, port=port, use_reloader=True, threaded=True)

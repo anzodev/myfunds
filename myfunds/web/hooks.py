@@ -21,7 +21,7 @@ def add_constants_to_globals():
 
 
 def setup_logger():
-    g.logger = logging.getLogger(f"web.views.{request.endpoint}")
+    g.logger = logging.getLogger(f"myfunds.web.views.{request.endpoint}")
 
 
 def errorhandler(exc: Exception) -> Response:
@@ -62,7 +62,7 @@ def log_request():
     if r.endpoint == "static":
         return
 
-    logger = logging.getLogger("web.requests")
+    logger = logging.getLogger("myfunds.web.requests")
 
     query_string = r.query_string.decode()
     url = f"{r.path}?{query_string}" if query_string != "" else r.path

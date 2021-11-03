@@ -1,5 +1,4 @@
 import peewee as pw
-from flask import Flask
 
 
 def init_database(database_path: str) -> pw.SqliteDatabase:
@@ -11,7 +10,3 @@ def init_database(database_path: str) -> pw.SqliteDatabase:
             ("foreign_keys", 1),
         ],
     )
-
-
-def init_app(app: Flask) -> None:
-    app.config["DATABASE"] = init_database(app.config["DATABASE_PATH"])

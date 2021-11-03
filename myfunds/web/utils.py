@@ -1,6 +1,4 @@
 import logging
-from argparse import ArgumentParser
-from argparse import Namespace
 from datetime import datetime
 from typing import Optional
 from typing import Tuple
@@ -9,14 +7,6 @@ from wtforms import Form
 
 from myfunds.web import notify
 from myfunds.web.exceptions import FormValidationError
-
-
-def command_line_args() -> Namespace:
-    parser = parser = ArgumentParser()
-    parser.add_argument(
-        "--env", type=str, default=None, help="environment configuration file path"
-    )
-    return parser.parse_args()
 
 
 def make_amount_pattern(currency_precision: int) -> str:

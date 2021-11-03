@@ -27,7 +27,7 @@ from myfunds.web.views.dashboard.views import bp
 
 
 def make_stats_years() -> List[int]:
-    years = current_app.config["DASHBOARD_JOINT_LIMITS_YEARS"]
+    years = current_app.config["MAX_YEARS_OF_STATISTICS"]
     current_year = utils.current_year()
     return [current_year] + [current_year - i for i in range(1, years + 1)]
 
