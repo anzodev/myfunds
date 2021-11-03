@@ -178,3 +178,11 @@ class AddCyptoTransactionForm(Form):
     currency_id = id_field()
     quantity = StringField(validators=[vals.InputRequired()])
     price = StringField(validators=[vals.InputRequired()])
+
+
+class SignUpTelegramBotAccountForm(Form):
+    chat_id = id_field()
+
+
+class ResetTelegramBotAccountForm(Form):
+    chat_id = id_field()

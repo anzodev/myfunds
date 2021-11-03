@@ -142,6 +142,14 @@ class CryptoActionLog(BaseModel):
     created_at = pw.DateTimeField(index=True)
 
 
+class TelegramBotAccount(BaseModel):
+    class Meta:
+        table_name = "telegram_bot_accounts"
+
+    account = pw.ForeignKeyField(Account, unique=True)
+    chat_id = pw.IntegerField(unique=True)
+
+
 def get_models() -> List[BaseModel]:
     # fmt: off
     return [

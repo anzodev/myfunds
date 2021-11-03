@@ -1,0 +1,55 @@
+{% extends 'layouts/account-page.html' %}
+
+
+{% block top_line %}
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3 m-0">Telegram Bot</h1>
+</div>
+{% endblock %}
+
+
+{% block main %}
+{% if config.TGBOT_TOKEN %}
+<section>
+  <table class="table table-sm table-borderless shadow-none fs-6 mb-5">
+    <tr>
+      <td class="ps-0" style="width: 1px;">Username: </td>
+      <td>@{{ bot_username }}</td>
+    </tr>
+    <tr>
+      <td class="ps-0 text-nowrap" style="width: 1px;">Bot address: </td>
+      <td><a href="https://t.me/{{ bot_username }}"
+          target="_blank">https://t.me/{{ bot_username }}</a></td>
+    </tr>
+  </table>
+
+  <div class="row">
+    <div class="col-3">
+
+      {% if tg_account %}
+      <form action="{{ url_for('tgbot.reset') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label">Chat ID</label>
+          <input type="text" name="chat_id" class="form-control px-3" value="{{ tg_account.chat_id }}" readonly>
+        </div>
+        <button type="submit" class="btn btn-danger">Reset</button>
+      </form>
+      {% else %}
+      <form action="{{ url_for('tgbot.sign_up') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label">Chat ID</label>
+          <input type="text" name="chat_id" class="form-control px-3" pattern="^\d+$" required>
+        </div>
+        <button type="submit" class="btn btn-info">Sign Up</button>
+      </form>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+{% else %}
+<section>
+  <p>Telegram bot token not set.</p>
+</section>
+{% endif %}
+{% endblock %}

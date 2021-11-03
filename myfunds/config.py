@@ -19,6 +19,10 @@ class Config:
     WEB_RUN_ON_HOST: str
     WEB_RUN_ON_PORT: int
 
+    TGBOT_TOKEN: Optional[str]
+    TGBOT_UPDATES_LIMIT: int
+    TGBOT_UPDATES_TIMEOUT: int
+
 
 def init_config(env_path: Optional[str] = None) -> Config:
     env = Env()
@@ -36,6 +40,9 @@ def init_config(env_path: Optional[str] = None) -> Config:
             WEB_SECRET_KEY=env.str("WEB_SECRET_KEY"),
             WEB_RUN_ON_HOST=env.str("WEB_RUN_ON_HOST", "localhost"),
             WEB_RUN_ON_PORT=env.int("WEB_RUN_ON_PORT", 8080),
+            TGBOT_TOKEN=env.str("TGBOT_TOKEN", None),
+            TGBOT_UPDATES_LIMIT=env.int("TGBOT_UPDATES_LIMIT", 10),
+            TGBOT_UPDATES_TIMEOUT=env.int("TGBOT_UPDATES_TIMEOUT", 20),
         )
 
 

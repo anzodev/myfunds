@@ -10,6 +10,7 @@ from myfunds.web.views import currencies
 from myfunds.web.views import dashboard
 from myfunds.web.views import general
 from myfunds.web.views import joint_limits
+from myfunds.web.views import tgbot
 
 
 def init_app(app: Flask) -> None:
@@ -23,3 +24,4 @@ def init_app(app: Flask) -> None:
     dashboard.init_app(app)
     general.init_app(app)
     joint_limits.init_app(app)
+    tgbot.init_app(app)
