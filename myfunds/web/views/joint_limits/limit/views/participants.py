@@ -69,9 +69,7 @@ def participants_new():
         # fmt: on
         return render_template("limit/new_participant.html", step=1, accounts=accounts)
 
-    redirect_url = url_for(
-        "joint_limits.i.participants_new", limit_id=g.limit.id
-    )
+    redirect_url = url_for("joint_limits.i.participants_new", limit_id=g.limit.id)
 
     step_form = JointLimitParticipantGetStepForm(request.form)
     utils.validate_form(step_form, redirect_url)
@@ -147,9 +145,7 @@ def participants_new():
         JointLimitParticipant.create(limit=g.limit, category=category)
         notify.info("New participant was added successfully.")
 
-        return redirect(
-            url_for("joint_limits.i.participants", limit_id=g.limit.id)
-        )
+        return redirect(url_for("joint_limits.i.participants", limit_id=g.limit.id))
 
 
 @bp.route("/participants/delete", methods=["POST"])
@@ -164,9 +160,7 @@ def delete_participant():
 
     participant_id = form.participant_id.data
 
-    participant = JointLimitParticipant.get_or_none(
-        id=participant_id, limit=g.limit
-    )
+    participant = JointLimitParticipant.get_or_none(id=participant_id, limit=g.limit)
     if participant is None:
         notify.error("Participant not found.")
         return redirect(redirect_url)
