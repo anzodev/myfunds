@@ -183,7 +183,7 @@ def handler(ctx: HandlerContext) -> None:
 
         if len(joint_limits_data) == 0:
             text = "\n\n".join(
-                ["*Joint Limits*", f"No data \\({year}\\-{month:>02}\\)\\."]
+                ["*Joint Limits*", f"No data {year}\\-{month:>02}\\."]
             )
             ctx.client.edit_message_text(
                 text=text,

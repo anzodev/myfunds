@@ -104,7 +104,7 @@ def build_report(account: Account) -> str:
 
     report = "\n\n".join(
         [
-            "*Crypto Balances 123*",
+            "*Crypto Balances*",
             f"```\n{general_table.get_string(header=False, right_padding_width=1)}```",
             f"```\n{balances_table.get_string(header=False, right_padding_width=1)}```",
         ]
