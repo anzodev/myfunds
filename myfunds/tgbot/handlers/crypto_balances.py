@@ -70,6 +70,8 @@ def build_report(account: Account) -> str:
     current_value = 0.0
     current_profit_value = 0.0
     current_profit_value_pct = 0.0
+    total_profit_value = 0.0
+    total_profit_value_pct = 0.0
 
     if balances_values:
         current_value = sum(i["amount"] for i in balances_values.values())
@@ -79,14 +81,19 @@ def build_report(account: Account) -> str:
         current_profit_value_pct = round(
             (current_profit_value / investments_value) * 100, 2
         )
+        total_profit_value = round(current_profit_value + fixed_profit_value, 2)
+        total_profit_value_pct = round(
+            (total_profit_value / investments_value) * 100, 2
+        )
 
     # fmt: off
     general_table = PrettyTable()
     general_table.set_style(PLAIN_COLUMNS)
     general_table.add_row(["Investments:", f"{investments_value}$"])
     general_table.add_row(["Current value:", f"{current_value}$"])
-    general_table.add_row(["Current profit:", f"{current_profit_value}$ ({current_profit_value_pct})%"])  # noqa: E501
     general_table.add_row(["Fixed profit:", f"{fixed_profit_value}$"])
+    general_table.add_row(["Current profit:", f"{current_profit_value}$ ({current_profit_value_pct})%"])  # noqa: E501
+    general_table.add_row(["Total profit:", f"{total_profit_value}$ ({total_profit_value_pct})%"])  # noqa: E501
     general_table.align = "l"
     # fmt: on
 
