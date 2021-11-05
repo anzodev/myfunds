@@ -22,6 +22,7 @@ class Bot:
     def __init__(self, config: Config):
         self._config = config
         self._client = BotClient(config.TGBOT_TOKEN)
+        self._logger = utils.get_logger()
 
         self._handlers = {}
 
@@ -34,8 +35,7 @@ class Bot:
 
     @utils.log_error_and_restart(5)
     def run(self) -> None:
-        logger = utils.get_logger()
-        logger.info("Starts listening for updates ...")
+        self._logger.info("Starts listening for updates ...")
 
         offset = 0
         while True:
@@ -46,7 +46,7 @@ class Bot:
                     timeout=self._config.TGBOT_UPDATES_TIMEOUT,
                 )
             except BotClientError as e:
-                logger.warning(repr(e))
+                self._logger.warning(repr(e))
                 continue
 
             if len(updates) == 0:
@@ -78,10 +78,11 @@ class Bot:
         command = utils.extract_command(update)
         command_args = utils.extract_command_args(command)
 
+        self._logger.info(f"{account.username}: {command}")
+
         handler = self._get_handler(command)
         if handler is None:
-            logger = utils.get_logger()
-            logger.warning(f"Handler not found (command '{command}').")
+            self._logger.warning(f"Handler not found (command '{command}').")
             return
 
         ctx = HandlerContext(
@@ -96,8 +97,7 @@ class Bot:
         try:
             return handler(ctx)
         except Exception:
-            logger = utils.get_logger()
-            logger.exception("Unexpected error:")
+            self._logger.exception("Unexpected error:")
 
     def _get_handler(self, command: str):
         command_name = utils.extract_command_name(command)

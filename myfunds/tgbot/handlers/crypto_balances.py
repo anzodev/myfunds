@@ -90,7 +90,7 @@ def build_report(account: Account) -> str:
     )
     currencies_prices_table = []
     for c in unique_currencies:
-        currencies_prices_table.append(f"{c.symbol}: {prices[c.cmc_id]}")
+        currencies_prices_table.append(f"{c.symbol}: {prices[c.cmc_id]}$")
     currencies_prices_table = "\n".join(currencies_prices_table)
 
     # fmt: off

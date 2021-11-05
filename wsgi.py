@@ -1,9 +1,11 @@
 import logging.config
+import os
 
 from myfunds.config import init_config
 from myfunds.config import init_env_parser
 from myfunds.core.models import db_proxy
 from myfunds.web import create_app
+from myfunds.web.utils import disable_werkzeug_logs
 
 
 parser = init_env_parser()
@@ -15,3 +17,18 @@ if config.LOGGING_CONFIG != {}:
 
 app = create_app(config)
 db_proxy.initialize(app.config["DATABASE"])
+
+
+if __name__ == "__main__":
+    disable_werkzeug_logs()
+
+    # Disable Flask messages.
+    os.environ["WERKZEUG_RUN_MAIN"] = "true"
+
+    app.templates_auto_reload = True
+    app.jinja_options["auto_reload"] = True
+
+    host, port = app.config["WEB_RUN_ON_HOST"], app.config["WEB_RUN_ON_PORT"]
+    print(f"Running on http://{host}:{port}/")
+
+    app.run(host=host, port=port, use_reloader=True, threaded=True)
