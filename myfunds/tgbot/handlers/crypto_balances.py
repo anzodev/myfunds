@@ -1,6 +1,4 @@
 import peewee as pw
-from prettytable import PLAIN_COLUMNS
-from prettytable import PrettyTable
 
 from myfunds.core.constants import CryptoDirection
 from myfunds.core.models import Account
@@ -10,7 +8,6 @@ from myfunds.core.models import CryptoTransaction
 from myfunds.modules import cmc
 from myfunds.tgbot.bot import HandlerContext
 from myfunds.tgbot.utils import InlineKeyboard
-from myfunds.tgbot.utils import get_logger
 from myfunds.web import utils as web_utils
 
 
@@ -50,20 +47,21 @@ def build_report(account: Account) -> str:
     )
 
     currencies_ids = [i.currency.cmc_id for i in balances]
-    try:
-        prices = cmc.fetch_prices(currencies_ids, "USD")
-    except Exception as e:
-        logger = get_logger()
-        logger.warning(f"Unexpected error while fetching cmc prices ({repr(e)}).")
-        prices = {}
+
+    prices = cmc.fetch_prices(currencies_ids, "USD")
 
     balances_values = {}
     for b in balances:
-        price, amount = prices.get(b.currency.cmc_id), None
-        if price is not None:
-            amount = round(float(web_utils.make_hrf_amount(b.quantity, 8)) * price, 2)
+        price = prices[b.currency.cmc_id]
+        # fmt: off
+        amount = (
+            float(web_utils.make_hrf_amount(b.quantity, 8))
+            * price
+        )
+        amount = round(amount, 2)
+        # fmt: on
 
-        balances_values[int(b.id)] = {"price": price, "amount": amount}
+        balances_values[b.id] = {"price": price, "amount": amount}
 
     investments_value = round(investments / 100, 2)
     fixed_profit_value = round(fixed_profit / 100, 2)
@@ -74,7 +72,7 @@ def build_report(account: Account) -> str:
     total_profit_value_pct = 0.0
 
     if balances_values:
-        current_value = sum(i["amount"] for i in balances_values.values())
+        current_value = round(sum(i["amount"] for i in balances_values.values()), 2)
 
     if investments_value > 0:
         current_profit_value = round(current_value - investments_value, 2)
@@ -86,7 +84,17 @@ def build_report(account: Account) -> str:
             (total_profit_value / investments_value) * 100, 2
         )
 
+    unique_currencies = sorted(
+        set(b.currency for b in balances),
+        key=lambda c: c.symbol,
+    )
+    currencies_prices_table = []
+    for c in unique_currencies:
+        currencies_prices_table.append(f"{c.symbol}: {prices[c.cmc_id]}")
+    currencies_prices_table = "\n".join(currencies_prices_table)
+
     # fmt: off
+<<<<<<< Updated upstream
     general_table = PrettyTable()
     general_table.set_style(PLAIN_COLUMNS)
     general_table.add_row(["Investments:", f"{investments_value}$"])
@@ -95,27 +103,31 @@ def build_report(account: Account) -> str:
     general_table.add_row(["Current profit:", f"{current_profit_value}$ ({current_profit_value_pct})%"])  # noqa: E501
     general_table.add_row(["Total profit:", f"{total_profit_value}$ ({total_profit_value_pct})%"])  # noqa: E501
     general_table.align = "l"
+=======
+    general_table = []
+    general_table.append(f"Investments: {investments_value}$")
+    general_table.append(f"Current value: {current_value}$")
+    general_table.append(f"Current profit: {current_profit_value}$ ({current_profit_value_pct})%")  # noqa: E501
+    general_table.append(f"Fixed profit: {fixed_profit_value}$")
+    general_table = "\n".join(general_table)
+>>>>>>> Stashed changes
     # fmt: on
 
-    balances_table = PrettyTable()
-    balances_table.set_style(PLAIN_COLUMNS)
+    balances_table = []
     for i in balances:
         quantity = round(i.quantity / (10 ** 8), 8)
-        balances_table.add_row(
-            [
-                f"{i.name}:",
-                f"{quantity} {i.currency.symbol} ({balances_values[i.id]['amount']}$)",
-            ]
+        balances_table.append(
+            f"{i.name}: {quantity} {i.currency.symbol}"
+            f" ({balances_values[i.id]['amount']}$)",
         )
-    balances_table.align = "l"
+    balances_table = "\n".join(balances_table)
 
-    report = "\n\n".join(
-        [
-            "*Crypto Balances*",
-            f"```\n{general_table.get_string(header=False, right_padding_width=1)}```",
-            f"```\n{balances_table.get_string(header=False, right_padding_width=1)}```",
-        ]
-    )
+    report = []
+    report.append("*Crypto Balances*")
+    report.append(f"```\n{currencies_prices_table}```")
+    report.append(f"```\n{general_table}```")
+    report.append(f"```\n{balances_table}```")
+    report = "\n\n".join(report)
 
     return report
 

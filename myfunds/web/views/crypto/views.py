@@ -304,11 +304,7 @@ def ajax_balances_values():
     )
     currencies_ids = [i.currency.cmc_id for i in balances]
 
-    try:
-        prices = cmc.fetch_prices(currencies_ids, USD_CODE)
-    except Exception as e:
-        g.logger.warning(f"Unexpected error while fetching cmc prices ({repr(e)}).")
-        prices = {}
+    prices = cmc.fetch_prices(currencies_ids, USD_CODE)
 
     data = {}
     for b in balances:

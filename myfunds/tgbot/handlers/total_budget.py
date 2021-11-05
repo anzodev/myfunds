@@ -37,7 +37,7 @@ def build_report(account: Account) -> Optional[str]:
         exchange_rates = convertmymoney.fetch_exchange_rates()
     except Exception as e:
         logger = get_logger()
-        logger.warning(f"Unexpected error while fetching exchange rates ({repr(e)}).")
+        logger.warning(f"Fethcing exchange rates occures error ({repr(e)}).")
         exchange_rates = {}
 
     for b in balances:
@@ -62,7 +62,7 @@ def build_report(account: Account) -> Optional[str]:
         prices = cmc.fetch_prices(currencies_ids)
     except Exception as e:
         logger = get_logger()
-        logger.warning(f"Unexpected error while fetching cmc prices ({repr(e)}).")
+        logger.warning(f"Fethcing prices occures error ({repr(e)}).")
         prices = {}
 
     for b in crypto_balances:

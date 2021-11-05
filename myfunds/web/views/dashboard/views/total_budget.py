@@ -62,8 +62,8 @@ def total_budget():
 
     try:
         prices = cmc.fetch_prices(currencies_ids)
-    except Exception as e:
-        g.logger.warning(f"Unexpected error while fetching cmc prices ({repr(e)}).")
+    except cmc.CMCError as e:
+        g.logger.warning(repr(e))
         prices = {}
 
     for b in crypto_balances:
