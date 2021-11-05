@@ -97,8 +97,9 @@ def build_report(account: Account) -> str:
     general_table = []
     general_table.append(f"Investments: {investments_value}$")
     general_table.append(f"Current value: {current_value}$")
-    general_table.append(f"Current profit: {current_profit_value}$ ({current_profit_value_pct})%")  # noqa: E501
     general_table.append(f"Fixed profit: {fixed_profit_value}$")
+    general_table.append(f"Current profit: {current_profit_value}$ ({current_profit_value_pct})%")  # noqa: E501
+    general_table.append(f"Total profit: {total_profit_value}$ ({total_profit_value_pct})%")  # noqa: E501
     general_table = "\n".join(general_table)
     # fmt: on
 
