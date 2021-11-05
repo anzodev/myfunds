@@ -1,6 +1,7 @@
 import json
 import logging
 import threading
+import time
 from typing import Tuple
 
 
@@ -30,16 +31,23 @@ def daemonize(f):
     return wrapper
 
 
-def log_error_and_restart(f):
-    def wrapper(*args, **kwargs):
-        while True:
-            try:
-                f(*args, **kwargs)
-            except Exception:
-                logger = get_logger()
-                logger.exception("Unexpected error:")
+def log_error_and_restart(delay: int = 0):
+    def outer(f):
+        def inner(*args, **kwargs):
+            logger = get_logger()
 
-    return wrapper
+            while True:
+                try:
+                    f(*args, **kwargs)
+                except Exception:
+                    logger.exception("Unexpected error:")
+
+                logger.info(f"Run {f.__name__} after {delay}s delay...")
+                time.sleep(delay)
+
+        return inner
+
+    return outer
 
 
 def update_has_callback(update: dict) -> bool:

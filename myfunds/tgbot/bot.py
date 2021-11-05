@@ -32,7 +32,7 @@ class Bot:
 
         self._handlers[command_name] = handler
 
-    @utils.log_error_and_restart
+    @utils.log_error_and_restart(5)
     def run(self) -> None:
         logger = utils.get_logger()
         logger.info("Starts listening for updates ...")

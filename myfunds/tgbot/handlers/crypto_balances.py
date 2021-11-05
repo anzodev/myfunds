@@ -94,23 +94,12 @@ def build_report(account: Account) -> str:
     currencies_prices_table = "\n".join(currencies_prices_table)
 
     # fmt: off
-<<<<<<< Updated upstream
-    general_table = PrettyTable()
-    general_table.set_style(PLAIN_COLUMNS)
-    general_table.add_row(["Investments:", f"{investments_value}$"])
-    general_table.add_row(["Current value:", f"{current_value}$"])
-    general_table.add_row(["Fixed profit:", f"{fixed_profit_value}$"])
-    general_table.add_row(["Current profit:", f"{current_profit_value}$ ({current_profit_value_pct})%"])  # noqa: E501
-    general_table.add_row(["Total profit:", f"{total_profit_value}$ ({total_profit_value_pct})%"])  # noqa: E501
-    general_table.align = "l"
-=======
     general_table = []
     general_table.append(f"Investments: {investments_value}$")
     general_table.append(f"Current value: {current_value}$")
     general_table.append(f"Current profit: {current_profit_value}$ ({current_profit_value_pct})%")  # noqa: E501
     general_table.append(f"Fixed profit: {fixed_profit_value}$")
     general_table = "\n".join(general_table)
->>>>>>> Stashed changes
     # fmt: on
 
     balances_table = []
