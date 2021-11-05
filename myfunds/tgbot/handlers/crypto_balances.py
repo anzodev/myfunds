@@ -11,6 +11,27 @@ from myfunds.tgbot.utils import InlineKeyboard
 from myfunds.web import utils as web_utils
 
 
+def handler(ctx: HandlerContext) -> None:
+    message_id = ctx.update["callback_query"]["message"]["message_id"]
+
+    if len(ctx.command_args) > 0 and ctx.command_args[0] == "remove":
+        ctx.client.delete_message(ctx.chat_id, message_id)
+        return
+
+    report = build_report(ctx.account)
+
+    keyboard = InlineKeyboard(1)
+    keyboard.add_button(0, "Remove", "/crypto_balances remove")
+
+    ctx.client.edit_message_text(
+        text=report,
+        chat_id=ctx.chat_id,
+        message_id=message_id,
+        parse_mode="MarkdownV2",
+        reply_markup=keyboard.jsonify(),
+    )
+
+
 def build_report(account: Account) -> str:
     # fmt: off
     investments = (
@@ -120,24 +141,3 @@ def build_report(account: Account) -> str:
     report = "\n\n".join(report)
 
     return report
-
-
-def handler(ctx: HandlerContext) -> None:
-    message_id = ctx.update["callback_query"]["message"]["message_id"]
-
-    if len(ctx.command_args) > 0 and ctx.command_args[0] == "remove":
-        ctx.client.delete_message(ctx.chat_id, message_id)
-        return
-
-    report = build_report(ctx.account)
-
-    keyboard = InlineKeyboard(1)
-    keyboard.add_button(0, "Remove", "/crypto_balances remove")
-
-    ctx.client.edit_message_text(
-        text=report,
-        chat_id=ctx.chat_id,
-        message_id=message_id,
-        parse_mode="MarkdownV2",
-        reply_markup=keyboard.jsonify(),
-    )

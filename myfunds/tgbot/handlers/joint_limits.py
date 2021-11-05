@@ -1,5 +1,4 @@
 import calendar
-from datetime import date
 from datetime import datetime
 from typing import List
 from typing import Tuple
@@ -17,18 +16,128 @@ from myfunds.core.models import JointLimitParticipant
 from myfunds.core.models import Transaction
 from myfunds.tgbot.bot import HandlerContext
 from myfunds.tgbot.utils import InlineKeyboard
+from myfunds.tgbot.utils import calculate_available_years
+from myfunds.tgbot.utils import make_date_range_by_year_and_month
 from myfunds.web import utils as web_utils
 
 
-def calculate_available_years(max_years: int) -> List[int]:
-    current_year = date.today().year
-    return [current_year] + [current_year - i for i in range(1, max_years + 1)]
+def handler(ctx: HandlerContext) -> None:
+    message_id = ctx.update["callback_query"]["message"]["message_id"]
 
+    if ctx.command_args[0] == "set_year":
+        years = calculate_available_years(ctx.config.MAX_YEARS_OF_STATISTICS)
+        grouped_years = [years[i : i + 6] for i in range(0, len(years), 6)]
 
-def make_date_range_by_year_and_month(year: int, month: int) -> Tuple[date, date]:
-    until_year = year if month < 12 else year + 1
-    until_month = month + 1 if month < 12 else 1
-    return (date(year, month, 1), date(until_year, until_month, 1))
+        keyboard = InlineKeyboard(len(grouped_years))
+        for i, years in enumerate(grouped_years):
+            for y in years:
+                keyboard.add_button(i, str(y), f"/joint_limits set_month {y}")
+
+        text = "\n\n".join(["*Joint Limits*", "Selecting year \\.\\.\\."])
+
+        ctx.client.edit_message_text(
+            text=text,
+            chat_id=ctx.chat_id,
+            message_id=message_id,
+            parse_mode="MarkdownV2",
+            reply_markup=keyboard.jsonify(),
+        )
+        return
+
+    elif ctx.command_args[0] == "set_month":
+        months = calendar.month_name
+        year = ctx.command_args[1]
+
+        keyboard = InlineKeyboard(3)
+        keyboard.add_button(0, months[1], f"/joint_limits build_report {year} 1")
+        keyboard.add_button(0, months[2], f"/joint_limits build_report {year} 2")
+        keyboard.add_button(0, months[3], f"/joint_limits build_report {year} 3")
+        keyboard.add_button(0, months[4], f"/joint_limits build_report {year} 4")
+        keyboard.add_button(1, months[5], f"/joint_limits build_report {year} 5")
+        keyboard.add_button(1, months[6], f"/joint_limits build_report {year} 6")
+        keyboard.add_button(1, months[7], f"/joint_limits build_report {year} 7")
+        keyboard.add_button(1, months[8], f"/joint_limits build_report {year} 8")
+        keyboard.add_button(2, months[9], f"/joint_limits build_report {year} 9")
+        keyboard.add_button(2, months[10], f"/joint_limits build_report {year} 10")
+        keyboard.add_button(2, months[11], f"/joint_limits build_report {year} 11")
+        keyboard.add_button(2, months[12], f"/joint_limits build_report {year} 12")
+
+        text = "\n\n".join(
+            ["*Joint Limits*", f"`Year: {year}`", "Selecting month \\.\\.\\."]
+        )
+
+        ctx.client.edit_message_text(
+            text=text,
+            chat_id=ctx.chat_id,
+            message_id=message_id,
+            parse_mode="MarkdownV2",
+            reply_markup=keyboard.jsonify(),
+        )
+        return
+
+    elif ctx.command_args[0] == "build_report":
+        year, month = int(ctx.command_args[1]), int(ctx.command_args[2])
+        stats_range = make_date_range_by_year_and_month(year, month)
+        joint_limits_data = prepare_joint_limits_data(ctx.account, stats_range)
+
+        keyboard = InlineKeyboard(1)
+        keyboard.add_button(0, "Remove", "/joint_limits remove")
+
+        text = []
+        text.append("*Joint Limits*")
+        text.append(f"`Year: {year}`\n`Month: {calendar.month_name[month]}`")
+
+        if len(joint_limits_data) == 0:
+            text.append("No data\\.")
+            text = "\n\n".join(text)
+
+            ctx.client.edit_message_text(
+                text=text,
+                chat_id=ctx.chat_id,
+                message_id=message_id,
+                parse_mode="MarkdownV2",
+                reply_markup=keyboard.jsonify(),
+            )
+            return
+
+        limits_tables = []
+        for i in joint_limits_data:
+            ccy_precision = i["currency"].precision
+            total_expense = web_utils.make_hrf_amount(i["total_expense"], ccy_precision)
+            limit_amount = web_utils.make_hrf_amount(i["limit"].amount, ccy_precision)
+
+            table = PrettyTable()
+            table.set_style(PLAIN_COLUMNS)
+            table.add_row(["Name:", i["limit"].name])
+            table.add_row(["Currency:", i["currency"].code_alpha])
+            for p in i["participants"]:
+                table.add_row(
+                    [
+                        f'User {p["account"].username}:',
+                        web_utils.make_hrf_amount(p["total_expense"], ccy_precision),
+                    ]
+                )
+            table.add_row(["Total expense:", total_expense])
+            table.add_row(["Limit:", f"{limit_amount} ({i['total_expense_pct']}%)"])
+            table.align = "l"
+
+            limits_tables.append(table)
+
+        for t in limits_tables:
+            text.append(f"```\n{t.get_string(header=False, right_padding_width=1)}```")
+        text = "\n\n".join(text)
+
+        ctx.client.edit_message_text(
+            text=text,
+            chat_id=ctx.chat_id,
+            message_id=message_id,
+            parse_mode="MarkdownV2",
+            reply_markup=keyboard.jsonify(),
+        )
+
+    elif ctx.command_args[0] == "remove":
+        ctx.client.delete_message(ctx.chat_id, message_id)
+        return
 
 
 def prepare_joint_limits_data(
@@ -115,117 +224,3 @@ def prepare_joint_limits_data(
         )
 
     return result
-
-
-def handler(ctx: HandlerContext) -> None:
-    message_id = ctx.update["callback_query"]["message"]["message_id"]
-
-    if ctx.command_args[0] == "remove":
-        ctx.client.delete_message(ctx.chat_id, message_id)
-        return
-
-    elif ctx.command_args[0] == "set_year":
-        years = calculate_available_years(ctx.config.MAX_YEARS_OF_STATISTICS)
-        grouped_years = [years[i : i + 6] for i in range(0, len(years), 6)]
-
-        keyboard = InlineKeyboard(len(grouped_years))
-        for i, years in enumerate(grouped_years):
-            for y in years:
-                keyboard.add_button(i, str(y), f"/joint_limits set_month {y}")
-
-        text = "\n\n".join(["*Joint Limits*", "Select year\\."])
-
-        ctx.client.edit_message_text(
-            text=text,
-            chat_id=ctx.chat_id,
-            message_id=message_id,
-            parse_mode="MarkdownV2",
-            reply_markup=keyboard.jsonify(),
-        )
-        return
-
-    elif ctx.command_args[0] == "set_month":
-        months = calendar.month_name
-        year = ctx.command_args[1]
-
-        keyboard = InlineKeyboard(3)
-        keyboard.add_button(0, months[1], f"/joint_limits build_report {year} 1")
-        keyboard.add_button(0, months[2], f"/joint_limits build_report {year} 2")
-        keyboard.add_button(0, months[3], f"/joint_limits build_report {year} 3")
-        keyboard.add_button(0, months[4], f"/joint_limits build_report {year} 4")
-        keyboard.add_button(1, months[5], f"/joint_limits build_report {year} 5")
-        keyboard.add_button(1, months[6], f"/joint_limits build_report {year} 6")
-        keyboard.add_button(1, months[7], f"/joint_limits build_report {year} 7")
-        keyboard.add_button(1, months[8], f"/joint_limits build_report {year} 8")
-        keyboard.add_button(2, months[9], f"/joint_limits build_report {year} 9")
-        keyboard.add_button(2, months[10], f"/joint_limits build_report {year} 10")
-        keyboard.add_button(2, months[11], f"/joint_limits build_report {year} 11")
-        keyboard.add_button(2, months[12], f"/joint_limits build_report {year} 12")
-
-        text = "\n\n".join(["*Joint Limits*", f"Year {year}, select month\\."])
-
-        ctx.client.edit_message_text(
-            text=text,
-            chat_id=ctx.chat_id,
-            message_id=message_id,
-            parse_mode="MarkdownV2",
-            reply_markup=keyboard.jsonify(),
-        )
-        return
-
-    elif ctx.command_args[0] == "build_report":
-        year, month = int(ctx.command_args[1]), int(ctx.command_args[2])
-        stats_range = make_date_range_by_year_and_month(year, month)
-        joint_limits_data = prepare_joint_limits_data(ctx.account, stats_range)
-
-        keyboard = InlineKeyboard(1)
-        keyboard.add_button(0, "Remove", "/joint_limits remove")
-
-        if len(joint_limits_data) == 0:
-            text = "\n\n".join(
-                ["*Joint Limits*", f"No data {year}\\-{month:>02}\\."]
-            )
-            ctx.client.edit_message_text(
-                text=text,
-                chat_id=ctx.chat_id,
-                message_id=message_id,
-                parse_mode="MarkdownV2",
-                reply_markup=keyboard.jsonify(),
-            )
-            return
-
-        limits_tables = []
-        for i in joint_limits_data:
-            ccy_precision = i["currency"].precision
-            total_expense = web_utils.make_hrf_amount(i["total_expense"], ccy_precision)
-            limit_amount = web_utils.make_hrf_amount(i["limit"].amount, ccy_precision)
-
-            table = PrettyTable()
-            table.set_style(PLAIN_COLUMNS)
-            table.add_row(["Name:", i["limit"].name])
-            table.add_row(["Currency:", i["currency"].code_alpha])
-            for p in i["participants"]:
-                table.add_row(
-                    [
-                        f'User {p["account"].username}:',
-                        web_utils.make_hrf_amount(p["total_expense"], ccy_precision),
-                    ]
-                )
-            table.add_row(["Total expense:", total_expense])
-            table.add_row(["Limit:", f"{limit_amount} ({i['total_expense_pct']}%)"])
-            table.align = "l"
-
-            limits_tables.append(table)
-
-        text = ["*Joint Limits*"]
-        for t in limits_tables:
-            text.append(f"```\n{t.get_string(header=False, right_padding_width=1)}```")
-        text = "\n\n".join(text)
-
-        ctx.client.edit_message_text(
-            text=text,
-            chat_id=ctx.chat_id,
-            message_id=message_id,
-            parse_mode="MarkdownV2",
-            reply_markup=keyboard.jsonify(),
-        )

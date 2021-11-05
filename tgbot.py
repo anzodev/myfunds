@@ -6,6 +6,7 @@ from myfunds.config import init_env_parser
 from myfunds.core.models import db_proxy
 from myfunds.database import init_database
 from myfunds.tgbot.bot import Bot
+from myfunds.tgbot.handlers import balance_stats
 from myfunds.tgbot.handlers import crypto_balances
 from myfunds.tgbot.handlers import joint_limits
 from myfunds.tgbot.handlers import start
@@ -35,6 +36,7 @@ def main() -> None:
     bot.add_handler("/crypto_balances", crypto_balances.handler)
     bot.add_handler("/total_budget", total_budget.handler)
     bot.add_handler("/joint_limits", joint_limits.handler)
+    bot.add_handler("/balance_stats", balance_stats.handler)
     bot.run()
 
 

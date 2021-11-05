@@ -2,6 +2,8 @@ import json
 import logging
 import threading
 import time
+from datetime import date as dt_date
+from typing import List
 from typing import Tuple
 
 
@@ -81,3 +83,14 @@ def extract_command_args(command: str) -> Tuple[str]:
         return ()
 
     return tuple(parts[1:])
+
+
+def calculate_available_years(max_years: int) -> List[int]:
+    current_year = dt_date.today().year
+    return [current_year] + [current_year - i for i in range(1, max_years + 1)]
+
+
+def make_date_range_by_year_and_month(year: int, month: int) -> Tuple[dt_date, dt_date]:
+    until_year = year if month < 12 else year + 1
+    until_month = month + 1 if month < 12 else 1
+    return (dt_date(year, month, 1), dt_date(until_year, until_month, 1))
