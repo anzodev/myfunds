@@ -26,12 +26,17 @@ def handler(ctx: HandlerContext) -> None:
 
     if ctx.command_args[0] == "set_year":
         years = calculate_available_years(ctx.config.MAX_YEARS_OF_STATISTICS)
-        grouped_years = [years[i : i + 6] for i in range(0, len(years), 6)]
+        grouped_years = [years[i : i + 2] for i in range(0, len(years), 2)]
 
-        keyboard = InlineKeyboard(len(grouped_years))
+        keyboard = InlineKeyboard(len(grouped_years) + 1)
+        keyboard.add_button(
+            0,
+            "Current year and month",
+            f"/joint_limits build_report {web_utils.current_year()} {web_utils.current_month()}",  # noqa: E501
+        )
         for i, years in enumerate(grouped_years):
             for y in years:
-                keyboard.add_button(i, str(y), f"/joint_limits set_month {y}")
+                keyboard.add_button((i + 1), str(y), f"/joint_limits set_month {y}")
 
         text = "\n\n".join(["*Joint Limits*", "Selecting year \\.\\.\\."])
 
