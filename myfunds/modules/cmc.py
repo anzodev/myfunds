@@ -58,7 +58,8 @@ def fetch_currency(url: str) -> CryptoCurrency:
     symbol = []
 
     expected_block_numbers = ["3", "2"]
-    for block_number in expected_block_numbers:
+    for i in expected_block_numbers:
+        block_number = i
         symbol = tree.xpath(symbol_xpath.format(block_number))
         if len(symbol) != 0:
             break
