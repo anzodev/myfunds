@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 
 from myfunds.config import Config
@@ -47,6 +48,8 @@ class Bot:
                 )
             except BotClientError as e:
                 self._logger.warning(repr(e))
+                self._logger.info("Waiting for 10s ...")
+                time.sleep(10)
                 continue
 
             if len(updates) == 0:
