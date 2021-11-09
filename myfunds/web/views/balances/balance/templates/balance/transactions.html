@@ -83,16 +83,22 @@
     <thead>
       <tr class="bg-light border-bottom">
         <th class="align-middle text-muted py-2 small" style="width: 1px;">Time</th>
+        <th class="align-middle text-muted py-2 small" style="width: 1px;">Sum</th>
         <th class="align-middle text-muted py-2 small" style="width: 1px;">Amount</th>
         <th class="align-middle text-muted py-2 small" style="width: 1px;">Remainder</th>
         <th class="align-middle text-muted py-2 small" style="width: 1px;">Category</th>
-        <th class="align-middle text-muted py-2 small" colspan="2">Comment</th>
+        <th class="align-middle text-muted py-2 small">Comment</th>
+        <th class="align-middle text-muted py-2 small"></th>
       </tr>
     </thead>
     <tbody>
       {% for txn in txns %}
       <tr class="hover:bg-light">
         <td class="align-middle text-nowrap py-3 pe-4">{{ txn.created_at }}</td>
+        <td class="align-middle text-center p-0 px-3" style="width: 1px;">
+          <input class="recalculate-txns-sum form-check-input shadow-none" type="checkbox"
+            style="transform: scale(1.5);" data-amount="{{ hrf_amount(txn.amount) }}">
+        </td>
         <td
           class="align-middle text-nowrap py-3 pe-4 text-{% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}success{% else %}danger{% endif %}">
           {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount)
@@ -212,7 +218,7 @@
   </table>
 
   <section class="p-3 border-top">
-    <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
       <div class="d-flex">
         {% if has_prev or has_next %}
     {% set pagination_args = request.args.to_dict() %}
@@ -229,20 +235,29 @@
         {% endif %}
       </div>
 
-      <div class="d-flex align-items-center">
-        <span class="text-nowrap me-3">Show items:</span>
-        <form>
+      <div class="d-flex flex-grow-1 align-items-center justify-content-end">
+        <div class="input-group" style="width: 220px;">
+          <span class="input-group-text">Summary:</span>
+          <input type="text" id="sum-field" class="form-control" value="0.00" readonly>
+        </div>
+
+        <div>
+          <form class="ms-3">
           {% set limit_control_args = request.args.to_dict() %}
           {% set current_limit = limit_control_args.pop("limit", None) %}
           {% for k, v in limit_control_args.items() %}
           <input type="hidden" name="{{ k }}" value="{{ v }}">
           {% endfor %}
-          <select name="limit" class="form-control px-3" onchange="this.form.submit()" required>
+            <div class="input-group">
+              <span class="input-group-text">Show items:</span>
+              <select name="limit" class="form-control" onchange="this.form.submit()" required>
             <option value="10" {% if current_limit=="10" %}selected{% endif %}>10</option>
             <option value="20" {% if current_limit=="20" %}selected{% endif %}>20</option>
             <option value="30" {% if current_limit=="30" %}selected{% endif %}>30</option>
           </select>
+            </div>
         </form>
+        </div>
       </div>
 
     </div>
@@ -325,6 +340,21 @@
 
     $('#created-at-range-hrf').on('change', function () {
       this.form.submit();
+    });
+
+
+    const sumField = $('#sum-field');
+
+    $('.recalculate-txns-sum').on('click', function () {
+      let $this = $(this);
+      let amount = parseFloat($this.attr('data-amount'));
+      let sum = parseFloat(sumField.val());
+
+      if ($this.is(':checked')) {
+        sumField.val((sum + amount).toFixed(parseInt('{{ g.currency.precision }}')));
+      } else {
+        sumField.val((sum - amount).toFixed(parseInt('{{ g.currency.precision }}')));
+      }
     });
 
   })();
