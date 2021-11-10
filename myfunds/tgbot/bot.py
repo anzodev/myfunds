@@ -53,6 +53,7 @@ class Bot:
                 continue
 
             if len(updates) == 0:
+                offset = 0
                 continue
 
             for update in updates:
