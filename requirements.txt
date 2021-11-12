@@ -2,6 +2,7 @@ attrs==21.2.0
 certifi==2021.10.8
 charset-normalizer==2.0.7
 click==8.0.1
+defusedxml==0.7.1
 environs==9.3.3
 Flask==2.0.1
 freezegun==1.1.0
