@@ -54,9 +54,10 @@ class MerchantAPI:
         res = requests.post(
             url=url,
             headers={"Content-Type": "application/xml"},
-            data=ET.tostring(
-                el_request, encoding="UTF-8", xml_declaration=True
-            ).decode(),
+            data=(
+                '<?xml version="1.0" encoding="UTF-8"?>\n'
+                f'{ET.tostring(el_request, encoding="UTF-8").decode()}'
+            ),
         )
 
         return DefusedET.fromstring(res.text)
