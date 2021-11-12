@@ -2,6 +2,7 @@ import inspect
 from typing import List
 
 import peewee as pw
+from playhouse.sqlite_ext import JSONField
 
 from myfunds.core.constants import CryptoDirection
 from myfunds.core.constants import FundsDirection
@@ -68,6 +69,16 @@ class Transaction(BaseModel):
     amount = pw.IntegerField()
     comment = pw.TextField(null=True)
     created_at = pw.DateTimeField(index=True)
+
+
+class TransactionImportSettings(BaseModel):
+    class Meta:
+        table_name = "transaction_import_settings"
+
+    balance = pw.ForeignKeyField(Balance, unique=True)
+    provider = pw.CharField()
+    config = JSONField()
+    internal_data = JSONField()
 
 
 class BalanceLimit(BaseModel):

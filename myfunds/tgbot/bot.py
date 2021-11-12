@@ -107,10 +107,3 @@ class Bot:
         command_name = utils.extract_command_name(command)
         if command_name:
             return self._handlers.get(command_name)
-
-    def _is_chat_signed_up(self, chat_id: int) -> bool:
-        return (
-            TelegramBotAccount.select()
-            .where(TelegramBotAccount.chat_id == chat_id)
-            .exists()
-        )

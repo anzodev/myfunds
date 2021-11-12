@@ -1,0 +1,79 @@
+{% extends 'layouts/balance-page.html' %}
+
+
+
+{% block content %}
+<div class="card">
+
+  <section class="p-3 border-bottom">
+    <div class="lead">Import by API</div>
+  </section>
+
+  <table class="table table-borderless shadow-none m-0">
+    <thead>
+      <tr class="bg-light border-bottom">
+        <th class="align-middle text-muted py-2 small" style="width: 1px;"></th>
+        <th class="align-middle text-muted py-2 small" style="width: 1px;">Time</th>
+        <th class="align-middle text-muted py-2 small" style="width: 1px;">Amount</th>
+        <th class="align-middle text-muted py-2 small">Comment</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for txn in txns %}
+      <tr class="txn-row {% if split_by_days and since.date() == txn.created_at.date() %}table-warning{% endif %}" data-txn-json="{{ txn.to_json() }}">
+        <td class="align-middle text-nowrap"><input class="include-txn form-check-input shadow-none" type="checkbox"
+            style="transform: scale(1.5);" {% if split_by_days %}{% if since.date() != txn.created_at.date() %}checked{% endif %}{% else %}checked{% endif %}></td>
+        <td class="align-middle text-nowrap">{{ txn.created_at }}</td>
+        <td
+          class="align-middle text-nowrap text-{% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}success{% else %}danger{% endif %}">
+          {% if txn.direction == g.CONST_FUNDS_DIRECTION.INCOME.value %}+{% else %}-{% endif %}{{ hrf_amount(txn.amount)
+          }}
+        </td>
+        <td class="align-middle text-nowrap">{{ txn.comment }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form id="import-form" method="POST">
+    <input type="hidden" name="data" required>
+    <section class="p-3 border-top">
+      <div class="d-flex justify-content-end">
+        <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id) }}"
+          class="btn btn-light me-3">Cancel</a>
+        <button type="submit" class="btn btn-info">Import</button>
+      </div>
+    </section>
+  </form>
+
+</div>
+{% endblock %}
+
+
+{% block js %}
+{{ super() }}
+<script>
+  (function () {
+
+    let importForm = $('#import-form');
+    importForm.on('submit', function (e) {
+      e.preventDefault();
+
+      let data = [];
+      $('.txn-row').each(function () {
+        let $this = $(this);
+        let includeTxn = $this.find('.include-txn');
+        if (includeTxn.prop('checked')) {
+          data.push(JSON.parse($this.attr('data-txn-json')));
+        }
+      });
+
+      let base64data = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      $(this.elements.data).val(base64data);
+
+      this.submit();
+    });
+
+  })();
+</script>
+{% endblock %}

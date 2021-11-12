@@ -1,10 +1,13 @@
+import base64
 import csv
 import io
+import json
 import os
 import tempfile
 import uuid
 from collections import namedtuple
 from datetime import datetime
+from datetime import timedelta
 from typing import List
 from typing import Tuple
 
@@ -22,9 +25,13 @@ from wtforms import validators as vals
 
 from myfunds.core.models import Category
 from myfunds.core.models import Transaction
+from myfunds.core.models import TransactionImportSettings
 from myfunds.core.usecase import transactions as txn_usecase
+from myfunds.core.usecase.transactions import make_replenishment
+from myfunds.core.usecase.transactions import make_withdrawal
 from myfunds.core.usecase.transactions import remove_transaction
 from myfunds.modules import reparser
+from myfunds.modules import txnfetcher
 from myfunds.web import auth
 from myfunds.web import notify
 from myfunds.web import utils
@@ -170,8 +177,11 @@ def transactions():
     filtered_txns = filtered_transactions(filters)
     txns, has_prev, has_next = paginated_transactions(filters, filtered_txns)
 
+    import_settings = TransactionImportSettings.get_or_none(balance=g.balance)
+
     return render_template(
         "balance/transactions.html",
+        import_settings=import_settings,
         report_parsers=report_parsers,
         txns=txns,
         filters=filters,
@@ -351,3 +361,98 @@ def delete_transaction():
     notify.info(f"Transaction {txn.id} was deleted.")
 
     return redirect(redirect_url)
+
+
+@bp.route("/transactions/import-by-api", methods=["GET", "POST"])
+@auth.login_required
+@verify_balance
+def import_by_api():
+    if request.method == "GET":
+        redirect_url = url_for("balances.i.transactions", balance_id=g.balance.id)
+
+        settings = TransactionImportSettings.get_or_none(balance=g.balance)
+        if settings is None:
+            notify.error("Settings not found.")
+            return redirect(redirect_url)
+
+        min_interval = settings.internal_data.get("min_interval", 0)
+        last_fetch_at = settings.internal_data.get("last_fetch_at")
+        if min_interval > 0 and last_fetch_at is not None:
+            last_fetch_at = datetime.strptime(last_fetch_at, DATETIME_FORMAT)
+            now = datetime.now()
+            if last_fetch_at > (now - timedelta(seconds=min_interval)):
+                delta = min_interval - (now - last_fetch_at).seconds
+                notify.warning(
+                    f"Provider has interval of {min_interval}s between requests."
+                    f" Try to import transactions after {delta}s."
+                )
+                return redirect(redirect_url)
+
+        fetcher_class = txnfetcher.get_fetcher(settings.provider)
+        if fetcher_class is None:
+            notify.error("Provider not found.")
+            return redirect(redirect_url)
+
+        since = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        last_txn = (
+            Transaction.select()
+            .where(Transaction.balance == g.balance)
+            .order_by(Transaction.created_at.desc())
+            .first()
+        )
+        if last_txn is not None:
+            since = last_txn.created_at
+
+        since_offset = settings.internal_data.get("since_offset", 0)
+        since += timedelta(seconds=since_offset)
+
+        settings.internal_data["last_fetch_at"] = datetime.now().strftime(
+            DATETIME_FORMAT
+        )
+        settings.save()
+
+        fetcher = fetcher_class(settings.config)
+        txns = fetcher.fetch_transactions(since)
+
+        if len(txns) == 0:
+            notify.info("You don't have any new transactions.")
+            return redirect(redirect_url)
+
+        split_by_days = settings.internal_data.get("split_by_days", False)
+
+        return render_template(
+            "balance/import-by-api.html",
+            split_by_days=split_by_days,
+            since=since,
+            txns=txns,
+        )
+
+    redirect_url = url_for("balances.i.import_by_api", balance_id=g.balance.id)
+
+    data = request.form.get("data")
+    if data is None:
+        notify.error("Data not found.")
+        return redirect(redirect_url)
+
+    txns = json.loads(base64.b64decode(data).decode())
+    for txn in txns:
+        if txn["direction"] == FundsDirection.INCOME.value:
+            make_replenishment(
+                balance=g.balance,
+                amount=txn["amount"],
+                category=None,
+                comment=txn["comment"],
+                created_at=datetime.strptime(txn["created_at"], DATETIME_FORMAT),
+            )
+        else:
+            make_withdrawal(
+                balance=g.balance,
+                amount=txn["amount"],
+                category=None,
+                comment=txn["comment"],
+                created_at=datetime.strptime(txn["created_at"], DATETIME_FORMAT),
+            )
+
+    notify.info("Successfully import new transactions.")
+
+    return redirect(url_for("balances.i.transactions", balance_id=g.balance.id))

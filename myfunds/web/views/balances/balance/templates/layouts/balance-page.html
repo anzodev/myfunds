@@ -34,11 +34,13 @@
 
       <div class="list-group">
         <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id) }}"
-          class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.transactions' %}disabled bg-info text-white{% endif%}">Transactions</a>
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint in ['balances.i.transactions', 'balances.i.import_by_api'] %}disabled bg-info text-white{% endif%}">Transactions</a>
         <a href="{{ url_for('balances.i.balance_limits', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.balance_limits' %}disabled bg-info text-white{% endif%}">Limits</a>
         <a href="{{ url_for('balances.i.statistics', balance_id=g.balance.id) }}"
           class="list-group-item list-group-item-action p-3 {% if request.endpoint == 'balances.i.statistics' %}disabled bg-info text-white{% endif%}">Statistics</a>
+        <a href="{{ url_for('balances.i.import_settings', balance_id=g.balance.id) }}"
+          class="list-group-item list-group-item-action p-3 {% if request.endpoint in ['balances.i.import_settings', 'balances.i.setup_import_settings', 'balances.i.setup_import_settings__privat24', 'balances.i.setup_import_settings__monobank'] %}disabled bg-info text-white{% endif%}">Import Settings</a>
       </div>
 
     </div>

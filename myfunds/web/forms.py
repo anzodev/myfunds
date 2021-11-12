@@ -186,3 +186,9 @@ class SignUpTelegramBotAccountForm(Form):
 
 class ResetTelegramBotAccountForm(Form):
     chat_id = id_field()
+
+
+class Privat24FetcherConfigForm(Form):
+    merchant_id = StringField(validators=[vals.InputRequired()])
+    merchant_password = StringField(validators=[vals.InputRequired()])
+    card = StringField(validators=[vals.InputRequired()])

@@ -13,9 +13,15 @@
           <i data-feather="more-vertical" width="16" height="16"></i>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          {% if import_settings %}
+          <li>
+            <a class="dropdown-item" href="{{ url_for('balances.i.import_by_api', balance_id=g.balance.id) }}">Import by API</a>
+          </li>
+          {% endif %}
           <li>
             <a class="dropdown-item" href="#" data-bs-toggle="modal"
-              data-bs-target="#import-transactions-modal">Import</a>
+              data-bs-target="#import-transactions-from-csv-modal">Import
+              from CSV</a>
           </li>
           <li>
             <a class="dropdown-item"
@@ -221,17 +227,17 @@
     <div class="d-flex align-items-center">
       <div class="d-flex">
         {% if has_prev or has_next %}
-    {% set pagination_args = request.args.to_dict() %}
-    {% set _ = pagination_args.pop("limit", None) %}
-    {% set _ = pagination_args.pop("offset", None) %}
-      {% if has_prev %}
-      <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id, limit=filters.limit, offset=filters.offset - filters.limit, **pagination_args) }}"
-        class="btn btn-light me-3">Previous</a>
-      {% endif %}
-      {% if has_next %}
-      <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id, limit=filters.limit, offset=filters.offset + filters.limit, **pagination_args) }}"
-        class="btn btn-light me-3">Next</a>
-      {% endif %}
+        {% set pagination_args = request.args.to_dict() %}
+        {% set _ = pagination_args.pop("limit", None) %}
+        {% set _ = pagination_args.pop("offset", None) %}
+        {% if has_prev %}
+        <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id, limit=filters.limit, offset=filters.offset - filters.limit, **pagination_args) }}"
+          class="btn btn-light me-3">Previous</a>
+        {% endif %}
+        {% if has_next %}
+        <a href="{{ url_for('balances.i.transactions', balance_id=g.balance.id, limit=filters.limit, offset=filters.offset + filters.limit, **pagination_args) }}"
+          class="btn btn-light me-3">Next</a>
+        {% endif %}
         {% endif %}
       </div>
 
@@ -243,20 +249,20 @@
 
         <div>
           <form class="ms-3">
-          {% set limit_control_args = request.args.to_dict() %}
-          {% set current_limit = limit_control_args.pop("limit", None) %}
-          {% for k, v in limit_control_args.items() %}
-          <input type="hidden" name="{{ k }}" value="{{ v }}">
-          {% endfor %}
+            {% set limit_control_args = request.args.to_dict() %}
+            {% set current_limit = limit_control_args.pop("limit", None) %}
+            {% for k, v in limit_control_args.items() %}
+            <input type="hidden" name="{{ k }}" value="{{ v }}">
+            {% endfor %}
             <div class="input-group">
               <span class="input-group-text">Show items:</span>
               <select name="limit" class="form-control" onchange="this.form.submit()" required>
-            <option value="10" {% if current_limit=="10" %}selected{% endif %}>10</option>
-            <option value="20" {% if current_limit=="20" %}selected{% endif %}>20</option>
-            <option value="30" {% if current_limit=="30" %}selected{% endif %}>30</option>
-          </select>
+                <option value="10" {% if current_limit=="10" %}selected{% endif %}>10</option>
+                <option value="20" {% if current_limit=="20" %}selected{% endif %}>20</option>
+                <option value="30" {% if current_limit=="30" %}selected{% endif %}>30</option>
+              </select>
             </div>
-        </form>
+          </form>
         </div>
       </div>
 
@@ -270,13 +276,13 @@
 </div>
 
 
-<div class="modal fade" id="import-transactions-modal">
+<div class="modal fade" id="import-transactions-from-csv-modal">
   <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
       <form action="{{ url_for('balances.i.import_transactions', balance_id=g.balance.id) }}" method="POST"
         enctype="multipart/form-data">
         <div class="modal-header">
-          <h5 class="modal-title">Import Transactions</h5>
+          <h5 class="modal-title">Import from CSV</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
