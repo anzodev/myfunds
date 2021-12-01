@@ -371,9 +371,7 @@ def statistics():
     if year < current_year and filter_form.month.data is None:
         month = 12
 
-    disabled_months = (
-        list(range(1, 13))[-(12 - current_month) :] if year == current_year else []
-    )
+    disabled_months = list(range(1, 13))[current_month:] if year == current_year else []
 
     # Set last allowed month if the month number is in disabled months list.
     if month in disabled_months:

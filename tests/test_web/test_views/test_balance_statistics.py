@@ -1,3 +1,5 @@
+from datetime import date as dt_date
+
 import pytest
 
 from myfunds.web.views.balances.balance.views import statistics
@@ -21,3 +23,24 @@ def test_init_expense_limit_params(args, amount, percent, css_text_color):
     assert expense_limit.amount == amount
     assert expense_limit.percent == percent
     assert expense_limit.css_text_color == css_text_color
+
+
+@pytest.mark.parametrize(
+    "year,month,expected_result",
+    [
+        (2021, 1, (dt_date(2021, 1, 1), dt_date(2021, 2, 1))),
+        (2021, 2, (dt_date(2021, 2, 1), dt_date(2021, 3, 1))),
+        (2021, 3, (dt_date(2021, 3, 1), dt_date(2021, 4, 1))),
+        (2021, 4, (dt_date(2021, 4, 1), dt_date(2021, 5, 1))),
+        (2021, 5, (dt_date(2021, 5, 1), dt_date(2021, 6, 1))),
+        (2021, 6, (dt_date(2021, 6, 1), dt_date(2021, 7, 1))),
+        (2021, 7, (dt_date(2021, 7, 1), dt_date(2021, 8, 1))),
+        (2021, 8, (dt_date(2021, 8, 1), dt_date(2021, 9, 1))),
+        (2021, 9, (dt_date(2021, 9, 1), dt_date(2021, 10, 1))),
+        (2021, 10, (dt_date(2021, 10, 1), dt_date(2021, 11, 1))),
+        (2021, 11, (dt_date(2021, 11, 1), dt_date(2021, 12, 1))),
+        (2021, 12, (dt_date(2021, 12, 1), dt_date(2022, 1, 1))),
+    ],
+)
+def test_make_date_range_by_year_and_month(year, month, expected_result):
+    assert statistics.make_date_range_by_year_and_month(year, month) == expected_result
