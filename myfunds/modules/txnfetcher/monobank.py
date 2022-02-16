@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 from typing import List
 
 from myfunds.modules.api.monobank import PersonalAPI
@@ -19,8 +20,9 @@ class MonobankTxnFetcher(BaseTxnFetcher):
 
         account = self.config["account"]
         from_ = int(since.timestamp())
+        to = int((since + timedelta(days=30)).timestamp())
 
-        data = api.payments(account, from_)
+        data = api.payments(account, from_, to)
 
         txns = []
         for i in data:
